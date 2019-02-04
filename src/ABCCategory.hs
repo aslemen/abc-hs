@@ -1,5 +1,5 @@
 module ABCCategory (
-    ABCCategory,
+    ABCCategory(antecedent, consequence, name, comment),
     strBot,
     createBot,
     createBase,
@@ -7,7 +7,9 @@ module ABCCategory (
     (->>),
     reduce,
     reduceWithComment,
-    parse
+    parser,
+    createFromString,
+    Psc.ParseError
     ) where
 
 import qualified Text.Parsec as Psc
@@ -93,15 +95,15 @@ printCategory isComment cat
         RightFunctor ant conseq x
             -> "<" ++ (show conseq) ++ "\\" ++ (show ant) ++ ">" 
                     ++ (showComment isComment x)
-        where
-            makeComment :: String -> String
-            makeComment str
-                | str == "" = ""
-                | otherwise = ".\"" ++ str ++ "\""
-            showComment :: Bool -> String -> String
-            showComment isComment
-                | True = makeComment
-                | False = \_ -> ""
+    where
+        makeComment :: String -> String
+        makeComment str
+            | str == "" = ""
+            | otherwise = ".\"" ++ str ++ "\""
+        showComment :: Bool -> String -> String
+        showComment isComment
+            | True = makeComment
+            | False = \_ -> ""
 
 instance Show ABCCategory where
     show = printCategory True
@@ -123,14 +125,14 @@ reduceInner left@(LeftFunctor ant1 conseq1 _) (LeftFunctor ant2 conseq2 _)
             FCLeft n
                 -> (deeper_cat ->> conseq2, FCLeft (n + 1))
             _ -> (createBot, None)
-            where 
-                deeper_res :: (ABCCategory, ABCStatusFC)
-                deeper_res = reduceInner left ant2 
-                    -- A/B C where C might be X/Y
-                deeper_cat :: ABCCategory
-                deeper_cat = fst deeper_res
-                deeper_num :: ABCStatusFC
-                deeper_num = snd deeper_res
+        where 
+            deeper_res :: (ABCCategory, ABCStatusFC)
+            deeper_res = reduceInner left ant2 
+                -- A/B C where C might be X/Y
+            deeper_cat :: ABCCategory
+            deeper_cat = fst deeper_res
+            deeper_num :: ABCStatusFC
+            deeper_num = snd deeper_res
 reduceInner (RightFunctor (BaseCategory ant _) conseq _) (BaseCategory name _) -- A\B X
     = if name == ant
         then (conseq, FCRight 0) 
@@ -143,14 +145,14 @@ reduceInner (RightFunctor ant1 conseq1 _) right@(RightFunctor ant2 conseq2 _)
             FCRight n
                 -> (conseq1 <<- deeper_cat, FCRight (n + 1))
             _ -> (createBot, None)
-            where 
-                deeper_res :: (ABCCategory, ABCStatusFC)
-                deeper_res = reduceInner ant1 right
-                    -- B C\D where B might be X\Y
-                deeper_cat :: ABCCategory
-                deeper_cat = fst deeper_res
-                deeper_num :: ABCStatusFC
-                deeper_num = snd deeper_res
+        where 
+            deeper_res :: (ABCCategory, ABCStatusFC)
+            deeper_res = reduceInner ant1 right
+                -- B C\D where B might be X\Y
+            deeper_cat :: ABCCategory
+            deeper_cat = fst deeper_res
+            deeper_num :: ABCStatusFC
+            deeper_num = snd deeper_res
 reduceInner _ _
     = (createBot, None)
 
@@ -160,26 +162,26 @@ reduce cat1 cat2 = fst (reduceInner cat1 cat2)
 reduceWithComment :: ABCCategory -> ABCCategory -> ABCCategory
 reduceWithComment cat1 cat2
     = cat {comment = makeComment num}
-        where
-            res :: (ABCCategory, ABCStatusFC)
-            res = reduceInner cat1 cat2
-            cat :: ABCCategory
-            cat = fst res
-            num :: ABCStatusFC
-            num = snd res
-            makeComment :: ABCStatusFC -> String
-            makeComment (FCLeft n)
-                | n > 0     = "FCLeft" ++ show n
-                | otherwise = "L"
-            makeComment (FCRight n)
-                | n > 0     = "FCRight" ++ show n
-                | otherwise = "R"
-            makeComment None
-                = ""
+    where
+        res :: (ABCCategory, ABCStatusFC)
+        res = reduceInner cat1 cat2
+        cat :: ABCCategory
+        cat = fst res
+        num :: ABCStatusFC
+        num = snd res
+        makeComment :: ABCStatusFC -> String
+        makeComment (FCLeft n)
+            | n > 0     = "FCLeft" ++ show n
+            | otherwise = "L"
+        makeComment (FCRight n)
+            | n > 0     = "FCRight" ++ show n
+            | otherwise = "R"
+        makeComment None
+            = ""
 
 -- ## Parsing
-parseBaseOrBot :: Parser ABCCategory
-parseBaseOrBot = 
+parserBaseOrBot :: Parser ABCCategory
+parserBaseOrBot = 
     (Psc.many1 Psc.letter)
     >>= \str ->
         if str == strBot
@@ -191,14 +193,14 @@ opTableComplex = [
     [PscExpr.Infix (Psc.char '\\' >> return (<<-)) PscExpr.AssocLeft]
     ]
 
-parseCommentMaybe :: Parser String
-parseCommentMaybe =
-    Psc.optionMaybe parseComment
+parserCommentMaybe :: Parser String
+parserCommentMaybe =
+    Psc.optionMaybe parserComment
     >>= \res -> 
         return (printComment (res :: Maybe String))
     where
-        parseComment :: Parser String
-        parseComment = 
+        parserComment :: Parser String
+        parserComment = 
             Psc.string ".\""
             >> Psc.many (Psc.noneOf "\"")
             >>= \res ->
@@ -208,24 +210,27 @@ parseCommentMaybe =
         printComment (Just x) = x
         printComment Nothing = ""
 
-parseCat :: Parser ABCCategory
-parseCat
-    = PscExpr.buildExpressionParser opTableComplex parseComplex
+parser :: Parser ABCCategory
+parser
+    = PscExpr.buildExpressionParser opTableComplex parserComplex
     where
-        parseFunc :: Parser ABCCategory
-        parseFunc
+        parserFunc :: Parser ABCCategory
+        parserFunc
             = Psc.char '<'
-                >> parseCat
+                >> parser
                 >>= \cat ->
                     Psc.char '>'
                     >> return cat
-        parseComplex :: Parser ABCCategory
-        parseComplex
-            = (parseFunc Psc.<|> parseBaseOrBot)
+        parserComplex :: Parser ABCCategory
+        parserComplex
+            = (parserFunc Psc.<|> parserBaseOrBot)
                 >>= \cat -> 
-                    parseCommentMaybe
+                    parserCommentMaybe
                     >>= \com ->
                         return cat {comment = com}
                 Psc.<?> "ABC Cagetory"
 
-parse = Psc.parse parseCat "ABC Cagetory"
+-- | generate an ABC-Category from a string or a stream. 
+createFromString :: String -> Either Psc.ParseError ABCCategory
+createFromString 
+    = Psc.parse parser "ABC Cagetory"
