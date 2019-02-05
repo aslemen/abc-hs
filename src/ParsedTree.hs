@@ -4,18 +4,22 @@ module ParsedTree (
     printPretty,
     parser,
     createFromString,
+    parserDoc,
+    createDoc,
     Psc.ParseError
     ) where
+
+import Control.Applicative
+import qualified Data.List as DL
 
 import qualified Text.Parsec as Psc
 import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Char as PscCh
 -- import qualified Text.Parsec.Language as PscLang
-import qualified Data.List as DL
 
 data Tree termtype
     = Node {
-        node :: termtype,
+        label :: termtype,
         children :: [Tree termtype]
      }
 
@@ -23,7 +27,7 @@ data Tree termtype
 createTerminalNode :: termtype -> Tree termtype
 createTerminalNode node
     = Node {
-        node = node,
+        label = node,
         children = []
     }
 
@@ -80,28 +84,34 @@ instance (Show termtype) => Show (Tree termtype) where
 parser :: Parser term -> Parser (Tree term)
 parser parserLabel
     = parserTree Psc.<|> parserTerminal
+    Psc.<?> "Parsed Tree"
     where
         -- parserTree :: Parser (Tree term)
         parserTree 
-            = Psc.char '('
-            >> Psc.spaces
-            >> parserLabel
-            >>= \node ->
-                Psc.spaces
-                >> Psc.many (
-                    (parser parserLabel)
-                    >>= \child ->
-                        Psc.spaces
-                        >> return child
-                ) >>= \children ->
-                    Psc.char ')'
-                    >> return (Node node children)
+            = Psc.between (Psc.char '(') (Psc.char ')') (
+                Node 
+                <$> (Psc.between Psc.spaces Psc.spaces parserLabel)
+                <*> ((parser parserLabel) `Psc.sepBy` Psc.spaces)
+                                    -- RECURSION occurring
+            ) Psc.<?> "Non-Terminal Node of a Parsed Tree"
         -- parserTerminal :: Parser (Tree term)
         parserTerminal
-            = parserLabel
-                >>= \term ->
-                    return (Node term [])
+            = createTerminalNode <$> parserLabel
+            Psc.<?> "Terminal Node of a Parsed Tree"
 
 createFromString :: Parser term -> String -> Either Psc.ParseError (Tree term)
-createFromString termparser 
-    = Psc.parse (parser termparser) "Tree"
+createFromString parserLabel 
+    = Psc.parse (parser parserLabel) "Parser of Parsed Trees"
+
+parserDoc :: Parser term -> Parser [Tree term]
+parserDoc parserLabel
+    = Psc.spaces
+        *> (
+            ((parser parserLabel) `Psc.sepEndBy` Psc.spaces)
+            --(\c -> [c]) <$> (parser parserLabel)
+            Psc.<?> "The Content of a Parsed Trees Document"
+        ) <* Psc.eof
+
+createDoc :: Parser term -> String -> Either Psc.ParseError [Tree term]
+createDoc parserLabel
+    = Psc.parse (parserDoc parserLabel) "Parser of Parsed Trees Documents"

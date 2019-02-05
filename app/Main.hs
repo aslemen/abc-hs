@@ -1,48 +1,110 @@
 module Main where
 
+import System.IO
+import Data.Monoid
+
 import qualified ABCCategory as ABCC
 import qualified ParsedTree as PT
-import System.IO
 
+import qualified Options.Applicative as OPT
+
+-- # Type Aliases
 type ABCT = PT.Tree ABCC.ABCCategory
 
-parseTree :: String -> Either PT.ParseError ABCT
-parseTree = PT.createFromString ABCC.parser
+-- # Tree Parser
+runParserTree :: String -> Either PT.ParseError ABCT
+runParserTree = PT.createFromString ABCC.parser
 
-readPrompt :: IO String
-readPrompt
-    = putStr "Tree Parse>>"
-        >> hFlush stdout
-        >> getLine
+runParserDoc :: String -> Either PT.ParseError [ABCT]
+runParserDoc = PT.createDoc ABCC.parser
 
+-- # Commandline Option Parser
+-- よくわかっていないので、放っておくことにする。しばらくはstdin/stdoutを使う。
+-- 並列処理とかできればもっと嬉しい。
+data Options 
+    = Options {
+    inputPath :: FilePath,
+    outputPath :: FilePath
+    } deriving (Show)
+
+parserInputPath :: OPT.Parser FilePath
+parserInputPath
+    = OPT.strArgument $ mconcat [
+        OPT.help "The path to the input file",
+        OPT.metavar "input_path",
+        OPT.action "file"
+    ]
+
+parserOutputPath :: OPT.Parser FilePath
+parserOutputPath
+    = OPT.strArgument $ mconcat [
+        OPT.help "The path of output",
+        OPT.metavar "output_path",
+        OPT.action "file"
+    ]
+    
+
+parserOptions :: OPT.Parser Options
+parserOptions
+    = (<*>) OPT.helper (
+        Options <$> parserInputPath <*> parserOutputPath
+    )
+        
+
+parserOptionsWithInfo :: OPT.ParserInfo Options
+parserOptionsWithInfo 
+    = OPT.info parserOptions $ mconcat [
+        OPT.fullDesc,
+        OPT.progDesc "ABC Tree Checker"
+        ]
+
+-- # Actual Job
 relabel :: ABCT -> ABCT
 relabel (PT.Node node children)
     | (length children) == 2 
-        = PT.Node res_fc (map relabel children)
-    | otherwise = PT.Node node (map relabel children)
+        = PT.Node {
+            PT.label = node `ABCC.addComment` (com res node),
+            PT.children = map relabel children
+        }
+    | otherwise 
+        = PT.Node {
+            PT.label = node,
+            PT.children = map relabel children
+        }
     where
         child1 :: ABCT
         child2 :: ABCT
         child1 : (child2 : _) = children
-        res_fc :: ABCC.ABCCategory
-        res_fc = ABCC.reduceWithComment (PT.node child1) (PT.node child2)
+        res :: (ABCC.ABCCategory, ABCC.ABCStatusFC)
+        res = ABCC.reduceWithResult (PT.label child1) (PT.label child2)
+        com :: (ABCC.ABCCategory, ABCC.ABCStatusFC) -> ABCC.ABCCategory -> String
+        com (_, ABCC.Failed) _ = "FAIL"
+        com (cat_new, stat) cat_orig
+            | cat_new == cat_orig
+                = show stat
+            | otherwise
+                = "INCORR;" 
+                    ++ (show cat_new) 
+                    ++ ":"
+                    ++ show stat
 
-parse :: String -> IO()
-parse str
-    = case parseTree str of
+batchRelabel :: [ABCT] -> [ABCT]
+batchRelabel
+    = fmap relabel
+
+parseDoc :: String -> IO [ABCT]
+parseDoc str
+    = case runParserDoc str of
         Left err 
-            -> putStrLn ("\n" ++ show err)
+            -> putStrLn ("\n" ++ show err) >> return []
         Right res 
-            -> print $ relabel res
+            -> return res
 
-interactive :: IO()
-interactive
-    = readPrompt
-        >>= \str ->
-            parse str
-            >> interactive
-
+-- # Main Procedure
 main :: IO ()
-main = interactive
-
-
+main 
+    = (
+        batchRelabel 
+        <$> (hGetContents stdin >>= parseDoc)
+    ) >>= \trees -> 
+        foldr ((>>) . print) (return ())  trees
