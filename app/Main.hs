@@ -15,9 +15,17 @@ readPrompt
         >> hFlush stdout
         >> getLine
 
-change :: ABCT -> ABCT
-change (PT.Node node children)
-    = PT.Node (ABCC.createBot {ABCC.comment = show node}) (map change children)
+relabel :: ABCT -> ABCT
+relabel (PT.Node node children)
+    | (length children) == 2 
+        = PT.Node res_fc (map relabel children)
+    | otherwise = PT.Node node (map relabel children)
+    where
+        child1 :: ABCT
+        child2 :: ABCT
+        child1 : (child2 : _) = children
+        res_fc :: ABCC.ABCCategory
+        res_fc = ABCC.reduceWithComment (PT.node child1) (PT.node child2)
 
 parse :: String -> IO()
 parse str
@@ -25,7 +33,7 @@ parse str
         Left err 
             -> putStrLn ("\n" ++ show err)
         Right res 
-            -> print $ change res
+            -> print $ relabel res
 
 interactive :: IO()
 interactive
