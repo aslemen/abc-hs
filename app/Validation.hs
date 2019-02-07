@@ -105,6 +105,5 @@ main :: IO ()
 main 
     = (
         batchRelabel 
-        <$> (hGetContents stdin >>= parseDoc)
-    ) >>= \trees -> 
-        foldr ((>>) . print) (return ())  trees
+        <$> (getContents >>= parseDoc)
+    ) >>= foldr ((>>) . print) (return ())

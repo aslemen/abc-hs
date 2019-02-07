@@ -28,8 +28,8 @@ library:
   source-dirs: src
 
 executables:
-  abc-hs-exe:
-    main:                Main.hs
+  abc-validate:
+    main:                Validation.hs
     source-dirs:         app
     ghc-options:
     - -threaded
@@ -37,7 +37,25 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - abc-hs
-
+  abc-lint:
+    main:               Linting.hs
+    source-dirs:        app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - abc-hs
+  abc-relabel:
+    main:               Relabeling.hs
+    source-dirs:        app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - abc-hs
+    
 tests:
   abc-hs-test:
     main:                Spec.hs
