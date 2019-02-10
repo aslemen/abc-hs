@@ -25,6 +25,8 @@ import Text.Parsec.String (Parser)
 -- import qualified Text.Parsec.Language as PscLang
 import qualified Text.Parsec.Expr as PscExpr
 
+import StringWithBrackets as SWB
+
 -- # The Data Type
 data ABCCategory = 
       Bottom {
@@ -206,33 +208,16 @@ parser
     where
         parserBaseOrBot :: Parser ABCCategory
         parserBaseOrBot = 
-            create . concat
-            <$> Psc.many1 (
-                (
-                    Psc.between 
-                        (Psc.char '{') (Psc.char '}')
-                        --(Psc.many Psc.letter)
-                        (Psc.many (Psc.satisfy (/= '}')))
-                    Psc.<?> "Quote in a base ABC Category"
-                ) 
-                Psc.<|>
-                (
-                    (\c -> [(c :: Char)])
-                    <$> Psc.satisfy ( \c -> 
-                        not (
-                            DCh.isSpace (c :: Char)
-                            || (c `elem` ".{}<>()/\\")
-                        )
-                    ) Psc.<?> "Letter in a base ABC Category"
-                )
-            )
+            create . SWB.concatStringWithBrackets 
+            <$> Psc.many1 (SWB.parserEitherCharOrBracketedString ".<>()/\\")
+                    Psc.<?> "Base ABC Category"
             where
                 create :: String -> ABCCategory
                 create str
                     | str == strBot 
                         = createBot
                     | otherwise
-                        = createBase str -- TODO: {   }の対応
+                        = createBase str
         opTableComplex = [
             [
                 PscExpr.Infix
@@ -263,11 +248,7 @@ parser
             where
                 parserComment :: Parser String
                 parserComment 
-                    = --Psc.between
-                        --(Psc.string ".\"")
-                        --(Psc.char '\"')
-                        --(Psc.many (Psc.noneOf "\""))
-                        Psc.char '.' *> (Psc.many (Psc.letter Psc.<|> Psc.oneOf "."))
+                    = Psc.char '.' *> (Psc.many (Psc.letter Psc.<|> Psc.oneOf "."))
                     Psc.<?> "Comment to a ABC Category"
                 printComment :: Maybe String -> String
                 printComment (Just x) = x

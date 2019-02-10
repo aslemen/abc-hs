@@ -1,4 +1,4 @@
-module Main where
+module Validation where
 
 import System.IO
 import Data.Monoid
