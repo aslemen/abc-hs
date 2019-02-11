@@ -106,4 +106,4 @@ main
     = (
         batchRelabel 
         <$> (getContents >>= parseDoc)
-    ) >>= foldr ((>>) . print) (return ())
+    ) >>= foldr ((>>) . (putStr . show)) (return ())

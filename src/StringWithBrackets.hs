@@ -1,5 +1,5 @@
 module StringWithBrackets (
-    BracketedString,
+    BracketedString(..),
     StringWithBrackets,
     concatStringWithBrackets,
     parserBracketedString,
@@ -15,7 +15,7 @@ import Text.Parsec.String (Parser)
 -- import qualified Text.Parsec.Language as PscLang
 import qualified Text.Parsec.Expr as PscExpr
 
-newtype BracketedString = BracketedString String
+newtype BracketedString = BracketedString String deriving (Eq)
 
 instance Show BracketedString where
     show (BracketedString str) = "{" ++ str ++ "}"
@@ -36,7 +36,7 @@ parserBracketedString :: Parser BracketedString
 parserBracketedString
     = BracketedString 
         <$> Psc.between (Psc.char '{') (Psc.char '}')
-                (Psc.many (Psc.satisfy (/= '}')))
+                (Psc.many (Psc.noneOf "}"))
         Psc.<?> "Bracketed String"
 
 parserEitherCharOrBracketedString :: 

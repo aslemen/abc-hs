@@ -244,15 +244,10 @@ parser
             Psc.<?> "Complex ABC Category"  -- with a RECURSION
         parserCommentOrEmpty :: Parser String
         parserCommentOrEmpty =
-            printComment <$> (Psc.optionMaybe parserComment)
-            where
-                parserComment :: Parser String
-                parserComment 
-                    = Psc.char '.' *> (Psc.many (Psc.letter Psc.<|> Psc.oneOf "."))
-                    Psc.<?> "Comment to a ABC Category"
-                printComment :: Maybe String -> String
-                printComment (Just x) = x
-                printComment Nothing = ""
+            Psc.option "" (
+                Psc.char '.' 
+                *> (Psc.many (Psc.letter Psc.<|> Psc.oneOf "\""))
+            ) Psc.<?> "Optional Comment to an ABC Category"
         parserComplex :: Parser ABCCategory
         parserComplex
             = addComment

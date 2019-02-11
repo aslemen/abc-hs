@@ -60,12 +60,13 @@ executables:
     - abc-hs
     
 tests:
-  abc-hs-test:
-    main:                Spec.hs
-    source-dirs:         test
+  spec-SWB:
+    main:                StringWithBracketsSpec.hs
+    source-dirs:         test/src
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - abc-hs
+    - hspec
