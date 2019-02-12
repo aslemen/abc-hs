@@ -2,12 +2,15 @@ module KeyakiCategory (
     KeyakiCategory(..),
     createBase,
     parser,
+    showFull,
+    showCat,
     createFromString,
     Psc.ParseError,
     ) where
 
 import qualified Data.Char as DC
 import qualified Data.List as DL
+import qualified Data.List.Split as DLS
 import qualified Text.Parsec as Psc
 import Text.Parsec.String (Parser)
 
@@ -17,7 +20,7 @@ data KeyakiCategory =
     KeyakiCategory {
         catlist :: [String],
         iched :: String,
-        sort :: String
+        sortInfo :: String
     }
     deriving (Eq)
 
@@ -26,30 +29,47 @@ createBase strlist
     = KeyakiCategory {
         catlist = strlist,
         iched = "",
-        sort = ""
+        sortInfo = ""
     }
 
+
+showCat :: KeyakiCategory -> String
+showCat kcat
+    = DL.intercalate "-" $ catlist kcat
+
+showFull :: KeyakiCategory -> String
+showFull all@(KeyakiCategory {
+    iched = iched,
+    sortInfo = sortInfo
+    }
+    )
+    = (showCat all)
+        ++ "-" ++ iched 
+        ++ (";{" ++ sortInfo ++ "}")
+
+
 instance Show KeyakiCategory where
-    show KeyakiCategory {catlist = cat}
-        = (DL.intercalate "-" cat)
+    show = showFull
 
 parser :: Parser KeyakiCategory
-parser
-    = (
-        SWB.concatStringWithBrackets 
-        <$> Psc.many1 (SWB.parserEitherCharOrBracketedString "()-;")
-        ) `Psc.sepBy` (Psc.char '-')
-        >>= \catICH ->
-            Psc.option "" (
-                Psc.between (Psc.string ";{") (Psc.char '}')
-                    (Psc.many (Psc.noneOf "}"))
-            )
-            >>= \sort ->
-                return $ (makeKC catICH) { sort = sort }
+parser 
+    = do
+        catICH <- concat <$> 
+            (Psc.many1 
+            $ SWB.parserStringOrBracketedString "()|"); -- String
+        -- TODO: 普通の;と;{...}との区別。先読みが必要。
+        sort <- Psc.option "" (
+            Psc.try $
+            Psc.between (Psc.string ";{") (Psc.char '}')
+                (Psc.many (Psc.noneOf "}"))
+            );
+        return $ (makeKC $ splitCatICH catICH) { sortInfo = sort }
     where
+        splitCatICH :: String -> [String]
+        splitCatICH = DLS.splitOn "-" 
         makeKC :: [String] -> KeyakiCategory
         makeKC li
-            | all DC.isDigit (last li) 
+            | length li > 1 && all DC.isDigit (last li) 
                 = (createBase (init li)) {iched = last li}
             | otherwise = createBase li
 

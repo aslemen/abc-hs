@@ -19,7 +19,7 @@ import qualified ParsedTree as PT
 type KCat = KC.KeyakiCategory
 type ABCCat = ABCC.ABCCategory
 
-type Marked cat = DMed.DepMarked cat
+type Marked cat = (DMed.DepMarked) cat
 type KCatMarked = Marked KCat
 type ABCCatMarked = Marked ABCCat
 
@@ -27,7 +27,7 @@ type KTMarked = PT.Tree KCatMarked
 type ABCTMarked = PT.Tree ABCCatMarked
 
 
-parserKTMarked = (DMed.parser KC.parser)
+parserKTMarked = DMed.parser KC.parser
 
 -- # Tree Parser
 runParserKTMarked :: String -> Either PT.ParseError KTMarked
@@ -39,7 +39,7 @@ runParserDoc = PT.createDoc parserKTMarked
 
 -- # Main Job
 createABCCBaseFromKC :: KCat -> ABCCat
-createABCCBaseFromKC = ABCC.createBase . show
+createABCCBaseFromKC = ABCC.createBase . KC.showCat
 {- |
     Example:
     [B C D E|h F G]
@@ -49,7 +49,7 @@ data SplitChildren prehead head posthead = SplitChildren {
     preHeads :: [prehead],
     headMaybe :: Maybe head,
     postHeads :: [posthead]
-    } deriving (Eq, Show)
+    } deriving (Eq, Show) -- Maybe Intでいいのでは？
 type UniformSplitChildren cat = SplitChildren cat cat cat
 
 concatChildren :: UniformSplitChildren cat -> [cat]
@@ -86,12 +86,12 @@ findHead children
                 postHeads = remainder
                 } 
         | otherwise -- continue searching
-            = findHeadInternal
+            = findHeadLoop
                 remainder
                 result { 
                     preHeads = (preHeads result) ++ [leftMost] 
                 }
-    findHeadInternal [] splitChildren -- no more searching
+    findHeadLoop [] splitChildren -- no more searching
         = splitChildren
 
 convertHead :: 
@@ -108,7 +108,7 @@ convertHead
     = SplitChildren {
         preHeads = pre,
         headMaybe = case mh of
-                        Just _ -> Just (catParent DMed.<--> DMing.Head)
+                        Just _ -> Just (catParent DMed.:| DMing.Head)
                         Nothing -> Nothing
         ,
         postHeads = post
@@ -124,10 +124,10 @@ convertPreHead ::
 convertPreHead children@(
     SplitChildren {
         preHeads 
-            = preHead@(DMed.DepMarked dep preHeadCat)
+            = preHead@(preHeadCat DMed.:| dep)
                 :remainder, -- one or more prehead
         headMaybe 
-            = Just head@(DMed.DepMarked _ headCat)
+            = Just head@(headCat DMed.:| _)
               -- there is actually a head
         }
     )
@@ -146,6 +146,18 @@ convertPreHead children@(
             in 
                 newRemainder {
                     preHeads 
+                        = newPreHead:(preHeads newRemainder)
+                }
+    | dep == DMing.None -- do nothing and continue the loop
+        = let
+            newPreHead = createABCCBaseFromKC <$> preHead
+            newRemainder
+                = convertPreHead children{
+                    preHeads = remainder
+                }
+            in 
+                newRemainder {
+                    preHeads
                         = newPreHead:(preHeads newRemainder)
                 }
     | otherwise
@@ -192,10 +204,10 @@ convertPostHead ::
 convertPostHead children@(
     SplitChildren {
         headMaybe 
-            = Just head@(DMed.DepMarked _ headCat),
+            = Just head@(headCat DMed.:| _),
                 -- there is actually a head,
         postHeads 
-            = postHead@(DMed.DepMarked dep postHeadCat)
+            = postHead@(postHeadCat DMed.:| dep)
                 :remainder -- one or more posthead
         }
     )
@@ -213,9 +225,21 @@ convertPostHead children@(
                 }
             in 
                 newRemainder {
-                    postHeads 
-                        = newPostHead:(postHeads newRemainder)
-                }
+                        postHeads 
+                            = newPostHead:(postHeads newRemainder)
+                    }
+    | dep == DMing.None -- do nothing and continue the loop
+    = let
+        newPostHead = createABCCBaseFromKC <$> postHead
+        newRemainder
+            = convertPostHead children{
+                postHeads = remainder
+            }
+        in 
+            newRemainder {
+                postHeads
+                    = newPostHead:(postHeads newRemainder)
+            }
     | otherwise -- head .. postHead -> head head\head
         = let
             newPostHead
@@ -277,7 +301,7 @@ getNewCategory catParent
 relabel :: KTMarked -> ABCTMarked
 relabel node@(
         PT.Node {
-            PT.label = DMed.DepMarked {
+            PT.label = (DMed.:|) {
                 DMed.category = cat
             }
         }
@@ -285,17 +309,12 @@ relabel node@(
     where
         relabelLoop :: ABCCat -> KTMarked -> ABCTMarked
         relabelLoop newParentCat PT.Node {
-                PT.label = DMed.DepMarked { 
-                    DMed.dependency = dep,
-                    DMed.category = cat 
-                    },
+                PT.label = cat DMed.:| dep,
                 PT.children = oldChildren
                 }
             = PT.Node {
-                PT.label = DMed.DepMarked {
-                    DMed.dependency = dep,
-                    DMed.category = newParentCat -- convert the parent label lately
-                    },
+                PT.label = newParentCat DMed.:| dep,
+                     -- convert the parent label lately
                 PT.children = newChildren
                 }
             where

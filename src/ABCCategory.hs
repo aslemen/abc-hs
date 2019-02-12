@@ -208,9 +208,10 @@ parser
     where
         parserBaseOrBot :: Parser ABCCategory
         parserBaseOrBot = 
-            create . SWB.concatStringWithBrackets 
-            <$> Psc.many1 (SWB.parserEitherCharOrBracketedString ".<>()/\\")
-                    Psc.<?> "Base ABC Category"
+            create . concat 
+            <$> Psc.many1 
+                (SWB.parserStringOrBracketedString ".<>()/\\")
+                Psc.<?> "Base ABC Category"
             where
                 create :: String -> ABCCategory
                 create str

@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - parsec
 - optparse-applicative
+- split
 
 library:
   source-dirs: src
@@ -58,7 +59,6 @@ executables:
     - -main-is Relabeling
     dependencies:
     - abc-hs
-    
 tests:
   spec-SWB:
     main:                StringWithBracketsSpec.hs
@@ -67,6 +67,29 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -main-is StringWithBracketsSpec
+    dependencies:
+    - abc-hs
+    - hspec
+  spec-KCat:
+    main:                KeyakiCategorySpec.hs
+    source-dirs:         test/src
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is KeyakiCategorySpec
+    dependencies:
+    - abc-hs
+    - hspec
+  spec-KTree:
+    main:                KeyakiTreeSpec.hs
+    source-dirs:         test/src
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is KeyakiTreeSpec
     dependencies:
     - abc-hs
     - hspec

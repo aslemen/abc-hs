@@ -4,7 +4,7 @@ module DepMarking (
     ) where
 
 data DepMarking 
-    = Head | Adjunct | Complement  | ComplementSpecial | None
+    = Head | Adjunct | Complement | ComplementSpecial | None
     deriving (Eq)
 
 instance Show DepMarking where
@@ -12,12 +12,12 @@ instance Show DepMarking where
     show Adjunct = "a"
     show Complement = "c"
     show ComplementSpecial = "cs"
-    show _ = ""
+    show None = "NA"
 
 createMarking :: String -> DepMarking 
 createMarking "h" = Head
 createMarking "a" = Adjunct
 createMarking "c" = Complement
 createMarking "cs" = ComplementSpecial
-createMarking "" = None
+createMarking "NA" = None
 createMarking _ = None

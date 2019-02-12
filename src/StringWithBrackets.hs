@@ -1,9 +1,6 @@
 module StringWithBrackets (
-    BracketedString(..),
-    StringWithBrackets,
-    concatStringWithBrackets,
     parserBracketedString,
-    parserEitherCharOrBracketedString
+    parserStringOrBracketedString,
     ) where
 
 import Control.Applicative
@@ -15,39 +12,27 @@ import Text.Parsec.String (Parser)
 -- import qualified Text.Parsec.Language as PscLang
 import qualified Text.Parsec.Expr as PscExpr
 
-newtype BracketedString = BracketedString String deriving (Eq)
-
-instance Show BracketedString where
-    show (BracketedString str) = "{" ++ str ++ "}"
-
-type EitherCharOrBracketedString = Either Char BracketedString
-
-type StringWithBrackets = [EitherCharOrBracketedString]
-
-concatStringWithBrackets :: StringWithBrackets -> String
-concatStringWithBrackets ((Left char):swbs)
-    = char : (concatStringWithBrackets swbs)
-concatStringWithBrackets ((Right swb):swbs)
-    = (show swb) ++ (concatStringWithBrackets swbs)
-concatStringWithBrackets [] 
-    = ""
-
-parserBracketedString :: Parser BracketedString
+parserBracketedString :: Parser String
 parserBracketedString
-    = BracketedString 
-        <$> Psc.between (Psc.char '{') (Psc.char '}')
-                (Psc.many (Psc.noneOf "}"))
+    = Psc.char '{'
+        >>= \open ->
+            Psc.many (Psc.noneOf "}")
+            >>= \content ->
+                Psc.char '}'
+                >>= \close ->
+                    return (open : (content ++ [close]))
         Psc.<?> "Bracketed String"
 
-parserEitherCharOrBracketedString :: 
-    [Char] -> Parser EitherCharOrBracketedString
-parserEitherCharOrBracketedString constraints
-    = (Right <$> parserBracketedString)
-        Psc.<|> 
-        (Left <$> Psc.satisfy ( \c -> 
-            not (
+parserStringOrBracketedString :: 
+    [Char] -> Parser String
+parserStringOrBracketedString constraints
+    = parserBracketedString
+        Psc.<|>
+        (Psc.many1 $ Psc.satisfy charCondition)
+    where
+        charCondition :: Char -> Bool
+        charCondition c
+            = not (
                 DCh.isSpace (c :: Char)
                 || (c `elem` "{}" ++ constraints)
             )
-            ) Psc.<?> "Letter"
-        )
