@@ -19,9 +19,8 @@ import qualified ParsedTree as PT
 type KCat = KC.KeyakiCategory
 type ABCCat = ABCC.ABCCategory
 
-type Marked cat = (DMed.DepMarked) cat
-type KCatMarked = Marked KCat
-type ABCCatMarked = Marked ABCCat
+type KCatMarked = DMed.DepMarked KCat
+type ABCCatMarked = DMed.DepMarked ABCCat
 
 type KTMarked = PT.Tree KCatMarked
 type ABCTMarked = PT.Tree ABCCatMarked
@@ -40,294 +39,170 @@ runParserDoc = PT.createDoc parserKTMarked
 -- # Main Job
 createABCCBaseFromKC :: KCat -> ABCCat
 createABCCBaseFromKC = ABCC.createBase . KC.showCat
-{- |
-    Example:
-    [B C D E|h F G]
-    -> [B C D], [E], [F G]
--}
-data SplitChildren prehead head posthead = SplitChildren {
-    preHeads :: [prehead],
-    headMaybe :: Maybe head,
-    postHeads :: [posthead]
-    } deriving (Eq, Show) -- Maybe Intでいいのでは？
-type UniformSplitChildren cat = SplitChildren cat cat cat
-
-concatChildren :: UniformSplitChildren cat -> [cat]
-concatChildren SplitChildren {
-        preHeads = pre,
-        headMaybe = hm,
-        postHeads = post
-    }
-    = pre ++ head ++ post
-    where
-        -- head :: [cat]
-        head 
-            = case hm of
-                Just h -> [h]
-                Nothing -> []
-
-findHead ::
-    [Marked cat] 
-    -> UniformSplitChildren (Marked cat)
-findHead children
-    = findHeadLoop children $ SplitChildren [] Nothing []
-    where
-    {- findHeadLoop :: 
-        [Marked cat] 
-        -> UniformSplitChildren (Marked cat)
-        -> UniformSplitChildren (Marked cat) 
-    -}
-    findHeadLoop
-        (leftMost:remainder) -- one or more child
-        result@(SplitChildren { headMaybe = Nothing }) -- head not yet found
-        | DMed.dependency leftMost == DMing.Head -- head found
-            = result {
-                headMaybe = Just leftMost,
-                postHeads = remainder
-                } 
-        | otherwise -- continue searching
-            = findHeadLoop
-                remainder
-                result { 
-                    preHeads = (preHeads result) ++ [leftMost] 
-                }
-    findHeadLoop [] splitChildren -- no more searching
-        = splitChildren
-
-convertHead :: 
-    ABCCat
-    -> (UniformSplitChildren KCatMarked)
-    -> SplitChildren KCatMarked ABCCatMarked KCatMarked
-convertHead 
-    catParent 
-    SplitChildren {
-        preHeads = pre,
-        headMaybe = mh, -- type: KCatMarked
-        postHeads = post
-    }
-    = SplitChildren {
-        preHeads = pre,
-        headMaybe = case mh of
-                        Just _ -> Just (catParent DMed.:| DMing.Head)
-                        Nothing -> Nothing
-        ,
-        postHeads = post
-    }
-{- |
-    Example:
-    [B C D], H|h, [F G]
-    -> [B|c C|c <B\C>/<B\C>|a], B\C\H|h
--}
-convertPreHead ::
-    SplitChildren KCatMarked ABCCatMarked KCatMarked
-    -> SplitChildren ABCCatMarked ABCCatMarked KCatMarked
-convertPreHead children@(
-    SplitChildren {
-        preHeads 
-            = preHead@(preHeadCat DMed.:| dep)
-                :remainder, -- one or more prehead
-        headMaybe 
-            = Just head@(headCat DMed.:| _)
-              -- there is actually a head
-        }
-    )
-    | dep == DMing.Complement -- preHead ... head -> preHead preHead\head
-        = let 
-            newPreHeadCat = createABCCBaseFromKC preHeadCat -- preHead
-            newPreHead = preHead { DMed.category = newPreHeadCat }
-            newRemainder
-                = convertPreHead children {
-                    preHeads = remainder,
-                    headMaybe = Just head {
-                        DMed.category = newPreHeadCat ABCC.<\> headCat 
-                                            -- preHead\Head
-                        }
-                }
-            in 
-                newRemainder {
-                    preHeads 
-                        = newPreHead:(preHeads newRemainder)
-                }
-    | dep == DMing.None -- do nothing and continue the loop
-        = let
-            newPreHead = createABCCBaseFromKC <$> preHead
-            newRemainder
-                = convertPreHead children{
-                    preHeads = remainder
-                }
-            in 
-                newRemainder {
-                    preHeads
-                        = newPreHead:(preHeads newRemainder)
-                }
-    | otherwise
-        = let
-            newPreHead
-                = preHead {
-                    DMed.category = headCat ABCC.</> headCat
-                    } 
-            newRemainder
-                = convertPreHead children {
-                    preHeads = remainder
-                }
-            in
-                newRemainder {
-                    preHeads = newPreHead:(preHeads newRemainder)
-                }
-convertPreHead children@(
-    SplitChildren { -- the empty preHead case
-            preHeads = [],
-            headMaybe = hm,
-            postHeads = post
-        }
-    ) = SplitChildren {
-            preHeads = [],
-            headMaybe = hm,
-            postHeads = post
-        }
-convertPreHead children@(
-    SplitChildren { -- the headless case
-        preHeads = pre,
-        headMaybe = Nothing,
-        postHeads = post
-        }
-    ) 
-    = SplitChildren {
-        preHeads = map (createABCCBaseFromKC <$>) pre,
-        headMaybe = Nothing,
-        postHeads = post
-        }
-
-convertPostHead :: 
-    SplitChildren ABCCatMarked ABCCatMarked KCatMarked
-    -> UniformSplitChildren ABCCatMarked
-convertPostHead children@(
-    SplitChildren {
-        headMaybe 
-            = Just head@(headCat DMed.:| _),
-                -- there is actually a head,
-        postHeads 
-            = postHead@(postHeadCat DMed.:| dep)
-                :remainder -- one or more posthead
-        }
-    )
-    | dep == DMing.Complement -- head .. postHead -> head/post post
-        = let 
-            newPostHeadCat = createABCCBaseFromKC postHeadCat -- postHead
-            newPostHead = postHead { DMed.category = newPostHeadCat }
-            newRemainder
-                = convertPostHead children {
-                    headMaybe = Just head {
-                        DMed.category = headCat ABCC.</> newPostHeadCat
-                                            -- head/post
-                        },
-                    postHeads = remainder                    
-                }
-            in 
-                newRemainder {
-                        postHeads 
-                            = newPostHead:(postHeads newRemainder)
-                    }
-    | dep == DMing.None -- do nothing and continue the loop
-    = let
-        newPostHead = createABCCBaseFromKC <$> postHead
-        newRemainder
-            = convertPostHead children{
-                postHeads = remainder
-            }
-        in 
-            newRemainder {
-                postHeads
-                    = newPostHead:(postHeads newRemainder)
-            }
-    | otherwise -- head .. postHead -> head head\head
-        = let
-            newPostHead
-                = postHead {
-                    DMed.category = headCat ABCC.<\> headCat
-                    } 
-            newRemainder
-                = convertPostHead children {
-                    postHeads = remainder
-                }
-            in
-                newRemainder {
-                    postHeads = newPostHead:(postHeads newRemainder)
-                }
-convertPostHead children@(
-    SplitChildren { -- the empty preHead case
-            preHeads = pre,
-            headMaybe = hm,
-            postHeads = []
-        }
-    ) = SplitChildren { 
-            preHeads = pre,
-            headMaybe = hm,
-            postHeads = []
-        }
-convertPostHead children@(
-    SplitChildren { -- the headless case
-        preHeads = pre,
-        headMaybe = Nothing,
-        postHeads = post
-        }
-    ) 
-    = SplitChildren {
-        preHeads = pre,
-        headMaybe = Nothing,
-        postHeads = map (createABCCBaseFromKC <$>) post
-        }
-
-convertAll :: 
-    ABCCat
-    -> UniformSplitChildren KCatMarked 
-    -> UniformSplitChildren ABCCatMarked
-convertAll catParent
-    = convertPostHead . convertPreHead . (convertHead catParent)
-
-getNewCategory :: 
-    ABCCat -> [KCatMarked] -> [ABCCatMarked]
-getNewCategory catParent
-    = concatChildren 
-        . revPostHeads 
-        . (convertAll catParent) 
-        . revPostHeads 
-        . findHead
-    where
-        revPostHeads :: SplitChildren a b c -> SplitChildren a b c
-        revPostHeads sc
-            = sc { postHeads = reverse (postHeads sc) }
 
 relabel :: KTMarked -> ABCTMarked
-relabel node@(
-        PT.Node {
-            PT.label = (DMed.:|) {
-                DMed.category = cat
-            }
-        }
-    ) = relabelLoop (createABCCBaseFromKC cat) node 
+relabel node@(PT.Node (cat DMed.:| _) _)
+    = snd $ relabelLoopLeft (createABCCBaseFromKC cat) node 
     where
-        relabelLoop :: ABCCat -> KTMarked -> ABCTMarked
-        relabelLoop newParentCat PT.Node {
-                PT.label = cat DMed.:| dep,
-                PT.children = oldChildren
-                }
-            = PT.Node {
-                PT.label = newParentCat DMed.:| dep,
-                     -- convert the parent label lately
-                PT.children = newChildren
-                }
+        -- | relabelLoopLeft 
+        --      givenCatParent isHeaded oldTree ~~> (isHeaded, New Tree)
+        relabelLoopLeft :: ABCCat -> KTMarked -> (Bool, ABCTMarked)
+        relabelLoopLeft 
+            givenCatParent -- 上・左から降ってくる新しい親範疇
+            oldTree@( -- もとのtree :: KTMarked
+                PT.Node {
+                    PT.label = catParent DMed.:| depParent,
+                    PT.children 
+                        = (treeLeftMost@(
+                            PT.Node {
+                                PT.label = catLeftMost DMed.:| depLeftMost
+                                }
+                            )
+                        ):remainder -- leftmost childを取ってくる
+                    }
+                )
+            = (
+                isHeaded,
+                newSiblingTree {
+                    PT.label 
+                        = newCatParent DMed.:| depParent,
+                    PT.children 
+                        = if isPRO treeLeftMost
+                            then PT.children newSiblingTree
+                            else newSubTree:(PT.children newSiblingTree)
+                    }
+                )
             where
-                newChildrenCat :: [ABCCatMarked]
-                newChildrenCat 
-                    = getNewCategory newParentCat $ map PT.label oldChildren
-                execSub :: (ABCCatMarked, KTMarked) -> ABCTMarked
-                execSub (newCat, oldTree) 
-                    = relabelLoop (DMed.category newCat) oldTree -- Loop
-                newChildren :: [ABCTMarked]
-                newChildren = 
-                    map execSub $ zip newChildrenCat oldChildren
-
+                isPRO :: KTMarked -> Bool
+                isPRO t =
+                    length (PT.children t) == 1
+                    && (KC.catlist $ DMed.category $ PT.label $ head $ PT.children t) == ["*PRO*"]
+                newCatCandidates :: (ABCCat, ABCCat) 
+                    -- (new leftmost head, new sibling-parent cat)
+                newCatCandidates
+                    | depLeftMost == DMing.Complement
+                        -- (leftmost|c, head) ~~> (lm|c, lm\head)
+                        = (
+                            convertCatLeftMost, 
+                            convertCatLeftMost ABCC.<\> givenCatParent
+                            )
+                        
+                    | depLeftMost == DMing.Head -- trivial
+                        = (givenCatParent, givenCatParent)
+                    | otherwise --depLeftMost == DMing.Adjunct
+                        -- (leftmost|a, head) ~~> (head/head|a, head)
+                        = (
+                            givenCatParent ABCC.</> givenCatParent,
+                            givenCatParent
+                        )
+                    where 
+                        convertCatLeftMost = createABCCBaseFromKC catLeftMost
+                newCatLeftMostCandidate :: ABCCat
+                newCatLeftMostCandidate = fst newCatCandidates
+                newCatSiblingHeadCandidate :: ABCCat
+                newCatSiblingHeadCandidate = snd newCatCandidates
+                newSiblingTreeWithIsHeaded :: (Bool, ABCTMarked)
+                newSiblingTreeWithIsHeaded -- RECURSION
+                    | depLeftMost == DMing.Head -- headed!
+                        = (
+                            True,
+                            relabelLoopRight
+                                newCatSiblingHeadCandidate
+                                oldTree { PT.children = remainder }
+                        )
+                    | otherwise
+                        = relabelLoopLeft 
+                            newCatSiblingHeadCandidate
+                            oldTree { PT.children = remainder }
+                isHeaded :: Bool
+                isHeaded = fst newSiblingTreeWithIsHeaded
+                newCatLeftMostFinal :: ABCCat
+                newCatLeftMostFinal
+                    = if isHeaded
+                        then newCatLeftMostCandidate
+                        else createABCCBaseFromKC catLeftMost
+                newCatSiblingHeadFinal :: ABCCat
+                newCatSiblingHeadFinal
+                    = if isHeaded
+                        then newCatSiblingHeadCandidate
+                        else givenCatParent
+                newSiblingTree :: ABCTMarked
+                newSiblingTree = snd newSiblingTreeWithIsHeaded
+                newSubTree :: ABCTMarked
+                newSubTree 
+                    = snd $ relabelLoopLeft newCatLeftMostFinal treeLeftMost
+                newCatParent :: ABCCat
+                newCatParent
+                    = if isPRO treeLeftMost
+                        then newCatSiblingHeadFinal
+                        else givenCatParent
+        relabelLoopLeft givenCatParent (PT.Node label [])
+            = (
+                False,
+                PT.Node {
+                    PT.label 
+                        = givenCatParent DMed.:| (DMed.dependency label),
+                    PT.children = []
+                    }
+                )
+        relabelLoopRight :: ABCCat -> KTMarked -> ABCTMarked
+        relabelLoopRight
+            givenCatParent -- 左から降ってくる新しい親範疇
+            oldTree@( -- もとのtree :: KTMarked
+                PT.Node {
+                    PT.label = catParent DMed.:| depParent,
+                    PT.children 
+                        = (treeLeftMost@(
+                            PT.Node {
+                                PT.label = catLeftMost DMed.:| depLeftMost
+                                }
+                            )
+                        ):remainder -- leftmost childを取ってくる
+                    }
+                )
+            = newSiblingTree {
+                    PT.label 
+                        = givenCatParent DMed.:| depParent,
+                    PT.children 
+                        = newSubTree:(PT.children newSiblingTree)
+                    }
+            where
+                newCatCandidates :: (ABCCat, ABCCat) 
+                    -- (new sibling-parent cat, new leftmost head)
+                newCatCandidates
+                    | depLeftMost == DMing.Complement
+                        -- (head, leftmost|c) ~~> (head/lm|h, lm|c)
+                        = (
+                            givenCatParent ABCC.</> convertCatLeftMost,
+                            convertCatLeftMost
+                        )
+                    | otherwise --depLeftMost == DMing.Adjunct
+                        -- (head, leftmost|a) ~~> (head, head\head|a)
+                        = (
+                            givenCatParent,
+                            givenCatParent ABCC.<\> givenCatParent
+                        )
+                    where 
+                        convertCatLeftMost = createABCCBaseFromKC catLeftMost
+                newCatLeftMostFinal :: ABCCat
+                newCatLeftMostFinal = snd newCatCandidates
+                newCatSiblingHeadFinal :: ABCCat
+                newCatSiblingHeadFinal = fst newCatCandidates
+                newSiblingTree :: ABCTMarked
+                newSiblingTree -- Left RECURSION
+                    = relabelLoopRight
+                        newCatSiblingHeadFinal
+                        oldTree { PT.children = remainder }
+                newSubTree :: ABCTMarked
+                newSubTree 
+                    = snd $ relabelLoopLeft newCatLeftMostFinal treeLeftMost
+        relabelLoopRight givenCatParent (PT.Node label [])
+            = PT.Node {
+                PT.label
+                    = givenCatParent DMed.:| (DMed.dependency label),
+                PT.children = []
+            }
+        
 -- # Routine
 parseDoc :: String -> IO [KTMarked]
 parseDoc str
