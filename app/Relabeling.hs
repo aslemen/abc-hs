@@ -50,33 +50,30 @@ relabel node@(PT.Node (cat DMed.:| _) _)
         relabelLoopLeft 
             givenCatParent -- 上・左から降ってくる新しい親範疇
             oldTree@( -- もとのtree :: KTMarked
-                PT.Node {
-                    PT.label = label,
-                    PT.children 
-                        = (treeLeftMost@(
-                            PT.Node {
-                                PT.label = catLeftMost DMed.:| depLeftMost
-                                }
-                            )
+                PT.Node rootLabel (
+                    treeLeftMost@(
+                        PT.Node { 
+                            PT.rootLabel = catLeftMost DMed.:|depLeftMost 
+                            }
                         ):remainder -- leftmost childを取ってくる
-                    }
-                )
+                    )
+                ) 
             = (
                 isHeaded,
                 newSiblingTree {
-                    PT.label 
-                        = (const newCatParent) <$> label,
-                    PT.children 
+                    PT.rootLabel 
+                        = newCatParent <$ rootLabel,
+                    PT.subForest 
                         = if isPRO treeLeftMost
-                            then PT.children newSiblingTree
-                            else newSubTree:(PT.children newSiblingTree)
+                            then PT.subForest newSiblingTree
+                            else newSubTree:(PT.subForest newSiblingTree)
                     }
                 )
             where
                 isPRO :: KTMarked -> Bool
                 isPRO t =
-                    length (PT.children t) == 1
-                    && (KC.catlist $ DMed.category $ PT.label $ head $ PT.children t) == ["*PRO*"]
+                    length (PT.subForest t) == 1
+                    && (KC.catlist $ DMed.category $ PT.rootLabel $ head $ PT.subForest t) == ["*PRO*"]
                 newCatCandidates :: (ABCCat, ABCCat) 
                     -- (new leftmost head, new sibling-parent cat)
                 newCatCandidates
@@ -108,12 +105,12 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                             True,
                             relabelLoopRight
                                 newCatSiblingHeadCandidate
-                                oldTree { PT.children = remainder }
+                                oldTree { PT.subForest = remainder }
                         )
                     | otherwise
                         = relabelLoopLeft 
                             newCatSiblingHeadCandidate
-                            oldTree { PT.children = remainder }
+                            oldTree { PT.subForest = remainder }
                 isHeaded :: Bool
                 isHeaded = fst newSiblingTreeWithIsHeaded
                 newCatLeftMostFinal :: ABCCat
@@ -136,35 +133,25 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                     = if isPRO treeLeftMost
                         then newCatSiblingHeadFinal
                         else givenCatParent
-        relabelLoopLeft givenCatParent (PT.Node label [])
-            = (
-                False,
-                PT.Node {
-                    PT.label 
-                        = (const givenCatParent) <$> label,
-                    PT.children = []
-                    }
-                )
+        relabelLoopLeft givenCatParent terminal@(PT.Node _ [])
+            = (False, (givenCatParent <$) <$> terminal)
         relabelLoopRight :: ABCCat -> KTMarked -> ABCTMarked
         relabelLoopRight
             givenCatParent -- 左から降ってくる新しい親範疇
             oldTree@( -- もとのtree :: KTMarked
-                PT.Node {
-                    PT.label = label,
-                    PT.children 
-                        = (treeLeftMost@(
-                            PT.Node {
-                                PT.label = catLeftMost DMed.:| depLeftMost
-                                }
-                            )
+                PT.Node rootLabel (
+                    treeLeftMost@(
+                        PT.Node { 
+                            PT.rootLabel = catLeftMost DMed.:|depLeftMost 
+                            }
                         ):remainder -- leftmost childを取ってくる
-                    }
-                )
+                    )
+                ) 
             = newSiblingTree {
-                    PT.label 
-                        = (const givenCatParent) <$> label,
-                    PT.children 
-                        = newSubTree:(PT.children newSiblingTree)
+                    PT.rootLabel 
+                        = givenCatParent <$ rootLabel,
+                    PT.subForest 
+                        = newSubTree:(PT.subForest newSiblingTree)
                     }
             where
                 newCatCandidates :: (ABCCat, ABCCat) 
@@ -192,16 +179,12 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                 newSiblingTree -- Left RECURSION
                     = relabelLoopRight
                         newCatSiblingHeadFinal
-                        oldTree { PT.children = remainder }
+                        oldTree { PT.subForest = remainder }
                 newSubTree :: ABCTMarked
                 newSubTree 
                     = snd $ relabelLoopLeft newCatLeftMostFinal treeLeftMost
-        relabelLoopRight givenCatParent (PT.Node label [])
-            = PT.Node {
-                PT.label
-                    = (const givenCatParent) <$> label,
-                PT.children = []
-            }
+        relabelLoopRight givenCatParent terminal@(PT.Node _ [])
+            = (givenCatParent <$) <$> terminal
         
 -- # Routine
 parseDoc :: String -> IO [KTMarked]
@@ -212,12 +195,8 @@ parseDoc str
         Right res 
             -> return res
 
-batchRelabel :: [KTMarked] -> [ABCTMarked]
-batchRelabel = fmap relabel
-
 main :: IO ()
 main 
-    = (
-        batchRelabel 
-        <$> (getContents >>= parseDoc)
-    ) >>= foldr ((>>) . (putStr . show)) (return ())
+    = getContents
+        >>= parseDoc
+        >>= mapM_ (putStr . PT.printPretty . relabel)

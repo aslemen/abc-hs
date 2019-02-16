@@ -63,20 +63,20 @@ relabel :: ABCT -> ABCT
 relabel (PT.Node node children)
     | (length children) == 2 
         = PT.Node {
-            PT.label = node `ABCC.addComment` (com res node),
-            PT.children = map relabel children
+            PT.rootLabel = node `ABCC.addComment` (com res node),
+            PT.subForest = map relabel children
         }
     | otherwise 
         = PT.Node {
-            PT.label = node,
-            PT.children = map relabel children
+            PT.rootLabel = node,
+            PT.subForest = map relabel children
         }
     where
         child1 :: ABCT
         child2 :: ABCT
         child1 : (child2 : _) = children
         res :: (ABCC.ABCCategory, ABCC.ABCStatusFC)
-        res = ABCC.reduceWithResult (PT.label child1) (PT.label child2)
+        res = ABCC.reduceWithResult (PT.rootLabel child1) (PT.rootLabel child2)
         com :: (ABCC.ABCCategory, ABCC.ABCStatusFC) -> ABCC.ABCCategory -> String
         com (_, ABCC.Failed) _ = "FAIL"
         com (cat_new, stat) cat_orig
@@ -103,7 +103,6 @@ parseDoc str
 -- # Main Procedure
 main :: IO ()
 main 
-    = (
-        batchRelabel 
-        <$> (getContents >>= parseDoc)
-    ) >>= foldr ((>>) . (putStr . show)) (return ())
+    = getContents
+        >>= parseDoc
+        >>= mapM_ (putStr . PT.printPretty . relabel)

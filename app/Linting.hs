@@ -77,4 +77,4 @@ main :: IO ()
 main 
     = getContents
         >>= parseDoc
-        >>= mapM_  (putStr . show . lint)
+        >>= mapM_  (putStr . PT.printPretty . lint)
