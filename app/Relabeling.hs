@@ -71,9 +71,9 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                 )
             where
                 isPRO :: KTMarked -> Bool
-                isPRO t =
-                    length (PT.subForest t) == 1
-                    && (KC.catlist $ DMed.category $ PT.rootLabel $ head $ PT.subForest t) == ["*PRO*"]
+                isPRO
+                    = PT.isFilterNearTerminal $
+                        (== "*PRO*") . head . KC.catlist . DMed.category
                 newCatCandidates :: (ABCCat, ABCCat) 
                     -- (new leftmost head, new sibling-parent cat)
                 newCatCandidates

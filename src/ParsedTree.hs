@@ -1,6 +1,10 @@
 module ParsedTree (
     DT.Tree(..),
     DT.Forest,
+    getUnary, isUnary,
+    justTerminal, isTerminal,
+    getNearTerminal, isNearTerminal,
+    filterNearTerminal, isFilterNearTerminal,
     printPretty,
     parser,
     createFromString,
@@ -9,8 +13,12 @@ module ParsedTree (
     Psc.ParseError
     ) where
 
+import qualified Control.Monad as CMon
+
 import qualified Data.List as DL
 import qualified Data.Tree as DT
+import qualified Data.Maybe as DMay
+
 
 import qualified Text.Parsec as Psc
 import Text.Parsec.String (Parser)
@@ -18,9 +26,31 @@ import qualified Text.Parsec.Char as PscCh
 -- import qualified Text.Parsec.Language as PscLang
 
 -- ## Function
-isTerminal :: DT.Tree termtype -> Bool
-isTerminal DT.Node { DT.subForest = [] } = True
-isTerminal _ = False
+getUnary :: (DT.Tree term) -> Maybe (DT.Tree term)
+getUnary DT.Node { DT.subForest = child:[] } = Just child
+getUnary _ = Nothing
+
+isUnary :: (DT.Tree term) -> Bool
+isUnary = DMay.isJust . getUnary
+
+justTerminal :: (DT.Tree term) -> Maybe term
+justTerminal (DT.Node lex []) = Just lex
+justTerminal _ = Nothing 
+
+isTerminal :: (DT.Tree term) -> Bool
+isTerminal = DMay.isJust . justTerminal
+
+getNearTerminal :: (DT.Tree term) -> Maybe term
+getNearTerminal = getUnary CMon.>=> justTerminal 
+
+isNearTerminal :: (DT.Tree term) -> Bool
+isNearTerminal = DMay.isJust . getNearTerminal
+
+filterNearTerminal :: (term -> Bool) -> (DT.Tree term) -> Maybe term
+filterNearTerminal cond tree = CMon.mfilter cond $ getNearTerminal tree
+
+isFilterNearTerminal :: (term -> Bool) -> (DT.Tree term) -> Bool
+isFilterNearTerminal cond = DMay.isJust . (filterNearTerminal cond)
 
 -- ## Showing
 printPrettyInternal :: Show termtype => 
