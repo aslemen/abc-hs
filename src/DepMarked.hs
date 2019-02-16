@@ -32,14 +32,6 @@ instance Functor DepMarked where
     -- fmap :: (a -> b) -> (DepMarked a) -> (DepMarked b)
     fmap f (cat :| dep) = (f cat) :| dep
 
-instance Applicative DepMarked where
-    -- pure :: a -> DepMarked a
-    pure x = x :| DMing.None
-    -- <*> :: DepMarked (a -> b) -> (DepMarked a) -> (DepMarked b)
-    (<*>) (df :| _) (cat :| dep2)
-        = (df cat) :| dep2
-            -- ignoring dep1 
-
 markCat :: String -> cat -> (DepMarked cat)
 markCat str x
     = x :| (DMing.createMarking str)

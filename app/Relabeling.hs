@@ -51,7 +51,7 @@ relabel node@(PT.Node (cat DMed.:| _) _)
             givenCatParent -- 上・左から降ってくる新しい親範疇
             oldTree@( -- もとのtree :: KTMarked
                 PT.Node {
-                    PT.label = catParent DMed.:| depParent,
+                    PT.label = label,
                     PT.children 
                         = (treeLeftMost@(
                             PT.Node {
@@ -65,7 +65,7 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                 isHeaded,
                 newSiblingTree {
                     PT.label 
-                        = newCatParent DMed.:| depParent,
+                        = (const newCatParent) <$> label,
                     PT.children 
                         = if isPRO treeLeftMost
                             then PT.children newSiblingTree
@@ -141,7 +141,7 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                 False,
                 PT.Node {
                     PT.label 
-                        = givenCatParent DMed.:| (DMed.dependency label),
+                        = (const givenCatParent) <$> label,
                     PT.children = []
                     }
                 )
@@ -150,7 +150,7 @@ relabel node@(PT.Node (cat DMed.:| _) _)
             givenCatParent -- 左から降ってくる新しい親範疇
             oldTree@( -- もとのtree :: KTMarked
                 PT.Node {
-                    PT.label = catParent DMed.:| depParent,
+                    PT.label = label,
                     PT.children 
                         = (treeLeftMost@(
                             PT.Node {
@@ -162,7 +162,7 @@ relabel node@(PT.Node (cat DMed.:| _) _)
                 )
             = newSiblingTree {
                     PT.label 
-                        = givenCatParent DMed.:| depParent,
+                        = (const givenCatParent) <$> label,
                     PT.children 
                         = newSubTree:(PT.children newSiblingTree)
                     }
@@ -199,7 +199,7 @@ relabel node@(PT.Node (cat DMed.:| _) _)
         relabelLoopRight givenCatParent (PT.Node label [])
             = PT.Node {
                 PT.label
-                    = givenCatParent DMed.:| (DMed.dependency label),
+                    = (const givenCatParent) <$> label,
                 PT.children = []
             }
         
