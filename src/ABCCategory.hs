@@ -26,6 +26,7 @@ import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Expr as PscExpr
 
 import StringWithBrackets as SWB
+import qualified PTPrintable as PTP
 
 -- # The Data Type
 data ABCCategory = 
@@ -119,7 +120,11 @@ printCategory isComment cat
 instance Show ABCCategory where
     show = printCategory True
 
--- ## Reduction
+instance PTP.Printable ABCCategory where
+    psdPrint (PTP.Option _ PTP.Minimal) = printCategory False
+    psdPrint _ = show
+
+    -- ## Reduction
 data ABCStatusFC = FCLeft Int | FCRight Int | Failed
 instance Eq ABCStatusFC where
     (==) (FCLeft n) (FCLeft m) 

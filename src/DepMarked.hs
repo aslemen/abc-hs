@@ -10,23 +10,26 @@ import qualified Text.Parsec as Psc
 import Text.Parsec.String (Parser)
 
 import qualified DepMarking as DMing
+import qualified PTPrintable as PTP
 
 data DepMarked cat
     = (:|) {
         category:: cat,
         dependency :: DMing.DepMarking
     } deriving (Eq)
-
-showFull :: (Show cat) => DepMarked cat -> String
-showFull (cat :| dep)
-    = (show cat) ++ "|" ++ (show dep)
-
-showLess :: (Show cat) => DepMarked cat -> String
-showLess (cat :| DMing.None) = show cat
-showLess dm@(_ :| _) = showFull dm
         
 instance (Show cat) => Show (DepMarked cat) where
-    show = showFull
+    show (cat :| dep) = (show cat) ++ "|" ++ (show dep)
+
+instance (PTP.Printable cat) => PTP.Printable (DepMarked cat) where
+    psdPrint 
+        min@(PTP.Option _ node)
+        dm@(cat :| DMing.None)
+            | node == PTP.Full
+                = show dm
+            | otherwise
+                = PTP.psdPrint min cat
+    psdPrint _ dm = show dm
 
 instance Functor DepMarked where
     -- fmap :: (a -> b) -> (DepMarked a) -> (DepMarked b)

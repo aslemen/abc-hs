@@ -5,7 +5,6 @@ module ParsedTree (
     justTerminal, isTerminal,
     getNearTerminal, isNearTerminal,
     filterNearTerminal, isFilterNearTerminal,
-    printPretty,
     parser,
     createFromString,
     parserDoc,
@@ -19,11 +18,12 @@ import qualified Data.List as DL
 import qualified Data.Tree as DT
 import qualified Data.Maybe as DMay
 
-
 import qualified Text.Parsec as Psc
 import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Char as PscCh
 -- import qualified Text.Parsec.Language as PscLang
+
+import qualified PTPrintable as PTP
 
 -- ## Function
 getUnary :: (DT.Tree term) -> Maybe (DT.Tree term)
@@ -53,17 +53,23 @@ isFilterNearTerminal :: (term -> Bool) -> (DT.Tree term) -> Bool
 isFilterNearTerminal cond = DMay.isJust . (filterNearTerminal cond)
 
 -- ## Showing
-printPrettyInternal :: Show termtype => 
-    Int -> DT.Tree termtype -> String
-printPrettyInternal indent wholenode@(DT.Node node children)
+printPrettyInternal ::
+    Int 
+    -> (term -> String) 
+    -> (DT.Tree term) 
+    -> String
+printPrettyInternal 
+    indent
+    termPrinter 
+    wholenode@(DT.Node node children)
     | isTerminal wholenode
-        = show node
+        = termPrinter node
     | otherwise
         = "(" ++ node_str ++ children_str ++ ")"
     where
         node_str :: String
         node_str 
-            = (show node) ++ " "
+            = (termPrinter node) ++ " "
         node_str_len :: Int
         node_str_len 
             = length node_str
@@ -75,18 +81,17 @@ printPrettyInternal indent wholenode@(DT.Node node children)
             = '\n' : concat (replicate children_indent " ")
         children_str :: String
         children_str
-            = DL.intercalate 
-                children_sep
-                (map 
-                    (printPrettyInternal children_indent) 
-                    children
-                )
+            = DL.intercalate children_sep $ map
+                (printPrettyInternal children_indent termPrinter) 
+                children
+                    
+                    -- RECURSION
 
--- | Provide a string representation of an ABCCategory.
-printPretty :: Show termtype => 
-    DT.Tree termtype -> String
-printPretty tree
-    = (printPrettyInternal 0 tree) ++ "\n\n"
+instance (PTP.Printable term) => PTP.Printable (DT.Tree term) where
+    psdPrint 
+        opt@(PTP.Option PTP.Pretty _)
+        tree
+        = (printPrettyInternal 0 (PTP.psdPrint opt) tree) ++ "\n\n"
 
 -- ## Parsing
 parser :: Parser term -> Parser (DT.Tree term)

@@ -3,6 +3,8 @@ module DepMarking (
     createMarking
     ) where
 
+import PTPrintable as PTP
+
 data DepMarking 
     = Head | Adjunct | Complement | ComplementSpecial | None
     deriving (Eq)
@@ -13,6 +15,8 @@ instance Show DepMarking where
     show Complement = "c"
     show ComplementSpecial = "cs"
     show None = "NA"
+
+instance PTP.Printable DepMarking
 
 createMarking :: String -> DepMarking 
 createMarking "h" = Head

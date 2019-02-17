@@ -13,7 +13,9 @@ import qualified KeyakiCategory as KC
 import qualified DepMarking as DMing
 import qualified DepMarked as DMed
 import qualified ABCCategory as ABCC
+
 import qualified ParsedTree as PT
+import qualified PTPrintable as PTP
 
 -- # Type Aliases
 type KCat = KC.KeyakiCategory
@@ -38,7 +40,9 @@ runParserDoc = PT.createDoc parserKTMarked
 
 -- # Main Job
 createABCCBaseFromKC :: KCat -> ABCCat
-createABCCBaseFromKC = ABCC.createBase . KC.showCat
+createABCCBaseFromKC 
+    = ABCC.createBase 
+        . (PTP.psdPrint (PTP.Option PTP.Pretty PTP.Minimal))
 
 relabel :: KTMarked -> ABCTMarked
 relabel node@(PT.Node (cat DMed.:| _) _)
@@ -199,4 +203,4 @@ main :: IO ()
 main 
     = getContents
         >>= parseDoc
-        >>= mapM_ (putStr . PT.printPretty . relabel)
+        >>= mapM_ (putStr . PTP.psdPrintDefault . relabel)

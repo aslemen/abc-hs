@@ -2,8 +2,6 @@ module KeyakiCategory (
     KeyakiCategory(..),
     createBase,
     parser,
-    showFull,
-    showCat,
     createFromString,
     Psc.ParseError,
     ) where
@@ -14,7 +12,8 @@ import qualified Data.List.Split as DLS
 import qualified Text.Parsec as Psc
 import Text.Parsec.String (Parser)
 
-import StringWithBrackets as SWB
+import qualified PTPrintable as PTP
+import qualified StringWithBrackets as SWB
 
 data KeyakiCategory =
     KeyakiCategory {
@@ -32,25 +31,20 @@ createBase strlist
         sortInfo = ""
     }
 
-
-showCat :: KeyakiCategory -> String
-showCat kcat
-    = DL.intercalate "-" $ catlist kcat
-
-showFull :: KeyakiCategory -> String
-showFull all@(KeyakiCategory {
-    iched = iched,
-    sortInfo = sortInfo
-    }
-    )
-    = (showCat all)
-        ++ "-" ++ iched 
-        ++ (";{" ++ sortInfo ++ "}")
-
+printCatList :: KeyakiCategory -> String
+printCatList (KeyakiCategory catList _ _)
+    = DL.intercalate "-" catList
 
 instance Show KeyakiCategory where
-    show = showFull
+    show all@(KeyakiCategory _ iched sortInfo)
+        = (printCatList all)
+            ++ "-" ++ iched 
+            ++ (";{" ++ sortInfo ++ "}")
 
+instance PTP.Printable KeyakiCategory where
+    psdPrint (PTP.Option _ PTP.Minimal) = printCatList
+    psdPrint _ = show
+    
 parser :: Parser KeyakiCategory
 parser 
     = do

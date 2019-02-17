@@ -5,6 +5,7 @@ import Data.Monoid
 
 import qualified ABCCategory as ABCC
 import qualified ParsedTree as PT
+import qualified PTPrintable as PTP
 
 import qualified Options.Applicative as OPT
 
@@ -105,4 +106,4 @@ main :: IO ()
 main 
     = getContents
         >>= parseDoc
-        >>= mapM_ (putStr . PT.printPretty . relabel)
+        >>= mapM_ (putStr . PTP.psdPrintDefault . relabel)

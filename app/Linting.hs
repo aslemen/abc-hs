@@ -8,6 +8,8 @@ import qualified ParsedTree as PT
 import qualified StringWithBrackets as SWB
 import qualified Options.Applicative as OPT
 
+import qualified PTPrintable as PTP
+
 -- # Type Aliases
 type ST = PT.Tree String
 
@@ -77,4 +79,4 @@ main :: IO ()
 main 
     = getContents
         >>= parseDoc
-        >>= mapM_  (putStr . PT.printPretty . lint)
+        >>= mapM_  (putStr . PTP.psdPrintDefault . lint)
