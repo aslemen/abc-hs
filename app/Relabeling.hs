@@ -215,34 +215,46 @@ Calculation Step 4:
                 ) 
             = result
             where
-                newCatsTentative :: (ABCCat, ABCCat) 
-                    -- (new sibling-parent cat, new leftmost head)
-                newCatsTentative
+                dropAnt :: [ABCCat] -> ABCCat -> ABCCat
+                dropAnt
+                    forbidList
+                    cat@(ABCC.LeftFunctor ant conseq _)
+                        | ant `notElem` forbidList  = dropAnt forbidList conseq
+                        | otherwise                 = cat
+                dropAnt _ cat = cat
+                multiplyLeft :: ABCCat -> ABCCat
+                multiplyLeft cat = cat ABCC.<\> cat
+                matchLexTreeLeftmost :: String -> Bool
+                matchLexTreeLeftmost str 
+                    = checkKTIsLexicalAndHasMainKCat str treeLeftmost
+                newCatLeftmost :: ABCCat
+                newCatLeftmost
                     = case depLeftmost of
                         DMing.Complement -- (head, leftmost|c) ~~> (head/lm|h, lm|c)
-                            -> (
-                                givenCatParent ABCC.</> convertCatLeftmost,
-                                convertCatLeftmost
-                            )
+                            -> createABCCBaseFromKC catLeftmost
+                        DMing.Adjunct
+                            | matchLexTreeLeftmost "てあげる"
+                                -> multiplyLeft $ dropAnt [ABCC.createBase "PPs"] givenCatParent
+                            | otherwise
+                                -> multiplyLeft $ dropAnt [] givenCatParent
                         _ -- (head) leftmost|?? ~~> head\head|?? by default
-                            -> (
-                                givenCatParent,
-                                givenCatParent ABCC.<\> givenCatParent
-                            )
-                    where 
-                        convertCatLeftmost = createABCCBaseFromKC catLeftmost
-                newCatLeftmost :: ABCCat
-                newCatLeftmost = snd newCatsTentative
+                            -> multiplyLeft givenCatParent
+                newTreeLeftmost :: ABCTMarked
+                newTreeLeftmost 
+                    = snd $ relabelLoopLeft newCatLeftmost treeLeftmost
                 newCatVSST :: ABCCat
-                newCatVSST = fst newCatsTentative
+                newCatVSST 
+                    = case depLeftmost of
+                        DMing.Complement -- (head, leftmost|c) ~~> (head/lm|h, lm|c)
+                            -> givenCatParent ABCC.</> newCatLeftmost
+                        _  -- (head) leftmost|?? ~~> head\head|?? by default
+                            -> givenCatParent
                 newVSST :: ABCTMarked
                 newVSST -- Left RECURSION
                     = relabelLoopRight
                         newCatVSST
                         oldTree { PT.subForest = remainder }
-                newTreeLeftmost :: ABCTMarked
-                newTreeLeftmost 
-                    = snd $ relabelLoopLeft newCatLeftmost treeLeftmost
+
                 result :: ABCTMarked
                 result
                     = newVSST {

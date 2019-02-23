@@ -1,5 +1,5 @@
 module ABCCategory (
-    ABCCategory(antecedent, consequence, name, comment),
+    ABCCategory(..),
     strBot,
     createBot,
     createBase,
