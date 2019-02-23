@@ -44,6 +44,21 @@ createABCCBaseFromKC
     = ABCC.createBase 
         . (PTP.psdPrint (PTP.Option PTP.Pretty PTP.Minimal))
 
+checkMainKCat :: String -> KCat -> Bool
+checkMainKCat str
+    = (== str) . head . KC.catlist
+
+checkMainKCatMarked :: String -> (DMed.DepMarked KCat) -> Bool
+checkMainKCatMarked str
+    = (checkMainKCat str) . DMed.category
+
+checkKTIsLexicalAndHasMainKCat :: String -> (PT.Tree (DMed.DepMarked KCat)) -> Bool
+checkKTIsLexicalAndHasMainKCat
+    = PT.isFilterNearTerminal . checkMainKCatMarked
+
+isKTPRO :: (PT.Tree (DMed.DepMarked KCat)) -> Bool
+isKTPRO = checkKTIsLexicalAndHasMainKCat "*PRO*"
+
 relabel :: KTMarked -> ABCTMarked
 relabel node@(PT.Node (cat DMed.:| _) _)
     = snd $ relabelLoopLeft (createABCCBaseFromKC cat) node 
@@ -55,138 +70,187 @@ relabel node@(PT.Node (cat DMed.:| _) _)
             givenCatParent -- 上・左から降ってくる新しい親範疇
             oldTree@( -- もとのtree :: KTMarked
                 PT.Node rootLabel (
-                    treeLeftMost@(
+                    treeLeftmost@(
                         PT.Node { 
-                            PT.rootLabel = catLeftMost DMed.:|depLeftMost 
+                            PT.rootLabel = catLeftmost DMed.:|depLeftmost 
                             }
                         ):remainder -- leftmost childを取ってくる
                     )
                 ) 
-            = (
-                isHeaded,
-                newSiblingTree {
-                    PT.rootLabel 
-                        = newCatParent <$ rootLabel,
-                    PT.subForest 
-                        = if isPRO treeLeftMost
-                            then PT.subForest newSiblingTree
-                            else newSubTree:(PT.subForest newSiblingTree)
-                    }
-                )
+            = result 
             where
-                isPRO :: KTMarked -> Bool
-                isPRO
-                    = PT.isFilterNearTerminal $
-                        (== "*PRO*") . head . KC.catlist . DMed.category
-                newCatCandidates :: (ABCCat, ABCCat) 
-                    -- (new leftmost head, new sibling-parent cat)
-                newCatCandidates
-                    | depLeftMost == DMing.Complement
-                        -- (leftmost|c, head) ~~> (lm|c, lm\head)
-                        = (
-                            convertCatLeftMost, 
-                            convertCatLeftMost ABCC.<\> givenCatParent
-                            )
-                        
-                    | depLeftMost == DMing.Head -- trivial
-                        = (givenCatParent, givenCatParent)
-                    | otherwise --depLeftMost == DMing.Adjunct
-                        -- (leftmost|a, head) ~~> (head/head|a, head)
-                        = (
-                            givenCatParent ABCC.</> givenCatParent,
-                            givenCatParent
-                        )
-                    where 
-                        convertCatLeftMost = createABCCBaseFromKC catLeftMost
-                newCatLeftMostCandidate :: ABCCat
-                newCatLeftMostCandidate = fst newCatCandidates
-                newCatSiblingHeadCandidate :: ABCCat
-                newCatSiblingHeadCandidate = snd newCatCandidates
-                newSiblingTreeWithIsHeaded :: (Bool, ABCTMarked)
-                newSiblingTreeWithIsHeaded -- RECURSION
-                    | depLeftMost == DMing.Head -- headed!
+                {-
+Terminology:
+    A Tree contains: 
+        - KeyakiCat (old)
+        - tentative ABCCat
+        - final ABCCat
+        - children
+
+    (Virtual) Parent Tree (VPT)
+        |--
+        |--
+        |-- ============== Below Focused
+        |-- The leftmost subtree
+        |--   ----------
+        |--   | ......    <- The remainder
+        |--   | ......       (which is considered to be contained in a virtual subtree: the virtual sibling-subtree (VSST))
+        |--   | ......
+        |--   ----------
+            ==============================
+                -} 
+                {- 
+Calculation Step 1:
+    - calculate the tentative ABCCat of the letfmost subtree
+        - case KeyakiCat leftmost subtree of
+            _ :| complement     -> keep the name of the KeyakiCat, converted to a basic ABCCat
+            _ :| head, adjunct  -> discard the KeyakiCat 
+                -}
+                newCatLeftmostTentative1 :: ABCCat 
+                newCatLeftmostTentative1
+                    = case depLeftmost of 
+                        DMing.Complement
+                        -- leftmost|c (head) ~~> leftmost|c
+                            -> createABCCBaseFromKC catLeftmost
+                        DMing.Head -- trivial
+                            -> givenCatParent
+                        _  -- depLeftmost == DMing.Adjunct
+                            -- leftmost|a (head) ~~> head/head|a
+                            -> givenCatParent ABCC.</> givenCatParent
+                {-
+Calculation Step 2:
+    - calculate the final leftmost subtree
+        - adopted in any case
+        - calculate its final ABCCat, taking into consideration PROs inside the subtree 
+                -}
+                defaultTreeLeftmost :: ABCTMarked
+                defaultTreeLeftmost
+                    = snd 
+                        $ relabelLoopLeft 
+                            (createABCCBaseFromKC catLeftmost)
+                            treeLeftmost
+                newTreeLeftmost :: ABCTMarked
+                newTreeLeftmost 
+                    = snd 
+                        $ relabelLoopLeft 
+                            newCatLeftmostTentative1
+                            treeLeftmost
+                newCatLeftmostTentative2 :: ABCCat
+                newCatLeftmostTentative2
+                    = DMed.category $ PT.rootLabel newTreeLeftmost
+                {-
+Calculation Step 3:
+    - calculate the final virtual subling ABCCat
+    - calculate the final virtual sibling subtree 
+        - adopted only when the head is found
+                -}
+                newCatVSSTTentative :: ABCCat
+                newCatVSSTTentative        
+                    | depLeftmost == DMing.Complement
+                        -- (leftmost|c) head ~~> leftmost\head
+                        = newCatLeftmostTentative2 ABCC.<\> givenCatParent
+                    | depLeftmost == DMing.Head
+                        = givenCatParent
+                    | otherwise --depLeftmost == DMing.Adjunct
+                        -- (leftmost|a) head) ~~> head
+                        = givenCatParent
+                newVSSTWithIsHeaded :: (Bool, ABCTMarked)
+                newVSSTWithIsHeaded -- RECURSION
+                    | depLeftmost == DMing.Head -- headed!
                         = (
                             True,
                             relabelLoopRight
-                                newCatSiblingHeadCandidate
+                                newCatVSSTTentative
                                 oldTree { PT.subForest = remainder }
                         )
                     | otherwise
                         = relabelLoopLeft 
-                            newCatSiblingHeadCandidate
+                            newCatVSSTTentative 
                             oldTree { PT.subForest = remainder }
+                newVSST :: ABCTMarked
+                newVSST = snd newVSSTWithIsHeaded
+                newCatVSST :: ABCCat
+                newCatVSST = DMed.category $ PT.rootLabel newVSST
                 isHeaded :: Bool
-                isHeaded = fst newSiblingTreeWithIsHeaded
-                newCatLeftMostFinal :: ABCCat
-                newCatLeftMostFinal
-                    = if isHeaded
-                        then newCatLeftMostCandidate
-                        else createABCCBaseFromKC catLeftMost
-                newCatSiblingHeadFinal :: ABCCat
-                newCatSiblingHeadFinal
-                    = if isHeaded
-                        then newCatSiblingHeadCandidate
-                        else givenCatParent
-                newSiblingTree :: ABCTMarked
-                newSiblingTree = snd newSiblingTreeWithIsHeaded
-                newSubTree :: ABCTMarked
-                newSubTree 
-                    = snd $ relabelLoopLeft newCatLeftMostFinal treeLeftMost
-                newCatParent :: ABCCat
-                newCatParent
-                    = if isPRO treeLeftMost
-                        then newCatSiblingHeadFinal
-                        else givenCatParent
-        relabelLoopLeft givenCatParent terminal@(PT.Node _ [])
-            = (False, (givenCatParent <$) <$> terminal)
+                isHeaded = fst newVSSTWithIsHeaded
+                {-
+Calculation Step 4:
+    - Collecting the results
+                -}
+                newVPT :: ABCTMarked
+                newVPT
+                    | isKTPRO treeLeftmost
+                        = newVSST
+                    | otherwise
+                        = newVSST {
+                            PT.rootLabel
+                                = 
+                                -- if isHeaded
+                                    -- then givenCatParent <$ rootLabel
+                                    -- else createABCCBaseFromKC <$> rootLabel
+                                    givenCatParent <$ rootLabel
+                            ,
+                            PT.subForest
+                                = (
+                                    if isHeaded
+                                        then newTreeLeftmost
+                                        else defaultTreeLeftmost
+                                ):(PT.subForest newVSST)
+                        }
+                result :: (Bool, ABCTMarked)
+                result = (isHeaded, newVPT)
+        relabelLoopLeft _ terminal@(PT.Node _ [])
+            = (False, (createABCCBaseFromKC <$>) <$> terminal)
         relabelLoopRight :: ABCCat -> KTMarked -> ABCTMarked
         relabelLoopRight
             givenCatParent -- 左から降ってくる新しい親範疇
             oldTree@( -- もとのtree :: KTMarked
                 PT.Node rootLabel (
-                    treeLeftMost@(
+                    treeLeftmost@(
                         PT.Node { 
-                            PT.rootLabel = catLeftMost DMed.:|depLeftMost 
+                            PT.rootLabel = catLeftmost DMed.:|depLeftmost 
                             }
                         ):remainder -- leftmost childを取ってくる
                     )
                 ) 
-            = newSiblingTree {
-                    PT.rootLabel 
-                        = givenCatParent <$ rootLabel,
-                    PT.subForest 
-                        = newSubTree:(PT.subForest newSiblingTree)
-                    }
+            = result
             where
-                newCatCandidates :: (ABCCat, ABCCat) 
+                newCatsTentative :: (ABCCat, ABCCat) 
                     -- (new sibling-parent cat, new leftmost head)
-                newCatCandidates
-                    | depLeftMost == DMing.Complement
-                        -- (head, leftmost|c) ~~> (head/lm|h, lm|c)
-                        = (
-                            givenCatParent ABCC.</> convertCatLeftMost,
-                            convertCatLeftMost
-                        )
-                    | otherwise --depLeftMost == DMing.Adjunct
-                        -- (head, leftmost|a) ~~> (head, head\head|a)
-                        = (
-                            givenCatParent,
-                            givenCatParent ABCC.<\> givenCatParent
-                        )
+                newCatsTentative
+                    = case depLeftmost of
+                        DMing.Complement -- (head, leftmost|c) ~~> (head/lm|h, lm|c)
+                            -> (
+                                givenCatParent ABCC.</> convertCatLeftmost,
+                                convertCatLeftmost
+                            )
+                        _ -- (head) leftmost|?? ~~> head\head|?? by default
+                            -> (
+                                givenCatParent,
+                                givenCatParent ABCC.<\> givenCatParent
+                            )
                     where 
-                        convertCatLeftMost = createABCCBaseFromKC catLeftMost
-                newCatLeftMostFinal :: ABCCat
-                newCatLeftMostFinal = snd newCatCandidates
-                newCatSiblingHeadFinal :: ABCCat
-                newCatSiblingHeadFinal = fst newCatCandidates
-                newSiblingTree :: ABCTMarked
-                newSiblingTree -- Left RECURSION
+                        convertCatLeftmost = createABCCBaseFromKC catLeftmost
+                newCatLeftmost :: ABCCat
+                newCatLeftmost = snd newCatsTentative
+                newCatVSST :: ABCCat
+                newCatVSST = fst newCatsTentative
+                newVSST :: ABCTMarked
+                newVSST -- Left RECURSION
                     = relabelLoopRight
-                        newCatSiblingHeadFinal
+                        newCatVSST
                         oldTree { PT.subForest = remainder }
-                newSubTree :: ABCTMarked
-                newSubTree 
-                    = snd $ relabelLoopLeft newCatLeftMostFinal treeLeftMost
+                newTreeLeftmost :: ABCTMarked
+                newTreeLeftmost 
+                    = snd $ relabelLoopLeft newCatLeftmost treeLeftmost
+                result :: ABCTMarked
+                result
+                    = newVSST {
+                        PT.rootLabel 
+                            = givenCatParent <$ rootLabel,
+                        PT.subForest 
+                            = newTreeLeftmost:(PT.subForest newVSST)
+                        }
         relabelLoopRight givenCatParent terminal@(PT.Node _ [])
             = (givenCatParent <$) <$> terminal
         
