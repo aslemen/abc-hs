@@ -57,7 +57,9 @@ checkKTIsLexicalAndHasMainKCat
     = PT.isFilterNearTerminal . checkMainKCatMarked
 
 isKTPRO :: (PT.Tree (DMed.DepMarked KCat)) -> Bool
-isKTPRO = checkKTIsLexicalAndHasMainKCat "*PRO*"
+isKTPRO tree 
+    = foldr (||) False
+        $ checkKTIsLexicalAndHasMainKCat <$> ["*PRO*", "*T*"] <*> [tree]
 
 relabel :: KTMarked -> ABCTMarked
 relabel node@(PT.Node (cat DMed.:| _) _)
