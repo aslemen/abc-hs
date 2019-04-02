@@ -1,22 +1,21 @@
 module ABCCategory (
     ABCCategory(..),
+    ABCComment(..),
+    ABCCategoryCommented(..),
     strBot,
-    createBot,
-    createBase,
     (</>),
     (<\>),
     (<^>),
-    addComment,
-
     ABCStatusFC(..),
     reduceWithResult,
-
+    reduceWithLog,
     parser,
     createFromString,
     Psc.ParseError
     ) where
 
 import Control.Applicative
+
 import Data.Maybe
 import Data.Char as DCh
 
@@ -30,63 +29,120 @@ import qualified PTPrintable as PTP
 
 -- # The Data Type
 data ABCCategory = 
-      Bottom {
-        comment :: String
-        }
+      Bottom
     | BaseCategory {
-        name :: String,
-        comment :: String
+        name :: String
         }
     | LeftFunctor { 
         antecedent :: ABCCategory, 
-        consequence :: ABCCategory,
-        comment :: String
+        consequence :: ABCCategory
         }
     | RightFunctor { 
         antecedent :: ABCCategory, 
-        consequence :: ABCCategory,
-        comment :: String
+        consequence :: ABCCategory
         }
 
+data ABCComment a 
+    = ABCComment {
+        content :: a,
+        comment :: String
+    }
+type ABCCategoryCommented = ABCComment ABCCategory
+
+instance (Eq a) => Eq (ABCComment a) where
+    (==) (ABCComment a _) (ABCComment b _)
+        = (a == b)
+
+instance (Show a) => Show (ABCComment a) where
+    show (ABCComment a c)
+        = if c == ""
+            then show a
+            else (show a) ++ ".\"" ++ c ++ "\""
+instance (PTP.Printable a) => PTP.Printable (ABCComment a) where
+    psdPrint opt@(PTP.Option _ PTP.Minimal)
+        = \ca -> PTP.psdPrint opt $ content ca
+    psdPrint _ 
+        = show
+
+instance Functor ABCComment where
+    fmap f ABCComment {
+        content = a,
+        comment = c
+        } = ABCComment {
+            content = f a,
+            comment = c
+        }
+
+instance Applicative ABCComment where
+    pure a
+        = ABCComment a ""
+    (<*>) (ABCComment f cf) (ABCComment a ca)
+        = ABCComment (f a) (cf ++ ";" ++ ca)
+
+instance Monad ABCComment where
+    (>>=) (ABCComment a ca) f
+        = ABCComment com_new_content (ca ++ ";" ++ com_new_comment)
+            where
+                -- com_new :: ABCComment sth
+                com_new = f a
+                -- com_new_content :: sth
+                com_new_content = content com_new
+                com_new_comment :: String
+                com_new_comment = comment com_new
+
+-- instance (Monoid w) => CMW.MonadWriter w ABCComment where
+--    writer (a, w)
+--        = ABCComment {
+--            content = a,
+--            comment = w
+--        }
+--    tell w
+--        = ABCComment {
+--            content = (),
+--            comment = w
+--        }
+--    listen ABCComment {
+--        content = a,
+--        comment = c
+--        } = ABCComment {
+--            content = (a, c),
+--            comment = c
+--        }
+--    pass ABCComment{
+--        content = (a, f),
+--        comment = c
+--        } = ABCComment{
+--            content = a,
+--            comment = f c
+--        }
+        
 strBot :: String
 strBot = "⊥"
-
--- ## Aliases of the constructors
-createBot :: ABCCategory
-createBot = Bottom {comment = ""}
-
-createBase :: String -> ABCCategory
-createBase x = BaseCategory {name = x, comment = ""}
 
 (<\>) :: ABCCategory -> ABCCategory -> ABCCategory
 ant <\> conseq 
     = LeftFunctor {
         antecedent = ant,
-        consequence = conseq,
-        comment = ""
+        consequence = conseq
         }
 
 (</>) :: ABCCategory -> ABCCategory -> ABCCategory
 conseq </> ant 
     = RightFunctor {
         antecedent = ant, 
-        consequence = conseq,
-        comment = ""
+        consequence = conseq
         }
-
-addComment :: ABCCategory -> String -> ABCCategory
-cat `addComment` str = cat { comment = str }
 
 -- ## Equation
 instance Eq ABCCategory where
     -- | The equation of ABCCategories ignores comments.
-    (==) (Bottom _) (Bottom _) 
+    (==) Bottom Bottom 
         = True
-    (==) (BaseCategory x _) (BaseCategory y _) 
+    (==) (BaseCategory x) (BaseCategory y) 
         = (x == y)
-    (==) (LeftFunctor ant1 conseq1 _) (LeftFunctor ant2 conseq2 _)
+    (==) (LeftFunctor ant1 conseq1) (LeftFunctor ant2 conseq2)
         = (ant1 == ant2) && (conseq1 == conseq2)
-    (==) (RightFunctor ant1 conseq1 _) (RightFunctor ant2 conseq2 _)
+    (==) (RightFunctor ant1 conseq1) (RightFunctor ant2 conseq2)
         = (ant1 == ant2) && (conseq1 == conseq2)
     (==) _ _ 
         = False
@@ -94,37 +150,20 @@ instance Eq ABCCategory where
 -- ## Showing
 
 -- | Provide a string representation of an ABCCategory.
-printCategory :: Bool -> ABCCategory -> String
-printCategory isComment cat
-    = case cat of
-        Bottom x
-            -> strBot ++ (showComment isComment x)
-        BaseCategory name x
-            -> name ++ (showComment isComment x)
-        LeftFunctor ant conseq x
-            -> "<" ++ (show ant) ++ "\\" ++ (show conseq) ++ ">"
-                     ++ (showComment isComment x)
-        RightFunctor ant conseq x
-            -> "<" ++ (show conseq) ++ "/" ++ (show ant) ++ ">" 
-                    ++ (showComment isComment x)
-    where
-        makeComment :: String -> String
-        makeComment str
-            | str == "" = ""
-            | otherwise = ".\"" ++ str ++ "\""
-        showComment :: Bool -> String -> String
-        showComment isComment
-            | True = makeComment
-            | False = \_ -> ""
-
 instance Show ABCCategory where
-    show = printCategory True
+    show Bottom 
+        = strBot
+    show (BaseCategory name) 
+        = name
+    show (LeftFunctor ant conseq)
+        = "<" ++ (show ant) ++ "\\" ++ (show conseq) ++ ">"
+    show (RightFunctor ant conseq)
+        = "<" ++ (show conseq) ++ "/" ++ (show ant) ++ ">" 
 
 instance PTP.Printable ABCCategory where
-    psdPrint (PTP.Option _ PTP.Minimal) = printCategory False
     psdPrint _ = show
 
-    -- ## Reduction
+-- ## Reduction
 data ABCStatusFC = FCLeft Int | FCRight Int | Failed
 instance Eq ABCStatusFC where
     (==) (FCLeft n) (FCLeft m) 
@@ -147,22 +186,22 @@ instance Show ABCStatusFC where
         = "FAIL"
 
 catStatFailed :: (ABCCategory, ABCStatusFC)
-catStatFailed = (createBot, Failed)
+catStatFailed = (Bottom, Failed)
 
 reduceWithResult :: ABCCategory -> ABCCategory -> (ABCCategory, ABCStatusFC)
-reduceWithResult base@(BaseCategory _ _) (LeftFunctor ant2 conseq2 _)
+reduceWithResult base@(BaseCategory _) (LeftFunctor ant2 conseq2)
     | base == ant2
         = (conseq2, FCLeft 0)
     | otherwise
         = catStatFailed
-reduceWithResult (RightFunctor ant1 conseq1 _) base@(BaseCategory _ _)
+reduceWithResult (RightFunctor ant1 conseq1) base@(BaseCategory _)
     | ant1 == base
         = (conseq1, FCRight 0)
-    |otherwise
+    | otherwise
         = catStatFailed
 reduceWithResult 
-    left@(LeftFunctor ant1 conseq1 _)
-    right@(LeftFunctor ant2 conseq2 _)
+    left@(LeftFunctor ant1 conseq1)
+    right@(LeftFunctor ant2 conseq2)
     | left == ant2
         = (conseq2, FCLeft 0)
     | otherwise
@@ -176,8 +215,8 @@ reduceWithResult
                 dres :: ABCStatusFC
                 (dcat, dres) = reduceWithResult conseq1 right
 reduceWithResult 
-    left@(RightFunctor ant1 conseq1 _)
-    right@(RightFunctor ant2 conseq2 _)
+    left@(RightFunctor ant1 conseq1)
+    right@(RightFunctor ant2 conseq2)
     | ant1 == right
         = (conseq1, FCRight 0)
     | otherwise
@@ -191,8 +230,8 @@ reduceWithResult
                 dres :: ABCStatusFC
                 (dcat, dres) = reduceWithResult left conseq2
 reduceWithResult 
-    left@(RightFunctor ant1 conseq1 _)
-    right@(LeftFunctor ant2 conseq2 _) -- conseq1/ant1 ant2\conseq2
+    left@(RightFunctor ant1 conseq1)
+    right@(LeftFunctor ant2 conseq2) -- conseq1/ant1 ant2\conseq2
     | left == ant2
         = (conseq2, FCLeft 0)
     | ant1 == right
@@ -202,14 +241,24 @@ reduceWithResult
 reduceWithResult _ _ 
     = catStatFailed
 
+reduceWithLog :: ABCCategory -> ABCCategory -> ABCCategoryCommented
+reduceWithLog left right
+    = ABCComment { content = cat, comment = show res }
+        where
+            cat :: ABCCategory
+            res :: ABCStatusFC
+            (cat, res) = reduceWithResult left right
+
 (<^>) :: ABCCategory -> ABCCategory -> ABCCategory
 cat1 <^> cat2 
     = fst (reduceWithResult cat1 cat2)
 
 -- ## Parsing
-parser :: Parser ABCCategory
+parser :: Parser ABCCategoryCommented
 parser
-    = PscExpr.buildExpressionParser opTableComplex parserComplex
+    = (
+        ABCComment <$> parserSimplex <*> parserCommentOrEmpty
+    ) Psc.<?> "ABC Category"
     where
         parserBaseOrBot :: Parser ABCCategory
         parserBaseOrBot = 
@@ -221,9 +270,9 @@ parser
                 create :: String -> ABCCategory
                 create str
                     | str == strBot 
-                        = createBot
+                        = Bottom
                     | otherwise
-                        = createBase str
+                        = BaseCategory str
         opTableComplex = [
             [
                 PscExpr.Infix
@@ -246,22 +295,20 @@ parser
             ]
         parserFunc :: Parser ABCCategory
         parserFunc
-            = Psc.between (Psc.char '<') (Psc.char '>') parser
+            = Psc.between (Psc.char '<') (Psc.char '>') parserCat
             Psc.<?> "Complex ABC Category"  -- with a RECURSION
+        parserCat :: Parser ABCCategory
+        parserCat = parserFunc Psc.<|> parserBaseOrBot
+        parserSimplex :: Parser ABCCategory
+        parserSimplex = PscExpr.buildExpressionParser opTableComplex parserCat
         parserCommentOrEmpty :: Parser String
         parserCommentOrEmpty =
             Psc.option "" (
                 Psc.char '.' 
                 *> (Psc.many (Psc.letter Psc.<|> Psc.oneOf "\""))
             ) Psc.<?> "Optional Comment to an ABC Category"
-        parserComplex :: Parser ABCCategory
-        parserComplex
-            = addComment
-                <$> (parserFunc Psc.<|> parserBaseOrBot) 
-                <*> parserCommentOrEmpty
-                Psc.<?> "ABC Category"
 
 -- | generate an ABC-Category from a string or a stream. 
-createFromString :: String -> Either Psc.ParseError ABCCategory
+createFromString :: String -> Either Psc.ParseError ABCCategoryCommented
 createFromString 
     = Psc.parse parser "Parser of ABC Categories"

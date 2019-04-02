@@ -41,7 +41,7 @@ runParserDoc = PT.createDoc parserKTMarked
 -- # Main Job
 createABCCBaseFromKC :: KCat -> ABCCat
 createABCCBaseFromKC 
-    = ABCC.createBase 
+    = ABCC.BaseCategory 
         . (PTP.psdPrint (PTP.Option PTP.Pretty PTP.Minimal))
 
 checkMainKCat :: String -> KCat -> Bool
@@ -220,7 +220,7 @@ Calculation Step 4:
                 dropAnt :: [ABCCat] -> ABCCat -> ABCCat
                 dropAnt
                     forbidList
-                    cat@(ABCC.LeftFunctor ant conseq _)
+                    cat@(ABCC.LeftFunctor ant conseq)
                         | ant `notElem` forbidList  = dropAnt forbidList conseq
                         | otherwise                 = cat
                 dropAnt _ cat = cat
@@ -236,7 +236,7 @@ Calculation Step 4:
                             -> createABCCBaseFromKC catLeftmost
                         DMing.Adjunct
                             | matchLexTreeLeftmost "てあげる"
-                                -> multiplyLeft $ dropAnt [ABCC.createBase "PPs"] givenCatParent
+                                -> multiplyLeft $ dropAnt [ABCC.BaseCategory "PPs"] givenCatParent
                             | otherwise
                                 -> multiplyLeft $ dropAnt [] givenCatParent
                         _ -- (head) leftmost|?? ~~> head\head|?? by default

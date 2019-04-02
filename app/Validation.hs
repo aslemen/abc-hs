@@ -10,13 +10,14 @@ import qualified PTPrintable as PTP
 import qualified Options.Applicative as OPT
 
 -- # Type Aliases
-type ABCT = PT.Tree ABCC.ABCCategory
+type ABCCom = ABCC.ABCCategoryCommented
+type ABCComT = PT.Tree ABCCom
 
 -- # Tree Parser
-runParserTree :: String -> Either PT.ParseError ABCT
+runParserTree :: String -> Either PT.ParseError ABCComT
 runParserTree = PT.createFromString ABCC.parser
 
-runParserDoc :: String -> Either PT.ParseError [ABCT]
+runParserDoc :: String -> Either PT.ParseError [ABCComT]
 runParserDoc = PT.createDoc ABCC.parser
 
 -- # Commandline Option Parser
@@ -60,11 +61,11 @@ parserOptionsWithInfo
         ]
 
 -- # Actual Job
-relabel :: ABCT -> ABCT
+relabel :: ABCComT -> ABCComT
 relabel (PT.Node node children)
     | (length children) == 2 
         = PT.Node {
-            PT.rootLabel = node `ABCC.addComment` (com res node),
+            PT.rootLabel = res,
             PT.subForest = map relabel children
         }
     | otherwise 
@@ -73,27 +74,22 @@ relabel (PT.Node node children)
             PT.subForest = map relabel children
         }
     where
-        child1 :: ABCT
-        child2 :: ABCT
+        child1 :: ABCComT
+        child2 :: ABCComT
         child1 : (child2 : _) = children
-        res :: (ABCC.ABCCategory, ABCC.ABCStatusFC)
-        res = ABCC.reduceWithResult (PT.rootLabel child1) (PT.rootLabel child2)
-        com :: (ABCC.ABCCategory, ABCC.ABCStatusFC) -> ABCC.ABCCategory -> String
-        com (_, ABCC.Failed) _ = "FAIL"
-        com (cat_new, stat) cat_orig
-            | cat_new == cat_orig
-                = show stat
-            | otherwise
-                = "INCORR;" 
-                    ++ (show cat_new) 
-                    ++ ":"
-                    ++ show stat
+        res :: ABCCom
+        res 
+            = join 
+                $ ABCC.reduceWithLog
+                    <$> (PT.rootLabel child1)
+                    <*> (PT.rootLabel child2)
+            where join m = m >>= id
 
-batchRelabel :: [ABCT] -> [ABCT]
+batchRelabel :: [ABCComT] -> [ABCComT]
 batchRelabel
     = fmap relabel
 
-parseDoc :: String -> IO [ABCT]
+parseDoc :: String -> IO [ABCComT]
 parseDoc str
     = case runParserDoc str of
         Left err 
