@@ -36,7 +36,7 @@ printCatList (KeyakiCategory catList _ _)
     where 
         isToBeEscaped :: String -> Bool
         isToBeEscaped
-            = any (\c -> DC.isSpace c || c `elem` "()-|")
+            = any (\c -> DC.isSpace c || c `elem` "()-'")
         escapedCat :: String -> String
         escapedCat str
             = if isToBeEscaped str
@@ -70,7 +70,7 @@ parserString
     where 
         condition :: Char -> Bool
         condition c
-            = not $ DC.isSpace c || c `elem` ";{}()-|"
+            = not $ DC.isSpace c || c `elem` ";{}()-'"
         parserNonEscapeChars :: Parser Char
         parserNonEscapeChars
             = Psc.satisfy condition

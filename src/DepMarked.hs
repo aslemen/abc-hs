@@ -1,6 +1,7 @@
 module DepMarked (
     DepMarked(..),
     markCat,
+    marker,
     parser,
     ) where
 
@@ -17,9 +18,12 @@ data DepMarked cat
         category:: cat,
         dependency :: DMing.DepMarking
     } deriving (Eq)
-        
+
+marker :: String
+marker = "''"
+
 instance (Show cat) => Show (DepMarked cat) where
-    show (cat :| dep) = (show cat) ++ "|" ++ (show dep)
+    show (cat :| dep) = (show cat) ++ marker ++ (show dep)
 
 instance (PTP.Printable cat) => PTP.Printable (DepMarked cat) where
     psdPrint 
@@ -51,4 +55,4 @@ parser parserCat
         parserMarkingInternal
             = markCat 
                 <$> Psc.option "" 
-                    (Psc.string "|" *> (Psc.many1 Psc.letter))
+                    (Psc.string marker *> (Psc.many1 Psc.letter))
