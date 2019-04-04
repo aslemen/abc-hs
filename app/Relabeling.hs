@@ -59,7 +59,9 @@ checkKTIsLexicalAndHasMainKCat
 isKTPRO :: (PT.Tree (DMed.DepMarked KCat)) -> Bool
 isKTPRO tree 
     = foldr (||) False
-        $ checkKTIsLexicalAndHasMainKCat <$> ["*PRO*", "*T*"] <*> [tree]
+        $ checkKTIsLexicalAndHasMainKCat 
+            <$> ["*PRO*", "*T*"] 
+            <*> [tree]
 
 relabel :: KTMarked -> ABCTMarked
 relabel node@(PT.Node (cat DMed.:| _) _)
@@ -114,11 +116,11 @@ Calculation Step 1:
                         DMing.Complement
                         -- leftmost|c (head) ~~> leftmost|c
                             -> createABCCBaseFromKC catLeftmost
-                        DMing.Head -- trivial
+                        DMing.Head -- TODO: NOT TRIVIAL!
                             -> givenCatParent
                         _  -- depLeftmost == DMing.Adjunct
                             -- leftmost|a (head) ~~> head/head|a
-                            -> givenCatParent ABCC.</> givenCatParent
+                            -> ABCC.makeLeftAdjunct givenCatParent
                 {-
 Calculation Step 2:
     - calculate the final leftmost subtree
@@ -139,10 +141,10 @@ Calculation Step 2:
                             treeLeftmost
                 newCatLeftmostTentative2 :: ABCCat
                 newCatLeftmostTentative2
-                    = DMed.category $ PT.rootLabel newTreeLeftmost
+                    = (DMed.category . PT.rootLabel) newTreeLeftmost
                 {-
 Calculation Step 3:
-    - calculate the final virtual subling ABCCat
+    - calculate the final virtual sibling ABCCat
     - calculate the final virtual sibling subtree 
         - adopted only when the head is found
                 -}
@@ -152,7 +154,7 @@ Calculation Step 3:
                         -- (leftmost|c) head ~~> leftmost\head
                         = newCatLeftmostTentative2 ABCC.<\> givenCatParent
                     | depLeftmost == DMing.Head
-                        = givenCatParent
+                        = givenCatParent -- PROBLEMATIC!
                     | otherwise --depLeftmost == DMing.Adjunct
                         -- (leftmost|a) head) ~~> head
                         = givenCatParent
@@ -182,7 +184,7 @@ Calculation Step 4:
                 newVPT :: ABCTMarked
                 newVPT
                     | isKTPRO treeLeftmost
-                        = newVSST
+                        = newVSST -- tree without PRO (which amounts to the VSST)
                     | otherwise
                         = newVSST {
                             PT.rootLabel
@@ -190,11 +192,12 @@ Calculation Step 4:
                                 -- if isHeaded
                                     -- then givenCatParent <$ rootLabel
                                     -- else createABCCBaseFromKC <$> rootLabel
-                                    givenCatParent <$ rootLabel
+                                    givenCatParent <$ rootLabel 
+                                    -- rootLabel no dep-marking dake-o hirot-te hanchu-o givenCatParent-de uwagaki suru
                             ,
                             PT.subForest
                                 = (
-                                    if isHeaded
+                                    if isHeaded -- attach the leftmost tree
                                         then newTreeLeftmost
                                         else defaultTreeLeftmost
                                 ):(PT.subForest newVSST)
@@ -224,8 +227,6 @@ Calculation Step 4:
                         | ant `notElem` forbidList  = dropAnt forbidList conseq
                         | otherwise                 = cat
                 dropAnt _ cat = cat
-                multiplyLeft :: ABCCat -> ABCCat
-                multiplyLeft cat = cat ABCC.<\> cat
                 matchLexTreeLeftmost :: String -> Bool
                 matchLexTreeLeftmost str 
                     = checkKTIsLexicalAndHasMainKCat str treeLeftmost
@@ -236,11 +237,13 @@ Calculation Step 4:
                             -> createABCCBaseFromKC catLeftmost
                         DMing.Adjunct
                             | matchLexTreeLeftmost "てあげる"
-                                -> multiplyLeft $ dropAnt [ABCC.BaseCategory "PPs"] givenCatParent
+                                -> ABCC.makeLeftAdjunct 
+                                    $ dropAnt [ABCC.BaseCategory "PPs"] givenCatParent
                             | otherwise
-                                -> multiplyLeft $ dropAnt [] givenCatParent
+                                -> ABCC.makeLeftAdjunct 
+                                    $ dropAnt [] givenCatParent
                         _ -- (head) leftmost|?? ~~> head\head|?? by default
-                            -> multiplyLeft givenCatParent
+                            -> ABCC.makeLeftAdjunct givenCatParent
                 newTreeLeftmost :: ABCTMarked
                 newTreeLeftmost 
                     = snd $ relabelLoopLeft newCatLeftmost treeLeftmost

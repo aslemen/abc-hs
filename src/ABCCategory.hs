@@ -4,7 +4,9 @@ module ABCCategory (
     ABCCategoryCommented(..),
     strBot,
     (</>),
+    makeLeftAdjunct,
     (<\>),
+    makeRightAdjunct,
     (<^>),
     ABCStatusFC(..),
     reduceWithResult,
@@ -126,12 +128,19 @@ ant <\> conseq
         consequence = conseq
         }
 
+makeLeftAdjunct :: ABCCategory -> ABCCategory
+makeLeftAdjunct c = c <\> c
+
 (</>) :: ABCCategory -> ABCCategory -> ABCCategory
 conseq </> ant 
     = RightFunctor {
         antecedent = ant, 
         consequence = conseq
         }
+
+makeRightAdjunct :: ABCCategory -> ABCCategory
+makeRightAdjunct c = c </> c
+        
 
 -- ## Equation
 instance Eq ABCCategory where
