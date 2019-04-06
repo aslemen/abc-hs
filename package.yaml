@@ -1,5 +1,5 @@
 name:                abc-hs
-version:             20190404
+version:             20190407
 github:              "aslemen/abc-hs"
 license:             BSD3
 author:              "T. N. Hayashi"
@@ -25,6 +25,7 @@ dependencies:
 - containers
 - optparse-applicative
 - split
+- mtl
 
 library:
   source-dirs: src
