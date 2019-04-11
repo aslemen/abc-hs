@@ -207,7 +207,19 @@ relabelBeforeHead
                                     []           -> [newTreeFirstChild]
                             }
                     else 
-                        return newTreeVSST
+                        return 
+                            $ (
+                                \node -> node {
+                                PT.rootLabel 
+                                    = (DMed.category $ PT.rootLabel node)
+                                        <$ oldTreeRootLabel
+                                })
+                            (
+                                case PT.subForest newTreeVSST of
+                                    _:(_:_)      -> newTreeVSST
+                                    onlyChild:[] -> onlyChild
+                                    []           -> newTreeVSST
+                            )
                 else 
                     relabelTrivial oldTree
         relabelAdjVSST :: KTMarked -> WithRelabelState ABCTMarked
@@ -268,9 +280,20 @@ relabelBeforeHead
                                     onlyChild:[] -> [newTreeFirstChild, onlyChild]
                                     []           -> [newTreeFirstChild]
                             }
-                    else 
-                        return newTreeVSST
-                else 
+                    else return 
+                            $ (
+                                \node -> node {
+                                PT.rootLabel 
+                                    = (DMed.category $ PT.rootLabel node)
+                                        <$ oldTreeRootLabel
+                                })
+                            (
+                                case PT.subForest newTreeVSST of
+                                    _:(_:_)      -> newTreeVSST
+                                    onlyChild:[] -> onlyChild
+                                    []           -> newTreeVSST
+                            )
+                else
                     relabelTrivial oldTree
 relabelBeforeHead oldTree@(PT.Node _ []) = do
     newTree <- relabelTrivial oldTree
@@ -367,7 +390,19 @@ relabelAfterHead
                                     []           -> [newTreeLastChild]
                             }
                     else 
-                        return newTreeVSST)
+                        return 
+                            $ (
+                                \node -> node {
+                                PT.rootLabel 
+                                    = (DMed.category $ PT.rootLabel node)
+                                        <$ oldTreeRootLabel
+                                })
+                            (
+                                case PT.subForest newTreeVSST of
+                                    _:(_:_)      -> newTreeVSST
+                                    onlyChild:[] -> onlyChild
+                                    []           -> newTreeVSST
+                            ))
         relabelVSSTAdj :: KTMarked -> WithRelabelState ABCTMarked
         relabelVSSTAdj oldTree = do
             stParent <- CMS.get       -- state of the parent tree
@@ -434,8 +469,19 @@ relabelAfterHead
                                     onlyChild:[] -> [onlyChild, newTreeLastChild]
                                     []           -> [newTreeLastChild]
                             }
-                    else 
-                        return newTreeVSST )
+                    else return 
+                            $ (
+                                \node -> node {
+                                PT.rootLabel 
+                                    = (DMed.category $ PT.rootLabel node)
+                                        <$ oldTreeRootLabel
+                                })
+                            (
+                                case PT.subForest newTreeVSST of
+                                    _:(_:_)      -> newTreeVSST
+                                    onlyChild:[] -> onlyChild
+                                    []           -> newTreeVSST
+                            ))
 relabelAfterHead oldTree@(PT.Node _ []) = do
     newTree <- relabelTrivial oldTree
     CMS.modify $ \st -> st { isHeadFound = True }
