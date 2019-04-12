@@ -21,7 +21,10 @@ description:         Please see the README on GitHub at <https://github.com/asle
 
 dependencies:
 - base >= 4.7 && < 5
+- text
 - parsec
+- parser-combinators
+- megaparsec
 - containers
 - optparse-applicative
 - split
@@ -32,8 +35,8 @@ library:
 
 executables:
   abc-validate:
-    main:                Validation.hs
-    source-dirs:         app
+    main:                Main.hs
+    source-dirs:         app/Validation
     ghc-options:
     - -threaded
     - -rtsopts
@@ -42,8 +45,8 @@ executables:
     dependencies:
     - abc-hs
   abc-lint:
-    main:               Linting.hs
-    source-dirs:        app
+    main:               Main.hs
+    source-dirs:        app/Linting
     ghc-options:
     - -threaded
     - -rtsopts
@@ -52,8 +55,8 @@ executables:
     dependencies:
     - abc-hs
   abc-relabel:
-    main:               Relabeling.hs
-    source-dirs:        app
+    main:               Main.hs
+    source-dirs:        app/Relabeling
     ghc-options:
     - -threaded
     - -rtsopts

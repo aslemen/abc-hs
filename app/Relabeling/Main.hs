@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 {- 
 The Pipeline:
 - pretreatments
@@ -7,7 +9,10 @@ The Pipeline:
 
 module Relabeling where
 
-import Data.Maybe
+import qualified Data.Text as DT
+import qualified Data.Text.IO as DTIO
+
+import qualified Text.Megaparsec as TMega
 
 import qualified Control.Monad.State as CMS
 
@@ -44,6 +49,7 @@ runParserDoc = PT.createDoc parserKTMarked
 createABCCBaseFromKC :: KCat -> ABCCat
 createABCCBaseFromKC 
     = ABCC.BaseCategory 
+        . DT.pack
         . (PTP.psdPrint (PTP.Option PTP.Pretty PTP.Minimal))
 
 checkMainKCat :: String -> KCat -> Bool
@@ -60,7 +66,7 @@ checkKTIsLexicalAndHasMainKCat
 
 isKTPRO :: KTMarked -> Bool
 isKTPRO tree 
-    = foldr (||) False
+    = or
         $ checkKTIsLexicalAndHasMainKCat 
             <$> ["*PRO*", "*T*"] 
             <*> [tree]
@@ -71,6 +77,7 @@ data RelabelState
         isHeadFound :: Bool,        -- Writeonly
         isPROToBeDropped :: Bool    -- Readonly
     } deriving (Eq, Show)
+    
 makeRelabelState :: ABCCat -> Bool -> RelabelState
 makeRelabelState cat pro
     = RelabelState {
@@ -503,7 +510,11 @@ isNonControl tree　-- ブラックリストにすべきか、ホワイトリス
         (\str -> checkKTIsLexicalAndHasMainKCat str tree)
         $ []
         
--- # Routine
+{-
+    ======
+    Routine
+    ======
+-}
 parseDoc :: String -> IO [KTMarked]
 parseDoc str
     = case runParserDoc str of
@@ -516,4 +527,4 @@ main :: IO ()
 main 
     = getContents
         >>= parseDoc
-        >>= mapM_ (putStr . PTP.psdPrintDefault . relabel)
+        >>= mapM_ (putStrLn . PTP.psdPrintDefault . relabel)
