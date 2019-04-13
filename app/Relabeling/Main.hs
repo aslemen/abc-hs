@@ -11,60 +11,58 @@ module Relabeling where
 
 import qualified Data.Text as DT
 import qualified Data.Text.IO as DTIO
+import qualified Data.Text.Lazy as DTL
+import qualified Data.Text.Lazy.Builder as DTLB
+import qualified Data.Void as DV
 
 import qualified Text.Megaparsec as TMega
 
 import qualified Control.Monad.State as CMS
 
-import qualified KeyakiCategory as KC
 import qualified DepMarking as DMing
 import qualified DepMarked as DMed
+import qualified DepMarked.Parser as DMedP
 import qualified ABCCategory as ABCC
 
 import qualified ParsedTree as PT
-import qualified PTPrintable as PTP
+import qualified ParsedTree.Parser as PTP
+
+import qualified PTDumpable as PTD
 
 -- # Type Aliases
-type KCat = KC.KeyakiCategory
 type ABCCat = ABCC.ABCCategory
 
-type KCatMarked = DMed.DepMarked KCat
+type PlainMarked = DMed.DepMarked DT.Text
 type ABCCatMarked = DMed.DepMarked ABCCat
 
-type KTMarked = PT.Tree KCatMarked
+type PlainTMarked = PT.Tree PlainMarked
 type ABCTMarked = PT.Tree ABCCatMarked
 
-
-parserKTMarked = DMed.parser KC.parser
-
 -- # Tree Parser
-runParserKTMarked :: String -> Either PT.ParseError KTMarked
-runParserKTMarked
-    = PT.createFromString parserKTMarked
+runParserPlainTMarked :: 
+    String
+        -> DT.Text 
+        -> Either (TMega.ParseErrorBundle DT.Text DV.Void) PlainTMarked
+runParserPlainTMarked
+    = PTP.createFromString PTP.getDefaultTermParsers
 
-runParserDoc :: String -> Either PT.ParseError [KTMarked]
-runParserDoc = PT.createDoc parserKTMarked
+runParserDoc :: 
+    String
+        -> DT.Text 
+        -> Either (TMega.ParseErrorBundle DT.Text DV.Void) [PlainTMarked]
+runParserDoc 
+    = PTP.createDoc PTP.getDefaultTermParsers
 
 -- # Main Job
-createABCCBaseFromKC :: KCat -> ABCCat
-createABCCBaseFromKC 
-    = ABCC.BaseCategory 
-        . DT.pack
-        . (PTP.psdPrint (PTP.Option PTP.Pretty PTP.Minimal))
+checkMainPlainMarked :: DT.Text -> PlainMarked -> Bool
+checkMainPlainMarked str
+    = (== str) . DMed.category
 
-checkMainKCat :: String -> KCat -> Bool
-checkMainKCat str
-    = (== str) . head . KC.catlist
-
-checkMainKCatMarked :: String -> KCatMarked -> Bool
-checkMainKCatMarked str
-    = (checkMainKCat str) . DMed.category
-
-checkKTIsLexicalAndHasMainKCat :: String -> KTMarked -> Bool
+checkKTIsLexicalAndHasMainKCat :: DT.Text -> PlainTMarked -> Bool
 checkKTIsLexicalAndHasMainKCat
-    = PT.isFilterNearTerminal . checkMainKCatMarked
+    = PT.isFilterNearTerminal . checkMainPlainMarked
 
-isKTPRO :: KTMarked -> Bool
+isKTPRO :: PlainTMarked -> Bool
 isKTPRO tree 
     = or
         $ checkKTIsLexicalAndHasMainKCat 
@@ -90,8 +88,8 @@ getIsHeadFound = isHeadFound
 
 type WithRelabelState a = CMS.State RelabelState a
 
-_dummyKCatHead :: KCatMarked 
-_dummyKCatHead = (KC.createBase []) DMed.:| DMing.Head
+_dummyKCatHead :: PlainMarked 
+_dummyKCatHead = "" DMed.:| DMing.Head
 
 dropAnt :: [ABCCat] -> ABCCat -> ABCCat
 dropAnt
@@ -101,17 +99,17 @@ dropAnt
         | otherwise                 = cat
 dropAnt _ cat = cat
 
-relabel :: KTMarked -> ABCTMarked
+relabel :: PlainTMarked -> ABCTMarked
 relabel oldTree@(PT.Node oldTreeRootLabel _)
     = (relabelBeforeHead oldTree) `CMS.evalState` initialState
     where 
         initialState :: RelabelState
         initialState 
             = makeRelabelState
-                (createABCCBaseFromKC $ DMed.category oldTreeRootLabel)
+                (ABCC.BaseCategory $ DMed.category oldTreeRootLabel)
                 True -- isPROToBeDropped
 
-relabelInternal :: KTMarked -> WithRelabelState ABCTMarked
+relabelInternal :: PlainTMarked -> WithRelabelState ABCTMarked
 relabelInternal oldTree@(PT.Node _ oldTreeSubForest)
     = case oldTreeSubForest of
         _:(_:_)  -- 2 or more children
@@ -119,7 +117,7 @@ relabelInternal oldTree@(PT.Node _ oldTreeSubForest)
         _        -- 0 or 1 child
             -> relabelTrivial oldTree
 
-relabelTrivial :: KTMarked -> WithRelabelState ABCTMarked
+relabelTrivial :: PlainTMarked -> WithRelabelState ABCTMarked
 relabelTrivial
     oldTree@(
         PT.Node {
@@ -142,7 +140,7 @@ relabelTrivial
         CMS.modify $ \st -> st { isHeadFound = False }
         return newTree
 
-relabelBeforeHead :: KTMarked -> WithRelabelState ABCTMarked
+relabelBeforeHead :: PlainTMarked -> WithRelabelState ABCTMarked
 relabelBeforeHead
     oldTree@(
         PT.Node {
@@ -159,14 +157,14 @@ relabelBeforeHead
         DMing.Head       -> relabelAfterHead oldTree
         _                -> relabelAdjVSST oldTree
     where
-        relabelCompVSST :: KTMarked -> WithRelabelState ABCTMarked
+        relabelCompVSST :: PlainTMarked -> WithRelabelState ABCTMarked
         relabelCompVSST oldTree = do
             stParent <- CMS.get       -- state of the parent tree
             let {
                 stFirstChild 
                     = makeRelabelState
                         (
-                            createABCCBaseFromKC
+                            ABCC.BaseCategory
                                 $ DMed.category
                                     $ PT.rootLabel oldTreeFirstChild
                         )
@@ -229,7 +227,7 @@ relabelBeforeHead
                             )
                 else 
                     relabelTrivial oldTree
-        relabelAdjVSST :: KTMarked -> WithRelabelState ABCTMarked
+        relabelAdjVSST :: PlainTMarked -> WithRelabelState ABCTMarked
         relabelAdjVSST oldTree = do
             stParent <- CMS.get       -- state of the parent tree
             let {
@@ -307,7 +305,7 @@ relabelBeforeHead oldTree@(PT.Node _ []) = do
     CMS.modify $ \st -> st { isHeadFound = False }
     return newTree
 
-relabelAfterHead :: KTMarked -> WithRelabelState ABCTMarked
+relabelAfterHead :: PlainTMarked -> WithRelabelState ABCTMarked
 relabelAfterHead
     oldTree@(
         PT.Node {
@@ -325,11 +323,11 @@ relabelAfterHead
         _   -> relabelVSSTAdj oldTree
         
     where
-        oldTreeSubForestRemainder :: [KTMarked]
+        oldTreeSubForestRemainder :: [PlainTMarked]
         oldTreeSubForestRemainder = init oldTreeSubForest
-        oldTreeLastChild :: KTMarked
+        oldTreeLastChild :: PlainTMarked
         oldTreeLastChild = last oldTreeSubForest
-        relabelRealHead :: KTMarked -> WithRelabelState ABCTMarked
+        relabelRealHead :: PlainTMarked -> WithRelabelState ABCTMarked
         relabelRealHead oldTree = do
             stInit <- CMS.get
             newHead <- relabelInternal oldTreeLastChild -- RECURSION
@@ -343,14 +341,14 @@ relabelAfterHead
                 }
             CMS.modify $ \st -> st {isHeadFound = True}
             return newTree
-        relabelVSSTComp :: KTMarked -> WithRelabelState ABCTMarked
+        relabelVSSTComp :: PlainTMarked -> WithRelabelState ABCTMarked
         relabelVSSTComp oldTree = do
             stParent <- CMS.get       -- state of the parent tree
             let {
                 stLastChild
                     = makeRelabelState
                         (
-                            createABCCBaseFromKC 
+                            ABCC.BaseCategory 
                                 $ DMed.category
                                     $ PT.rootLabel oldTreeLastChild
                         )
@@ -410,7 +408,7 @@ relabelAfterHead
                                     onlyChild:[] -> onlyChild
                                     []           -> newTreeVSST
                             ))
-        relabelVSSTAdj :: KTMarked -> WithRelabelState ABCTMarked
+        relabelVSSTAdj :: PlainTMarked -> WithRelabelState ABCTMarked
         relabelVSSTAdj oldTree = do
             stParent <- CMS.get       -- state of the parent tree
             let {
@@ -495,7 +493,7 @@ relabelAfterHead oldTree@(PT.Node _ []) = do
     return newTree
 
 
-isSBJControl :: KTMarked -> Bool -- Working now
+isSBJControl :: PlainTMarked -> Bool -- Working now
 isSBJControl tree
     = any 
         (\str -> checkKTIsLexicalAndHasMainKCat str tree)
@@ -504,7 +502,7 @@ isSBJControl tree
             , "てくれる"
         ]
 
-isNonControl :: KTMarked -> Bool
+isNonControl :: PlainTMarked -> Bool
 isNonControl tree　-- ブラックリストにすべきか、ホワイトリストにすべきか？
     = any
         (\str -> checkKTIsLexicalAndHasMainKCat str tree)
@@ -515,16 +513,27 @@ isNonControl tree　-- ブラックリストにすべきか、ホワイトリス
     Routine
     ======
 -}
-parseDoc :: String -> IO [KTMarked]
-parseDoc str
-    = case runParserDoc str of
-        Left err 
-            -> putStrLn ("\n" ++ show err) >> return []
+parseDoc :: DT.Text -> IO [PlainTMarked]
+parseDoc text
+    = case runParserDoc "<STDIN>" text of
+        Left errors
+            -> DTIO.putStrLn (
+                DT.pack
+                    $ TMega.errorBundlePretty errors
+            )
+            >> return []
         Right res 
             -> return res
 
 main :: IO ()
 main 
-    = getContents
+    = DTIO.getContents
         >>= parseDoc
-        >>= mapM_ (putStrLn . PTP.psdPrintDefault . relabel)
+        >>= mapM_ 
+            (
+                DTIO.putStrLn 
+                . DTL.toStrict
+                . DTLB.toLazyText
+                . PTD.psdDumpDefault
+                . relabel
+            )

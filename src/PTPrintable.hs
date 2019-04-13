@@ -1,37 +1,30 @@
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
 module PTPrintable (
-    TreeStyle(..),
-    NodeStyle(..),
-    Option(..),
+    PTD.TreeStyle(..),
+    PTD.NodeStyle(..),
+    PTD.Option(..),
     Printable(..)
     ) where
 
-data TreeStyle 
-    = OneLine | Pretty 
-        deriving (Eq, Show)
-data NodeStyle 
-    = Minimal | Default | Full
-        deriving (Eq, Show)
-data Option 
-    = Option { 
-        treeStyle :: TreeStyle, 
-        nodeStyle :: NodeStyle
-        } deriving (Eq, Show)
+import qualified PTDumpable as PTD
+
+type TreeStyle = PTD.TreeStyle
+type NodeStyle = PTD.NodeStyle
+type Option = PTD.Option
 
 class (Show a) => Printable a where
     psdPrint :: Option -> a -> String
-    psdPrint (Option Pretty Default)  -- 普段遣い
+    psdPrint (PTD.Option PTD.Pretty PTD.Default)  -- 普段遣い
         = show -- defaultではshowと同じ
-    psdPrint (Option Pretty _) 
-        = psdPrint (Option Pretty Default)
-    psdPrint (Option OneLine node) -- oneLine
-        = filter (\c -> c /= '\n') . psdPrint (Option Pretty Default) 
+    psdPrint (PTD.Option PTD.Pretty _) 
+        = psdPrint (PTD.Option PTD.Pretty PTD.Default)
+    psdPrint (PTD.Option PTD.OneLine node) -- oneLine
+        = filter (\c -> c /= '\n') . psdPrint (PTD.Option PTD.Pretty PTD.Default) 
     
     psdPrintDefault :: a -> String
-    psdPrintDefault = psdPrint (Option Pretty Default) 
+    psdPrintDefault = psdPrint (PTD.Option PTD.Pretty PTD.Default) 
         -- default print style
 
 instance Printable String where
-    psdPrint (Option Pretty Default) = id
+    psdPrint (PTD.Option PTD.Pretty PTD.Default) = id

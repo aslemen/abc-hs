@@ -2,7 +2,7 @@
 
 module ABCCategory (
     ABCCategory(..),
-    ABCComment(..),
+    Com.ABCComment(..),
     ABCCategoryCommented(..),
     strBot,
     (</>),
@@ -20,9 +20,14 @@ import Control.Applicative
 import Data.Maybe as DM
 import Data.Char as DCh
 import Data.Text as DT
+import Data.Text.Lazy as DTL
+import Data.Text.Lazy.Builder as DTLB
 import Data.String as DS
 
 import qualified PTPrintable as PTP
+import qualified PTDumpable as PTD
+
+import qualified ABCComment as Com
 
 -- # The Data Type
 data ABCCategory = 
@@ -39,80 +44,8 @@ data ABCCategory =
         consequence :: ABCCategory
         }
 
-data ABCComment a 
-    = ABCComment {
-        content :: a,
-        comment :: DT.Text
-    }
-type ABCCategoryCommented = ABCComment ABCCategory
+type ABCCategoryCommented = Com.ABCComment ABCCategory
 
-instance (Eq a) => Eq (ABCComment a) where
-    (==) (ABCComment a _) (ABCComment b _)
-        = (a == b)
-
-instance (Show a) => Show (ABCComment a) where
-    show (ABCComment a c)
-        = if c == ""
-            then show a
-            else (show a) ++ ".\"" ++ (unpack c) ++ "\""
-instance (PTP.Printable a) => PTP.Printable (ABCComment a) where
-    psdPrint opt@(PTP.Option _ PTP.Minimal)
-        = \ca -> PTP.psdPrint opt $ content ca
-    psdPrint _ 
-        = show
-
-instance Functor ABCComment where
-    fmap f ABCComment {
-        content = a,
-        comment = c
-        } = ABCComment {
-            content = f a,
-            comment = c
-        }
-
-instance Applicative ABCComment where
-    pure a
-        = ABCComment a ""
-    (<*>) (ABCComment f cf) (ABCComment a ca)
-        = ABCComment (f a) (cf <> ";" <> ca)
-
-instance Monad ABCComment where
-    (>>=) (ABCComment a ca) f
-        = ABCComment com_new_content (ca <> ";" <> com_new_comment)
-            where
-                -- com_new :: ABCComment sth
-                com_new = f a
-                -- com_new_content :: sth
-                com_new_content = content com_new
-                com_new_comment :: DT.Text
-                com_new_comment = comment com_new
-
--- instance (Monoid w) => CMW.MonadWriter w ABCComment where
---    writer (a, w)
---        = ABCComment {
---            content = a,
---            comment = w
---        }
---    tell w
---        = ABCComment {
---            content = (),
---            comment = w
---        }
---    listen ABCComment {
---        content = a,
---        comment = c
---        } = ABCComment {
---            content = (a, c),
---            comment = c
---        }
---    pass ABCComment{
---        content = (a, f),
---        comment = c
---        } = ABCComment{
---            content = a,
---            comment = f c
---        }
-        
 strBot :: DT.Text
 strBot = "⊥"
 
@@ -153,15 +86,26 @@ instance Eq ABCCategory where
 -- ## Showing
 
 -- | Provide a string representation of an ABCCategory.
+instance PTD.Dumpable ABCCategory where
+    psdDump _ Bottom 
+        = DTLB.fromText strBot
+    psdDump _ (BaseCategory name) 
+        = DTLB.fromText name
+    psdDump opt (LeftFunctor ant conseq)
+        = (DTLB.singleton '<')
+            <> (PTD.psdDump opt ant)
+            <> (DTLB.singleton '\\')
+            <> (PTD.psdDump opt conseq)
+            <> (DTLB.singleton '>')
+    psdDump opt (RightFunctor ant conseq)
+        = (DTLB.singleton '<')
+            <> (PTD.psdDump opt conseq)
+            <> (DTLB.singleton '/')
+            <> (PTD.psdDump opt ant)
+            <> (DTLB.singleton '>')
+
 instance Show ABCCategory where
-    show Bottom 
-        = unpack strBot
-    show (BaseCategory name) 
-        = unpack name
-    show (LeftFunctor ant conseq)
-        = "<" ++ (show ant) ++ "\\" ++ (show conseq) ++ ">"
-    show (RightFunctor ant conseq)
-        = "<" ++ (show conseq) ++ "/" ++ (show ant) ++ ">" 
+    show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault
 
 instance PTP.Printable ABCCategory where
     psdPrint _ = show
@@ -178,15 +122,25 @@ instance Eq ABCStatusFC where
         = True
     (==) _ _
         = False
+
+instance PTD.Dumpable ABCStatusFC where
+    psdDump _ (FCLeft n)
+        | n > 0 
+            = (DTLB.fromText "FCLeft")
+                <> (DTLB.fromString $ show n)
+        | otherwise
+            = DTLB.singleton 'L'
+    psdDump _ (FCRight n)
+        | n > 0
+            = (DTLB.fromText "FCRight")
+                <> (DTLB.fromString $ show n)
+        | otherwise
+            = DTLB.singleton 'R'
+    psdDump _ Failed
+        = DTLB.fromText "FAIL"
 instance Show ABCStatusFC where
-    show (FCLeft n)
-        | n > 0     = "FCLeft" ++ show n
-        | otherwise = "L"
-    show (FCRight n)
-        | n > 0     = "FCRight" ++ show n
-        | otherwise = "R"
-    show Failed
-        = "FAIL"
+    show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault 
+
 
 catStatFailed :: (ABCCategory, ABCStatusFC)
 catStatFailed = (Bottom, Failed)
@@ -246,7 +200,14 @@ reduceWithResult _ _
 
 reduceWithLog :: ABCCategory -> ABCCategory -> ABCCategoryCommented
 reduceWithLog left right
-    = ABCComment { content = cat, comment = pack $ show res }
+    = Com.ABCComment {
+        Com.content 
+            = cat, 
+        Com.comment 
+            = DTL.toStrict 
+                $ DTLB.toLazyText 
+                $ PTD.psdDumpDefault res 
+        }
         where
             cat :: ABCCategory
             res :: ABCStatusFC

@@ -5,22 +5,22 @@ import Data.Monoid
 
 import qualified ABCCategory as ABCC
 import qualified ParsedTree as PT
-import qualified StringWithBrackets as SWB
+import qualified ParsedTree.Parser as PTP
 import qualified Options.Applicative as OPT
 
-import qualified PTPrintable as PTP
+import qualified Data.Text as DT
+import qualified Data.Text.Lazy as DTL
+import qualified Data.Text.Lazy.Builder as DTLB
+import qualified Data.Text.IO as DTIO
+
+import qualified Text.Megaparsec as TMega
+
+import qualified PTDumpable as PTD
 
 -- # Type Aliases
-type ST = PT.Tree String
+type PlainTree = PT.Tree DT.Text
 
 -- # Tree Parser
-runParserTree :: String -> Either PT.ParseError ST
-runParserTree 
-    = PT.createFromString $ SWB.parserStringOrBracketedString "()"
-
-runParserDoc :: String -> Either PT.ParseError [ST]
-runParserDoc 
-    = PT.createDoc $ SWB.parserStringOrBracketedString "()"
 
 -- # Commandline Option Parser
 -- よくわかっていないので、放っておくことにする。しばらくはstdin/stdoutを使う。
@@ -62,21 +62,36 @@ parserOptionsWithInfo
         OPT.progDesc "ABC Tree Checker"
         ]
 
--- # Actual Job
-lint :: ST -> ST
-lint = id
-
-parseDoc :: String -> IO [ST]
-parseDoc str
-    = case runParserDoc str of
-        Left err 
-            -> putStrLn ("\n" ++ show err) >> return []
+{-
+    ======
+    Jobs
+    =====
+-}
+parseDoc :: DT.Text -> IO [PlainTree]
+parseDoc text
+    = case PTP.createDoc PTP.getDefaultTermParsers "<STDIN>" text of
+        Left errors
+            -> DTIO.putStrLn 
+                (
+                    DT.pack 
+                        $ TMega.errorBundlePretty errors
+                )
+                >> return []
         Right res 
             -> return res
-
--- # Main Procedure
+{-
+    ======
+    Routines
+    =====
+-}
 main :: IO ()
 main 
-    = getContents
+    = DTIO.getContents
         >>= parseDoc
-        >>= mapM_  (putStr . PTP.psdPrintDefault . lint)
+        >>= mapM_  
+            (
+                DTIO.putStrLn 
+                . DTL.toStrict 
+                . DTLB.toLazyText 
+                . PTD.psdDumpDefault
+            )

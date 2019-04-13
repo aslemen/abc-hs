@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module ABCCategory.Parser (
     pABCCategory,
     pABCCategoryCommented,
@@ -9,22 +12,22 @@ import qualified Control.Monad.Combinators as CMC
 import qualified Control.Monad.Combinators.Expr as CMCE
 
 import Data.Maybe
+import Data.Void as DV
 import Data.Char as DC
 import Data.Text as DT
 
 import qualified Text.Megaparsec as TMega
 
-import ABCCategory as ABCC
+import qualified ParsedTree.Parser as PTP
+import qualified ABCCategory as ABCC
 
-import LiteralParser as LP
-import qualified PTPrintable as PTP
-
+import qualified ABCComment as Com
 {-
     ======
     Type Definitions
     ======
 -}
-type Parser = TMega.Parsec () DT.Text
+type Parser = TMega.Parsec DV.Void DT.Text
 
 {-
     ======
@@ -49,13 +52,13 @@ pLiteral
     where
         pPureLiteral :: Parser DT.Text
         pPureLiteral
-            = TMega.takeWhileP (Just "Pure Literal") isCharLiteral
+            = TMega.takeWhile1P (Just "Pure Literal") isCharLiteral
         pBracketedLiteral :: Parser DT.Text
         pBracketedLiteral
-            = LP.pBracketedString TMega.<?> "Bracketed Literal"
+            = PTP.pBracketedString TMega.<?> "Bracketed Literal"
         isCharLiteral :: Char -> Bool
         isCharLiteral c
-            = (not $ DC.isSpace c) && (c `notElem` ".<>()/")
+            = (not $ DC.isSpace c) && (c `notElem` (".<>/" :: [Char]))
 
 {-
     ------
@@ -83,7 +86,7 @@ pABCComment
     ABCCategory
     ------
 -}
-pABCCategory :: Parser ABCCategory
+pABCCategory :: Parser ABCC.ABCCategory
 pABCCategory
     = CMCE.makeExprParser pTerm opTable TMega.<?> "ABC Category"
     where
@@ -91,7 +94,7 @@ pABCCategory
         pBaseOrBot
             = create <$> pLiteral
             where
-                create :: DT.Text -> ABCCategory
+                create :: DT.Text -> ABCC.ABCCategory
                 create text
                     | text == ABCC.strBot
                         = ABCC.Bottom
@@ -103,14 +106,14 @@ pABCCategory
         opTable 
             = [
                 [
-                    CMCE.InfixL $ TMega.single '\\' *> pure (<\>)
+                    CMCE.InfixL $ TMega.single '\\' *> pure (ABCC.<\>)
                 ]
                 ,
                 [
-                    CMCE.InfixL $ TMega.single '/' *> pure (</>)
+                    CMCE.InfixL $ TMega.single '/' *> pure (ABCC.</>)
                 ]
             ]
-        pTerm :: Parser ABCCategory
+        pTerm :: Parser ABCC.ABCCategory
         pTerm 
             = pCatParens pABCCategory 
                 TMega.<|> pBaseOrBot 
@@ -121,10 +124,27 @@ pABCCategory
     Parser runner
     ======
 -}
-createABCCategoryCommentedFromString :: DT.Text -> Either (TMega.ParseErrorBundle DT.Text ()) ABCCategoryCommented
+instance PTP.TermParsable ABCC.ABCCategoryCommented where
+    getDefaultTermParsers 
+        = PTP.TermParsers {
+            PTP.pTermMany 
+                = TMega.option
+                    (
+                        Com.ABCComment {
+                            Com.content = ABCC.BaseCategory ""
+                            ,
+                            Com.comment = ""
+                        }
+                    )
+                    pABCCategoryCommented
+            ,
+            PTP.pTermSome = pABCCategoryCommented
+        }
+
+createABCCategoryCommentedFromString :: DT.Text -> Either (TMega.ParseErrorBundle DT.Text DV.Void) ABCC.ABCCategoryCommented
 createABCCategoryCommentedFromString 
     = TMega.parse pABCCategoryCommented "<internal>"
 
-createABCCategoryFromString :: DT.Text -> Either (TMega.ParseErrorBundle DT.Text ()) ABCCategory
+createABCCategoryFromString :: DT.Text -> Either (TMega.ParseErrorBundle DT.Text DV.Void) ABCC.ABCCategory
 createABCCategoryFromString 
     = TMega.parse pABCCategory "<internal>"

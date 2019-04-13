@@ -1,17 +1,21 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module DepMarked (
     DepMarked(..),
     markCat,
-    marker,
-    parser,
+    marker
     ) where
 
 import Control.Applicative
 
-import qualified Text.Parsec as Psc
-import Text.Parsec.String (Parser)
+import qualified Data.Text as DT
+import qualified Data.Text.Lazy.Builder as DTLB
+
+import qualified Text.Megaparsec as TMega
 
 import qualified DepMarking as DMing
 import qualified PTPrintable as PTP
+import qualified PTDumpable as PTD
 
 data DepMarked cat
     = (:|) {
@@ -19,11 +23,11 @@ data DepMarked cat
         dependency :: DMing.DepMarking
     } deriving (Eq)
 
-marker :: String
+marker :: DT.Text
 marker = "''"
 
 instance (Show cat) => Show (DepMarked cat) where
-    show (cat :| dep) = (show cat) ++ marker ++ (show dep)
+    show (cat :| dep) = (show cat) ++ (DT.unpack marker) ++ (show dep)
 
 instance (PTP.Printable cat) => PTP.Printable (DepMarked cat) where
     psdPrint 
@@ -35,24 +39,25 @@ instance (PTP.Printable cat) => PTP.Printable (DepMarked cat) where
                 = PTP.psdPrint min cat
     psdPrint _ dm = show dm
 
+instance (PTD.Dumpable cat) => PTD.Dumpable (DepMarked cat) where
+    psdDump
+        opt@(PTP.Option _ optNode)
+        dm@(cat :| DMing.None)
+            | optNode == PTD.Full
+                = (PTD.psdDump opt cat) 
+                    <> (DTLB.fromText marker)
+                    <> (PTD.psdDump opt DMing.None)
+            | otherwise 
+                = PTD.psdDump opt cat
+    psdDump opt dm@(cat :| dep)
+        = (PTD.psdDump opt cat) 
+            <> (DTLB.fromText marker)
+            <> (PTD.psdDump opt dep)
+    
 instance Functor DepMarked where
     -- fmap :: (a -> b) -> (DepMarked a) -> (DepMarked b)
     fmap f (cat :| dep) = (f cat) :| dep
 
-markCat :: String -> cat -> (DepMarked cat)
+markCat :: DT.Text -> cat -> (DepMarked cat)
 markCat str x
     = x :| (DMing.createMarking str)
-
-parser :: Parser cat -> Parser (DepMarked cat)
-parser parserCat
-    = parserCat -- P Cat
-        >>= \cat -> -- Cat
-            parserMarkingInternal -- P Str -> P (cat -> DepMarked)
-            >>= \markfunc -> -- cat -> DepMarked
-                return (markfunc cat)
-    where
-        parserMarkingInternal :: Parser (c -> DepMarked c)
-        parserMarkingInternal
-            = markCat 
-                <$> Psc.option "" 
-                    (Psc.string marker *> (Psc.many1 Psc.letter))

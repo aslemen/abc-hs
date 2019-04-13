@@ -1,133 +1,139 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module ParsedTree (
-    DT.Tree(..),
-    DT.Forest,
+    DTree.Tree(..),
+    DTree.Forest,
     getUnary, isUnary,
     justTerminal, isTerminal,
     getNearTerminal, isNearTerminal,
-    filterNearTerminal, isFilterNearTerminal,
-    parser,
-    createFromString,
-    parserDoc,
-    createDoc,
-    Psc.ParseError
+    filterNearTerminal, isFilterNearTerminal
     ) where
 
 import qualified Control.Monad as CMon
+import qualified Control.Monad.Reader as CMonR
 
-import qualified Data.List as DL
-import qualified Data.Tree as DT
 import qualified Data.Maybe as DMay
-
-import qualified Text.Parsec as Psc
-import Text.Parsec.String (Parser)
-import qualified Text.Parsec.Char as PscCh
--- import qualified Text.Parsec.Language as PscLang
+import qualified Data.List as DList
+import qualified Data.Tree as DTree
+import qualified Data.Text as DText
+import qualified Data.Text.Lazy as DTextL
+import qualified Data.Text.Lazy.Builder as DTextLB
 
 import qualified PTPrintable as PTP
+import qualified PTDumpable as PTD
 
 -- ## Function
-getUnary :: (DT.Tree term) -> Maybe (DT.Tree term)
-getUnary DT.Node { DT.subForest = child:[] } = Just child
+getUnary :: (DTree.Tree term) -> Maybe (DTree.Tree term)
+getUnary DTree.Node { DTree.subForest = child:[] } = Just child
 getUnary _ = Nothing
 
-isUnary :: (DT.Tree term) -> Bool
+isUnary :: (DTree.Tree term) -> Bool
 isUnary = DMay.isJust . getUnary
 
-justTerminal :: (DT.Tree term) -> Maybe term
-justTerminal (DT.Node lex []) = Just lex
+justTerminal :: (DTree.Tree term) -> Maybe term
+justTerminal (DTree.Node lex []) = Just lex
 justTerminal _ = Nothing 
 
-isTerminal :: (DT.Tree term) -> Bool
+isTerminal :: (DTree.Tree term) -> Bool
 isTerminal = DMay.isJust . justTerminal
 
-getNearTerminal :: (DT.Tree term) -> Maybe term
+getNearTerminal :: (DTree.Tree term) -> Maybe term
 getNearTerminal = getUnary CMon.>=> justTerminal 
 
-isNearTerminal :: (DT.Tree term) -> Bool
+isNearTerminal :: (DTree.Tree term) -> Bool
 isNearTerminal = DMay.isJust . getNearTerminal
 
-filterNearTerminal :: (term -> Bool) -> (DT.Tree term) -> Maybe term
+filterNearTerminal :: (term -> Bool) -> (DTree.Tree term) -> Maybe term
 filterNearTerminal cond tree = CMon.mfilter cond $ getNearTerminal tree
 
-isFilterNearTerminal :: (term -> Bool) -> (DT.Tree term) -> Bool
+isFilterNearTerminal :: (term -> Bool) -> (DTree.Tree term) -> Bool
 isFilterNearTerminal cond = DMay.isJust . (filterNearTerminal cond)
 
--- ## Showing
-printPrettyInternal ::
-    Int 
-    -> (term -> String) 
-    -> (DT.Tree term) 
-    -> String
-printPrettyInternal 
-    indent
-    termPrinter 
-    wholenode@(DT.Node node children)
-    | isTerminal wholenode
-        = termPrinter node
-    | otherwise
-        = "(" ++ node_str ++ children_str ++ ")"
-    where
-        node_str :: String
-        node_str 
-            = (termPrinter node) ++ " "
-        node_str_len :: Int
-        node_str_len 
-            = length node_str
-        children_indent :: Int
-        children_indent
-            = 1 + indent + node_str_len
-        children_sep :: String
-        children_sep
-            = '\n' : concat (replicate children_indent " ")
-        children_str :: String
-        children_str
-            = DL.intercalate children_sep $ map
-                (printPrettyInternal children_indent termPrinter) 
-                children
-                    
-                    -- RECURSION
+{--
+    ======
+    Dumping with Text-builders
+    ======
+--}
+data DumpEnv term
+    = DumpEnv {
+        termDumper :: term -> DTextLB.Builder, -- Readonly
+        indent :: Int
+    }
+    
+initEnv :: (PTD.Dumpable term) => DumpEnv term
+initEnv 
+    = DumpEnv {
+        termDumper = PTD.psdDumpDefault,
+        indent = 0
+    } 
 
-instance (PTP.Printable term) => PTP.Printable (DT.Tree term) where
+dumpPrettyInternal :: 
+    (PTD.Dumpable term) => 
+    (DTree.Tree term)
+        -> CMonR.Reader (DumpEnv term) DTextLB.Builder
+-- TODO: さらなる高速化を考える：Seqを使うか、CPSを使うか。よく検討（まずは勉強）しなければならない。
+dumpPrettyInternal (DTree.Node label [])
+    = CMonR.asks termDumper
+        >>= \dumper ->
+            return $ dumper label
+dumpPrettyInternal (DTree.Node label children)
+    = CMonR.ask
+        >>= \env -> case env of 
+            DumpEnv dumper root_indent
+                -> (
+                    CMonR.local 
+                        (
+                            \env -> env {
+                                indent 
+                                    = root_indent
+                                        + 1
+                                        + fromIntegral (
+                                            -- unsafe conversion, Int64 -> Int
+                                            DTextL.length 
+                                            $ DTextLB.toLazyText
+                                            $ dumper label
+                                        )
+                                        + 1
+                            }
+                        )
+                        (
+                            foldr 
+                                (CMonR.liftM2 (<>)) 
+                                (return $ DTextLB.fromText DText.empty)
+                                $ DList.intersperse 
+                                    (
+                                        CMonR.asks indent
+                                            >>= \ind ->
+                                                return $ DTextLB.fromText
+                                                    $ "\n" <> (DText.replicate ind " ")
+                                    )
+                                    $ map dumpPrettyInternal children
+                        )
+                        >>= \text_children ->
+                            return (
+                                DTextLB.singleton '('
+                                <> dumper label
+                                <> DTextLB.singleton ' '
+                                <> text_children
+                                <> DTextLB.singleton ')'
+                            )
+                )
+                                        
+instance (PTD.Dumpable term) => PTD.Dumpable (DTree.Tree term) where
+    psdDump opt tree 
+        = (
+            CMonR.runReader (dumpPrettyInternal tree) env
+        ) <> (DTextLB.fromText "\n\n")
+        where
+            env :: DumpEnv term
+            env
+                = DumpEnv {
+                    termDumper = PTD.psdDump opt,
+                    indent = 0
+                    }
+
+instance (PTP.Printable term) => PTP.Printable (DTree.Tree term) where
     psdPrint 
-        opt@(PTP.Option PTP.Pretty _)
-        tree
-        = (printPrettyInternal 0 (PTP.psdPrint opt) tree) ++ "\n\n"
-
--- ## Parsing
-parser :: Parser term -> Parser (DT.Tree term)
-parser parserLabel
-    = parserTree Psc.<|> parserTerminal
-    Psc.<?> "Parsed Tree"
-    where
-        -- parserTree :: Parser (Tree term)
-        parserTree 
-            = Psc.between (Psc.char '(') (Psc.char ')') (
-                DT.Node 
-                <$> (Psc.between Psc.spaces Psc.spaces parserLabel)
-                <*> ((parser parserLabel) `Psc.sepBy` Psc.spaces)
-                                    -- RECURSION occurring
-            ) Psc.<?> "Non-Terminal Node of a Parsed Tree"
-        -- parserTerminal :: Parser (Tree term)
-        parserTerminal
-            = pure <$> parserLabel
-            Psc.<?> "Terminal Node of a Parsed Tree"
-
-createFromString :: 
-    Parser term 
-    -> String 
-    -> Either Psc.ParseError (DT.Tree term)
-createFromString parserLabel 
-    = Psc.parse (parser parserLabel) "Parser of Parsed Trees"
-
-parserDoc :: Parser term -> Parser [DT.Tree term]
-parserDoc parserLabel
-    = Psc.spaces
-        *> (
-            ((parser parserLabel) `Psc.sepEndBy` Psc.spaces)
-            --(\c -> [c]) <$> (parser parserLabel)
-            Psc.<?> "The Content of a Parsed Trees Document"
-        ) <* Psc.eof
-
-createDoc :: Parser term -> String -> Either Psc.ParseError [DT.Tree term]
-createDoc parserLabel
-    = Psc.parse (parserDoc parserLabel) "Parser of Parsed Trees Documents"
+        opt@(PTD.Option PTD.Pretty _)
+        = PTP.psdPrint opt

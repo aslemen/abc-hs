@@ -1,9 +1,14 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module DepMarking (
     DepMarking(..),
     createMarking
     ) where
 
-import PTPrintable as PTP
+import qualified Data.Text as DT
+
+import qualified PTPrintable as PTP
+import qualified PTDumpable as PTD
 
 data DepMarking 
     = Head | Adjunct | Complement | ComplementSpecial | None
@@ -18,7 +23,9 @@ instance Show DepMarking where
 
 instance PTP.Printable DepMarking
 
-createMarking :: String -> DepMarking 
+instance PTD.Dumpable DepMarking
+
+createMarking :: DT.Text -> DepMarking 
 createMarking "h" = Head
 createMarking "a" = Adjunct
 createMarking "c" = Complement
