@@ -11,14 +11,14 @@ import qualified PTPrintable as PTP
 import qualified PTDumpable as PTD
 
 data DepMarking 
-    = Head | Adjunct | Complement | ComplementSpecial | None
+    = Head | Adjunct | Complement | AdjunctControl | None
     deriving (Eq)
 
 instance Show DepMarking where
     show Head = "h"
     show Adjunct = "a"
     show Complement = "c"
-    show ComplementSpecial = "cs"
+    show AdjunctControl = "ac"
     show None = "NA"
 
 instance PTP.Printable DepMarking
@@ -29,6 +29,6 @@ createMarking :: DT.Text -> DepMarking
 createMarking "h" = Head
 createMarking "a" = Adjunct
 createMarking "c" = Complement
-createMarking "cs" = ComplementSpecial
+createMarking "ac" = AdjunctControl
 createMarking "NA" = None
 createMarking _ = None

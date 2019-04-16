@@ -14,6 +14,7 @@ import qualified Data.Text.IO as DTIO
 import qualified Data.Text.Lazy as DTL
 import qualified Data.Text.Lazy.Builder as DTLB
 import qualified Data.Void as DV
+import qualified Data.Set as DS
 
 import qualified Text.Megaparsec as TMega
 
@@ -91,7 +92,7 @@ type WithRelabelState a = CMS.State RelabelState a
 _dummyKCatHead :: PlainMarked 
 _dummyKCatHead = "" DMed.:| DMing.Head
 
-dropAnt :: [ABCCat] -> ABCCat -> ABCCat
+dropAnt :: (DS.Set ABCCat) -> ABCCat -> ABCCat
 dropAnt
     forbidList
     cat@(ABCC.LeftFunctor ant conseq)
@@ -320,7 +321,12 @@ relabelAfterHead
             -> case oldTreeSubForest of
                 _:(_:_) -> relabelVSSTAdj oldTree -- extra heads are treated as adjuncts
                 _:[]    -> relabelRealHead oldTree
-        _   -> relabelVSSTAdj oldTree
+        DMing.Adjunct
+            -> relabelVSSTAdj oldTree
+        DMing.AdjunctControl
+            -> relabelVSSTAdj oldTree
+        _   
+            -> relabelVSSTAdj oldTree
         
     where
         oldTreeSubForestRemainder :: [PlainTMarked]
@@ -436,15 +442,21 @@ relabelAfterHead
                 stLastChild 
                     = makeRelabelState
                         (
-                            ABCC.makeLeftAdjunct (case () of
-                                _
-                                    | isNonControl oldTreeLastChild
-                                        -> newVSSTCat
-                                    | isSBJControl oldTreeLastChild
-                                        -> dropAnt [ABCC.BaseCategory "PPs"] newVSSTCat
-                                    
-                                    | otherwise
-                                        -> dropAnt [] newVSSTCat
+                            ABCC.makeLeftAdjunct (
+                                dropAnt
+                                    (
+                                        if (
+                                            DMed.dependency 
+                                            $ PT.rootLabel oldTreeLastChild
+                                            ) == DMing.AdjunctControl 
+                                            then DS.fromAscList [
+                                                    ABCC.BaseCategory "PP-SBJ"
+                                                    ,
+                                                    ABCC.BaseCategory "PP-SBJ2"
+                                                    ]
+                                            else DS.empty
+                                    )
+                                    newVSSTCat 
                                 )
                         ) -- (VSST) head\head 
                         False -- to NOT drop PROs in complements
