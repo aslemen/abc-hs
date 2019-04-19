@@ -66,19 +66,35 @@ instance Applicative ABCComment where
     pure a
         = ABCComment a ""
     (<*>) (ABCComment f cf) (ABCComment a ca)
-        = ABCComment (f a) (cf <> ";" <> ca)
+        | cf == "" && ca == ""
+            = ABCComment (f a) ""
+        | cf == ""
+            = ABCComment (f a) ca
+        | ca == ""
+            = ABCComment (f a) cf
+        | otherwise
+            = ABCComment (f a) (cf <> ";" <> ca)
 
 instance Monad ABCComment where
     (>>=) (ABCComment a ca) f
-        = ABCComment com_new_content (ca <> ";" <> com_new_comment)
-            where
-                -- com_new :: ABCComment sth
-                com_new = f a
-                -- com_new_content :: sth
-                com_new_content = content com_new
-                com_new_comment :: DT.Text
-                com_new_comment = comment com_new
-
+        = ABCComment com_new_content com_new_comment_comb
+        where
+            -- com_new :: ABCComment sth
+            com_new = f a
+            -- com_new_content :: sth
+            com_new_content = content com_new
+            com_new_comment :: DT.Text
+            com_new_comment = comment com_new
+            com_new_comment_comb :: DT.Text
+            com_new_comment_comb
+                | ca == "" && com_new_comment == ""
+                    = ""
+                | ca == ""
+                    = com_new_comment
+                | com_new_comment == ""
+                    = ca
+                | otherwise
+                    = (ca <> ";" <> com_new_comment)
 -- instance (Monoid w) => CMW.MonadWriter w ABCComment where
 --    writer (a, w)
 --        = ABCComment {

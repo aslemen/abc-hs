@@ -124,6 +124,16 @@ pABCCategory
     Parser runner
     ======
 -}
+instance PTP.TermParsable ABCC.ABCCategory where
+    getDefaultTermParsers
+        = PTP.TermParsers {
+            PTP.pTermMany 
+                = TMega.option (ABCC.BaseCategory "")
+                    pABCCategory
+            ,
+            PTP.pTermSome = pABCCategory
+        }
+
 instance PTP.TermParsable ABCC.ABCCategoryCommented where
     getDefaultTermParsers 
         = PTP.TermParsers {

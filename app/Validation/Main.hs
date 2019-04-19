@@ -1,24 +1,48 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Validation where
 
-import System.IO
-import Data.Monoid
+import qualified Data.Text as DT
+import qualified Data.Text.IO as DTIO
+import qualified Data.Text.Lazy as DTL
+import qualified Data.Text.Lazy.Builder as DTLB
+import qualified Data.Void as DV
+import qualified Data.Set as DS
 
-import qualified ABCCategory as ABCC
+import qualified Text.Megaparsec as TMega
+
+import qualified Control.Monad.State as CMS
+
+import qualified ABCCategory.Parser as ABCP
+import qualified ABCCategory as ABCCat
+import qualified ABCComment as ABCCom
 import qualified ParsedTree as PT
-import qualified PTPrintable as PTP
+import qualified ParsedTree.Parser as PTP
+
+import qualified PTDumpable as PTD
 
 import qualified Options.Applicative as OPT
 
 -- # Type Aliases
-type ABCCom = ABCC.ABCCategoryCommented
+type ABCCat = ABCCat.ABCCategory
+type ABCT = PT.Tree ABCCat
+
+type ABCCom = ABCCat.ABCCategoryCommented
 type ABCComT = PT.Tree ABCCom
 
--- # Tree Parser
-runParserTree :: String -> Either PT.ParseError ABCComT
-runParserTree = PT.createFromString ABCC.parser
-
-runParserDoc :: String -> Either PT.ParseError [ABCComT]
-runParserDoc = PT.createDoc ABCC.parser
+{-
+    ======
+    Tree Parsers
+    ======
+-}
+runParserTree :: String 
+    -> DT.Text
+    -> Either (TMega.ParseErrorBundle DT.Text DV.Void) ABCT
+runParserDoc :: String 
+    -> DT.Text
+    -> Either (TMega.ParseErrorBundle DT.Text DV.Void) [ABCT]
+runParserTree = PTP.createFromString PTP.getDefaultTermParsers
+runParserDoc = PTP.createDoc PTP.getDefaultTermParsers
 
 -- # Commandline Option Parser
 -- よくわかっていないので、放っておくことにする。しばらくはstdin/stdoutを使う。
@@ -60,46 +84,57 @@ parserOptionsWithInfo
         OPT.progDesc "ABC Tree Checker"
         ]
 
--- # Actual Job
-relabel :: ABCComT -> ABCComT
-relabel (PT.Node node children)
-    | (length children) == 2 
-        = PT.Node {
-            PT.rootLabel = res,
-            PT.subForest = map relabel children
+{-
+    ======
+    Actual Job
+    ======
+-}
+relabel :: ABCT -> ABCComT
+relabel (PT.Node node children@(child1:child2:[]))
+    = PT.Node {
+        PT.rootLabel 
+            = ABCCat.reduceWithLog
+                (PT.rootLabel child1)
+                (PT.rootLabel child2)
+        ,
+        PT.subForest = map relabel children
         }
-    | otherwise 
-        = PT.Node {
-            PT.rootLabel = node,
-            PT.subForest = map relabel children
-        }
-    where
-        child1 :: ABCComT
-        child2 :: ABCComT
-        child1 : (child2 : _) = children
-        res :: ABCCom
-        res 
-            = join 
-                $ ABCC.reduceWithLog
-                    <$> (PT.rootLabel child1)
-                    <*> (PT.rootLabel child2)
-            where join m = m >>= id
+relabel (PT.Node node children@(_:_:_:_))
+    = PT.Node {
+        PT.rootLabel 
+            = ABCCom.ABCComment node "FAIL:NONBin"
+        ,
+        PT.subForest = map relabel children
+    }
+relabel (PT.Node node children) -- 1 or 0 child
+    = PT.Node {
+        PT.rootLabel
+            = ABCCom.ABCComment node ""
+        ,
+        PT.subForest = map relabel children
+    }
 
-batchRelabel :: [ABCComT] -> [ABCComT]
-batchRelabel
-    = fmap relabel
-
-parseDoc :: String -> IO [ABCComT]
-parseDoc str
-    = case runParserDoc str of
-        Left err 
-            -> putStrLn ("\n" ++ show err) >> return []
-        Right res 
+parseDoc :: DT.Text -> IO [ABCT]
+parseDoc text
+    = case runParserDoc "<STDIN>" text of
+        Left errors
+            -> DTIO.putStrLn (
+                DT.pack
+                    $ TMega.errorBundlePretty errors
+            ) 
+            >> return []
+        Right res
             -> return res
 
 -- # Main Procedure
 main :: IO ()
 main 
-    = getContents
+    = DTIO.getContents
         >>= parseDoc
-        >>= mapM_ (putStr . PTP.psdPrintDefault . relabel)
+        >>= mapM_ (
+            DTIO.putStrLn
+            . DTL.toStrict
+            . DTLB.toLazyText
+            . PTD.psdDumpDefault
+            .relabel 
+            )
