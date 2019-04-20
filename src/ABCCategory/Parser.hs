@@ -58,7 +58,7 @@ pLiteral
             = PTP.pBracketedString TMega.<?> "Bracketed Literal"
         isCharLiteral :: Char -> Bool
         isCharLiteral c
-            = (not $ DC.isSpace c) && (c `notElem` (".<>/" :: [Char]))
+            = (not $ DC.isSpace c) && (c `notElem` (".<>/\\" :: [Char]))
 
 {-
     ------
