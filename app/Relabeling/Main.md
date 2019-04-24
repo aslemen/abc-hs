@@ -1,12 +1,17 @@
+# ABCTreebank：範疇変換のプログラム
+## 概要 / Introduction
+範疇を変換する。
+すなわち、与えられた、正規化されたKeyakiの木から、範疇を変換してABCTreebankの木をつくる。
+アルゴリズムは＠＠＠のものに他ならないが、＠＠＠
+
+## ヘッダー / Header
+文字列として`Data.Text`を使用。
+
+```haskell
 {-# LANGUAGE OverloadedStrings #-}
+```
 
-{- 
-The Pipeline:
-- pretreatments
-- head-marking (Haskell? tsurgeon?)
-- **relabelling**
--}
-
+```haskell
 module Relabeling where
 
 import qualified Data.Text as DT
@@ -29,7 +34,11 @@ import qualified ParsedTree as PT
 import qualified ParsedTree.Parser as PTP
 
 import qualified PTDumpable as PTD
+```
 
+## 略記
+タイプの略記は以下の通り：
+```haskell
 -- # Type Aliases
 type ABCCat = ABCC.ABCCategory
 
@@ -38,8 +47,10 @@ type ABCCatMarked = DMed.DepMarked ABCCat
 
 type PlainTMarked = PT.Tree PlainMarked
 type ABCTMarked = PT.Tree ABCCatMarked
+```
 
--- # Tree Parser
+## パーザー
+```haskell
 runParserPlainTMarked :: 
     String
         -> DT.Text 
@@ -53,8 +64,10 @@ runParserDoc ::
         -> Either (TMega.ParseErrorBundle DT.Text DV.Void) [PlainTMarked]
 runParserDoc 
     = PTP.createDoc PTP.getDefaultTermParsers
+```
 
--- # Main Job
+## 判定関数
+```haskell
 checkMainPlainMarked :: DT.Text -> PlainMarked -> Bool
 checkMainPlainMarked str
     = (== str) . DMed.category
@@ -549,3 +562,4 @@ main
                 . PTD.psdDumpDefault
                 . relabel
             )
+```

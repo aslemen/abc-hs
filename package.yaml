@@ -29,6 +29,10 @@ dependencies:
 - optparse-applicative
 - split
 - mtl
+- markdown-unlit
+
+ghc-options:
+  - "-pgmL markdown-unlit"
 
 library:
   source-dirs: src
@@ -55,7 +59,7 @@ executables:
     dependencies:
     - abc-hs
   abc-relabel:
-    main:               Main.hs
+    main:               Main.lhs
     source-dirs:        app/Relabeling
     ghc-options:
     - -threaded

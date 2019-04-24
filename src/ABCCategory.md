@@ -1,3 +1,4 @@
+```haskell
 {-# LANGUAGE OverloadedStrings #-}
 
 module ABCCategory (
@@ -216,3 +217,4 @@ reduceWithLog left right
 (<^>) :: ABCCategory -> ABCCategory -> ABCCategory
 cat1 <^> cat2 
     = fst (reduceWithResult cat1 cat2)
+```
