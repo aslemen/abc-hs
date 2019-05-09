@@ -1,17 +1,30 @@
-```haskell
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+    Module:     ABCCategory
+    Copyright:  (c) T. N. Hayashi, 2019
+    License:    Undetermined
+
+    Provide an representation of categories of the ABC Grammar.
+    The parser is available at the 'ABCCategory.Parser' module.
+-}
 module ABCCategory (
+    -- * Types
     ABCCategory(..),
+    -- ** Subsidiaries
     Com.ABCComment(..),
     ABCCategoryCommented(..),
+    ABCStatusFC(..),
+    -- * Constants
     strBot,
+    -- * Functions
+    -- ** For Composition
     (</>),
     makeLeftAdjunct,
     (<\>),
     makeRightAdjunct,
+    -- ** For Reduction
     (<^>),
-    ABCStatusFC(..),
     reduceWithResult,
     reduceWithLog,
     ) where
@@ -30,27 +43,42 @@ import qualified PTDumpable as PTD
 
 import qualified ABCComment as Com
 
--- # The Data Type
-data ABCCategory = 
-      Bottom
+-- | 'ABCCategory' represents ABC categories.
+data ABCCategory =
+    -- | The Bottom ⊥.
+      Bottom 
+    -- | An atomic catetory.
     | BaseCategory {
-        name :: DT.Text
+        name :: DT.Text -- ^ The name of the category.
         }
+    -- | A functor category @<X\\C>@ which takes an @X@ to its left as its argument.
     | LeftFunctor { 
-        antecedent :: ABCCategory, 
-        consequence :: ABCCategory
+        antecedent :: ABCCategory, -- ^ The argument, corresponding to the @X@ above.
+        consequence :: ABCCategory -- ^ The base, corresponding to the @C@ above.
         }
+    -- | A functor category @<C/X>@ which takes an X to its right as its argument.
     | RightFunctor { 
-        antecedent :: ABCCategory, 
-        consequence :: ABCCategory
+        antecedent :: ABCCategory,  -- ^ The argument, corresponding to the @X@ above.
+        consequence :: ABCCategory -- ^ The base, corresponding to the @C@ above.
         }
 
+-- delete it!
 type ABCCategoryCommented = Com.ABCComment ABCCategory
 
+-- | The text representation of the bottom.
 strBot :: DT.Text
 strBot = "⊥"
 
-(<\>) :: ABCCategory -> ABCCategory -> ABCCategory
+-- | Compose two categories to form a left functor category.
+-- 
+--   Example:
+-- 
+--   >>> (BaseCategory "NP") <\> (BaseCategory "S")
+--   LeftFunctor (BaseCategory "NP") (BaseCategory "S")
+(<\>) :: 
+    ABCCategory -- ^ The argument category @X@.
+    -> ABCCategory -- ^ The base category @C@
+    -> ABCCategory -- ^ The resulted category @<X\\C>@. 
 ant <\> conseq 
     = LeftFunctor {
         antecedent = ant,
@@ -60,7 +88,16 @@ ant <\> conseq
 makeLeftAdjunct :: ABCCategory -> ABCCategory
 makeLeftAdjunct c = c <\> c
 
-(</>) :: ABCCategory -> ABCCategory -> ABCCategory
+-- | Compose two categories to form a right functor category.
+-- 
+--   Example:
+-- 
+--   >>> (BaseCategory "VP") </> (BaseCategory "NP")
+--   RightFunctor (BaseCategory "NP") (BaseCategory "VP")
+(</>) :: 
+    ABCCategory -- ^ The base category @C@
+    -> ABCCategory -- ^ The argument category @X@.
+    -> ABCCategory -- ^ The resulted category @<C/X>@. 
 conseq </> ant 
     = RightFunctor {
         antecedent = ant, 
@@ -217,4 +254,3 @@ reduceWithLog left right
 (<^>) :: ABCCategory -> ABCCategory -> ABCCategory
 cat1 <^> cat2 
     = fst (reduceWithResult cat1 cat2)
-```

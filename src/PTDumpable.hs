@@ -7,7 +7,7 @@
 
     Provide an type class type of which 
     supports pretty serialization in the munge-trees style, 
-    serving as an extension of the Show class in Prelude.
+    comparable to the Show class in Prelude.
 -}
 module PTDumpable (
     -- * Types
@@ -65,8 +65,8 @@ class (Show a) => Dumpable a where
             . psdDump (Option Pretty node)
     -- | Serialized a tree with the default option.
     --
-    --      * 'PTDumpable.treeStyle': 'PTDumpable.Pretty'
-    --      * 'PTDumpable.nodeStyle': 'PTDumpable.Default'
+    --       * 'PTDumpable.treeStyle': 'PTDumpable.Pretty'
+    --       * 'PTDumpable.nodeStyle': 'PTDumpable.Default'
     psdDumpDefault :: a -> DTLB.Builder
     psdDumpDefault 
         = psdDump (Option Pretty Default)
