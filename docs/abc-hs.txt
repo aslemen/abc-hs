@@ -69,6 +69,32 @@ instance PTDumpable.Dumpable Data.Text.Internal.Text
 instance PTDumpable.Dumpable Data.Text.Internal.Lazy.Text
 instance PTDumpable.Dumpable Data.Text.Internal.Builder.Builder
 
+
+-- | Provide an representation of categories of the Kainoki Treebank. The
+--   parser is available at the <a>Parser</a> module.
+module KaiCat
+
+-- | <a>KaiCat</a> represents Kainoki categories.
+data KaiCat
+
+-- | A Kainoki category.
+KaiCat :: [Text] -> Int -> Text -> KaiCat
+
+-- | The category name, separated by hyphens.
+[catlist] :: KaiCat -> [Text]
+
+-- | The ICH index. 0 for non-indexed cases.
+[iched] :: KaiCat -> Int
+
+-- | The sort information. Empty when none.
+[sortInfo] :: KaiCat -> Text
+
+-- | Construct a non-indexed, non-sort-infoed Kainoki category.
+createBase :: [Text] -> KaiCat
+instance GHC.Classes.Eq KaiCat.KaiCat
+instance PTDumpable.Dumpable KaiCat.KaiCat
+instance GHC.Show.Show KaiCat.KaiCat
+
 module DepMarking
 data DepMarking
 Head :: DepMarking
@@ -213,19 +239,11 @@ instance GHC.Classes.Eq ABCCategory.ABCCategory
 instance PTDumpable.Dumpable ABCCategory.ABCCategory
 instance GHC.Show.Show ABCCategory.ABCCategory
 
+
+-- | Provide an representation of parsed trees, reexported from Data.Tree
+--   (provided by containers). The parser is available at the
+--   <tt>ParseParser</tt> module.
 module ParsedTree
-
--- | Non-empty, possibly infinite, multi-way trees; also known as <i>rose
---   trees</i>.
-data Tree a
-Node :: a -> Forest a -> Tree a
-
--- | label value
-[rootLabel] :: Tree a -> a
-
--- | zero or more child trees
-[subForest] :: Tree a -> Forest a
-type Forest a = [Tree a]
 getUnary :: Tree term -> Maybe (Tree term)
 isUnary :: Tree term -> Bool
 justTerminal :: Tree term -> Maybe term

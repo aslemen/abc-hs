@@ -21,14 +21,13 @@ description:         Please see the README on GitHub at <https://github.com/asle
 
 dependencies:
 - base >= 4.7 && < 5
+- mtl
 - text
-- parsec
 - parser-combinators
 - megaparsec
 - containers
 - optparse-applicative
 - split
-- mtl
 - markdown-unlit
 
 ghc-options:

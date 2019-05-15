@@ -2,8 +2,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module ABCCategory.Parser (
+    -- * Parseing Parts
     pABCCategory,
     pABCCategoryCommented,
+    -- * Constructors Taking Texts
     createABCCategoryCommentedFromString,
     createABCCategoryFromString
     ) where
@@ -11,10 +13,10 @@ module ABCCategory.Parser (
 import qualified Control.Monad.Combinators as CMC
 import qualified Control.Monad.Combinators.Expr as CMCE
 
-import Data.Maybe
-import Data.Void as DV
-import Data.Char as DC
-import Data.Text as DT
+import qualified Data.Maybe as DMay
+import qualified Data.Void as DV
+import qualified Data.Char as DC
+import qualified Data.Text as DT
 
 import qualified Text.Megaparsec as TMega
 

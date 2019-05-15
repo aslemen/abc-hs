@@ -1,9 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
+{-|
+    Module:     ParsedTree
+    Copyright:  (c) T. N. Hayashi, 2019
+    License:    Undetermined
+
+    Provide an representation of parsed trees, 
+        reexported from Data.Tree (provided by containers).
+    The parser is available at the 'ParseParser' module.
+-}
 module ParsedTree (
-    DTree.Tree(..),
-    DTree.Forest,
+    -- * Data (Reexported from Data.Tree)
+    module Data.Tree,
+    -- * Functions
     getUnary, isUnary,
     justTerminal, isTerminal,
     getNearTerminal, isNearTerminal,
@@ -15,7 +25,7 @@ import qualified Control.Monad.Reader as CMonR
 
 import qualified Data.Maybe as DMay
 import qualified Data.List as DList
-import qualified Data.Tree as DTree
+import Data.Tree
 import qualified Data.Text as DText
 import qualified Data.Text.Lazy as DTextL
 import qualified Data.Text.Lazy.Builder as DTextLB
@@ -23,30 +33,30 @@ import qualified Data.Text.Lazy.Builder as DTextLB
 import qualified PTDumpable as PTD
 
 -- ## Function
-getUnary :: (DTree.Tree term) -> Maybe (DTree.Tree term)
-getUnary DTree.Node { DTree.subForest = child:[] } = Just child
+getUnary :: (Tree term) -> Maybe (Tree term)
+getUnary Node { subForest = child:[] } = Just child
 getUnary _ = Nothing
 
-isUnary :: (DTree.Tree term) -> Bool
+isUnary :: (Tree term) -> Bool
 isUnary = DMay.isJust . getUnary
 
-justTerminal :: (DTree.Tree term) -> Maybe term
-justTerminal (DTree.Node lex []) = Just lex
+justTerminal :: (Tree term) -> Maybe term
+justTerminal (Node lex []) = Just lex
 justTerminal _ = Nothing 
 
-isTerminal :: (DTree.Tree term) -> Bool
+isTerminal :: (Tree term) -> Bool
 isTerminal = DMay.isJust . justTerminal
 
-getNearTerminal :: (DTree.Tree term) -> Maybe term
+getNearTerminal :: (Tree term) -> Maybe term
 getNearTerminal = getUnary CMon.>=> justTerminal 
 
-isNearTerminal :: (DTree.Tree term) -> Bool
+isNearTerminal :: (Tree term) -> Bool
 isNearTerminal = DMay.isJust . getNearTerminal
 
-filterNearTerminal :: (term -> Bool) -> (DTree.Tree term) -> Maybe term
+filterNearTerminal :: (term -> Bool) -> (Tree term) -> Maybe term
 filterNearTerminal cond tree = CMon.mfilter cond $ getNearTerminal tree
 
-isFilterNearTerminal :: (term -> Bool) -> (DTree.Tree term) -> Bool
+isFilterNearTerminal :: (term -> Bool) -> (Tree term) -> Bool
 isFilterNearTerminal cond = DMay.isJust . (filterNearTerminal cond)
 
 {--
@@ -69,14 +79,14 @@ initEnv
 
 dumpPrettyInternal :: 
     (PTD.Dumpable term) => 
-    (DTree.Tree term)
+    (Tree term)
         -> CMonR.Reader (DumpEnv term) DTextLB.Builder
 -- TODO: さらなる高速化を考える：Seqを使うか、CPSを使うか。よく検討（まずは勉強）しなければならない。
-dumpPrettyInternal (DTree.Node label [])
+dumpPrettyInternal (Node label [])
     = CMonR.asks termDumper
         >>= \dumper ->
             return $ dumper label
-dumpPrettyInternal (DTree.Node label children)
+dumpPrettyInternal (Node label children)
     = CMonR.ask
         >>= \env -> case env of 
             DumpEnv dumper root_indent
@@ -119,7 +129,7 @@ dumpPrettyInternal (DTree.Node label children)
                             )
                 )
                                         
-instance (PTD.Dumpable term) => PTD.Dumpable (DTree.Tree term) where
+instance (PTD.Dumpable term) => PTD.Dumpable (Tree term) where
     psdDump opt tree 
         = (
             CMonR.runReader (dumpPrettyInternal tree) env
