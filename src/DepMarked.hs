@@ -14,7 +14,6 @@ import qualified Data.Text.Lazy.Builder as DTLB
 import qualified Text.Megaparsec as TMega
 
 import qualified DepMarking as DMing
-import qualified PTPrintable as PTP
 import qualified PTDumpable as PTD
 
 data DepMarked cat
@@ -29,19 +28,9 @@ marker = "''"
 instance (Show cat) => Show (DepMarked cat) where
     show (cat :| dep) = (show cat) ++ (DT.unpack marker) ++ (show dep)
 
-instance (PTP.Printable cat) => PTP.Printable (DepMarked cat) where
-    psdPrint 
-        min@(PTP.Option _ node)
-        dm@(cat :| DMing.None)
-            | node == PTP.Full
-                = show dm
-            | otherwise
-                = PTP.psdPrint min cat
-    psdPrint _ dm = show dm
-
 instance (PTD.Dumpable cat) => PTD.Dumpable (DepMarked cat) where
     psdDump
-        opt@(PTP.Option _ optNode)
+        opt@(PTD.Option _ optNode)
         dm@(cat :| DMing.None)
             | optNode == PTD.Full
                 = (PTD.psdDump opt cat) 
@@ -58,6 +47,6 @@ instance Functor DepMarked where
     -- fmap :: (a -> b) -> (DepMarked a) -> (DepMarked b)
     fmap f (cat :| dep) = (f cat) :| dep
 
-markCat :: DT.Text -> cat -> (DepMarked cat)
+markCat :: DT.Text -> cat -> DepMarked cat
 markCat str x
     = x :| (DMing.createMarking str)

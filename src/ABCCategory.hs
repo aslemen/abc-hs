@@ -12,7 +12,6 @@ module ABCCategory (
     -- * Types
     ABCCategory(..),
     -- ** Subsidiaries
-    Com.ABCComment(..),
     ABCStatusFC(..),
     -- * Constants
     strBot,
@@ -30,14 +29,13 @@ module ABCCategory (
 
 import qualified Control.Monad.State as CMS
 
-import Data.Maybe as DM
-import Data.Char as DCh
-import Data.Text as DT
-import Data.Text.Lazy as DTL
-import Data.Text.Lazy.Builder as DTLB
-import Data.String as DS
+import qualified Data.Maybe as DM
+import qualified Data.Char as DCh
+import qualified Data.Text as DT
+import qualified Data.Text.Lazy as DTL
+import qualified Data.Text.Lazy.Builder as DTLB
+import qualified Data.String as DS
 
-import qualified PTPrintable as PTP
 import qualified PTDumpable as PTD
 
 import qualified ABCComment as Com
@@ -160,9 +158,6 @@ instance PTD.Dumpable ABCCategory where
 
 instance Show ABCCategory where
     show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault
-
-instance PTP.Printable ABCCategory where
-    psdPrint _ = show
 
 {-
     'ABCStatusFC' represents the rule which has been used 

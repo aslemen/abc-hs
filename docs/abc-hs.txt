@@ -69,65 +69,6 @@ instance PTDumpable.Dumpable Data.Text.Internal.Text
 instance PTDumpable.Dumpable Data.Text.Internal.Lazy.Text
 instance PTDumpable.Dumpable Data.Text.Internal.Builder.Builder
 
-module PTPrintable
-
--- | <a>TreeStyle</a> specifies the serialization style of trees.
-data TreeStyle
-
--- | Each tree is serialized in one line.
-OneLine :: TreeStyle
-
--- | Each tree is serialized prettily in the same way of munge-trees.
-Pretty :: TreeStyle
-
--- | <a>NodeStyle</a> speficies the serialized style of node labels.
-data NodeStyle
-
--- | Each node is serialized as short as is possible.
-Minimal :: NodeStyle
-
--- | Each node is serialized normally.
-Default :: NodeStyle
-
--- | Each node is serialized with full information.
-Full :: NodeStyle
-
--- | <a>Option</a> bundles all the serialization options mentioned above.
-data Option
-Option :: TreeStyle -> NodeStyle -> Option
-
--- | The serialization style of tree structures.
-[treeStyle] :: Option -> TreeStyle
-
--- | The serialization style of nodes.
-[nodeStyle] :: Option -> NodeStyle
-class (Show a) => Printable a
-psdPrint :: Printable a => Option -> a -> String
-psdPrintDefault :: Printable a => a -> String
-instance PTPrintable.Printable GHC.Base.String
-
-module KeyakiCategory
-data KeyakiCategory
-KeyakiCategory :: [String] -> String -> String -> KeyakiCategory
-[catlist] :: KeyakiCategory -> [String]
-[iched] :: KeyakiCategory -> String
-[sortInfo] :: KeyakiCategory -> String
-createBase :: [String] -> KeyakiCategory
-parser :: Parser KeyakiCategory
-
--- | generate an Keyaki-Category from a string or a stream.
-createFromString :: String -> Either ParseError KeyakiCategory
-
--- | The abstract data type <tt>ParseError</tt> represents parse errors. It
---   provides the source position (<a>SourcePos</a>) of the error and a
---   list of error messages (<a>Message</a>). A <tt>ParseError</tt> can be
---   returned by the function <a>parse</a>. <tt>ParseError</tt> is an
---   instance of the <a>Show</a> and <a>Eq</a> classes.
-data ParseError
-instance GHC.Classes.Eq KeyakiCategory.KeyakiCategory
-instance GHC.Show.Show KeyakiCategory.KeyakiCategory
-instance PTPrintable.Printable KeyakiCategory.KeyakiCategory
-
 module DepMarking
 data DepMarking
 Head :: DepMarking
@@ -138,7 +79,6 @@ None :: DepMarking
 createMarking :: Text -> DepMarking
 instance GHC.Classes.Eq DepMarking.DepMarking
 instance GHC.Show.Show DepMarking.DepMarking
-instance PTPrintable.Printable DepMarking.DepMarking
 instance PTDumpable.Dumpable DepMarking.DepMarking
 
 module DepMarked
@@ -150,7 +90,6 @@ markCat :: Text -> cat -> DepMarked cat
 marker :: Text
 instance GHC.Classes.Eq cat => GHC.Classes.Eq (DepMarked.DepMarked cat)
 instance GHC.Show.Show cat => GHC.Show.Show (DepMarked.DepMarked cat)
-instance PTPrintable.Printable cat => PTPrintable.Printable (DepMarked.DepMarked cat)
 instance PTDumpable.Dumpable cat => PTDumpable.Dumpable (DepMarked.DepMarked cat)
 instance GHC.Base.Functor DepMarked.DepMarked
 
@@ -162,7 +101,6 @@ ABCComment :: a -> Text -> ABCComment a
 instance GHC.Classes.Eq a => GHC.Classes.Eq (ABCComment.ABCComment a)
 instance PTDumpable.Dumpable a => PTDumpable.Dumpable (ABCComment.ABCComment a)
 instance GHC.Show.Show a => GHC.Show.Show (ABCComment.ABCComment a)
-instance PTPrintable.Printable a => PTPrintable.Printable (ABCComment.ABCComment a)
 instance GHC.Base.Functor ABCComment.ABCComment
 instance GHC.Base.Applicative ABCComment.ABCComment
 instance GHC.Base.Monad ABCComment.ABCComment
@@ -203,10 +141,6 @@ RightFunctor :: ABCCategory -> ABCCategory -> ABCCategory
 
 -- | The base, corresponding to the <tt>C</tt> above.
 [consequence] :: ABCCategory -> ABCCategory
-data ABCComment a
-ABCComment :: a -> Text -> ABCComment a
-[content] :: ABCComment a -> a
-[comment] :: ABCComment a -> Text
 data ABCStatusFC
 
 -- | Indicating that a left reduction/functional-composition rule is used.
@@ -278,7 +212,6 @@ instance GHC.Base.Monoid ABCCategory.ABCStatusFC
 instance GHC.Classes.Eq ABCCategory.ABCCategory
 instance PTDumpable.Dumpable ABCCategory.ABCCategory
 instance GHC.Show.Show ABCCategory.ABCCategory
-instance PTPrintable.Printable ABCCategory.ABCCategory
 
 module ParsedTree
 
@@ -302,7 +235,6 @@ isNearTerminal :: Tree term -> Bool
 filterNearTerminal :: (term -> Bool) -> Tree term -> Maybe term
 isFilterNearTerminal :: (term -> Bool) -> Tree term -> Bool
 instance PTDumpable.Dumpable term => PTDumpable.Dumpable (Data.Tree.Tree term)
-instance PTPrintable.Printable term => PTPrintable.Printable (Data.Tree.Tree term)
 
 module ParsedTree.Parser
 data TermParsers term

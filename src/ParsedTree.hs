@@ -20,7 +20,6 @@ import qualified Data.Text as DText
 import qualified Data.Text.Lazy as DTextL
 import qualified Data.Text.Lazy.Builder as DTextLB
 
-import qualified PTPrintable as PTP
 import qualified PTDumpable as PTD
 
 -- ## Function
@@ -132,8 +131,3 @@ instance (PTD.Dumpable term) => PTD.Dumpable (DTree.Tree term) where
                     termDumper = PTD.psdDump opt,
                     indent = 0
                     }
-
-instance (PTP.Printable term) => PTP.Printable (DTree.Tree term) where
-    psdPrint 
-        opt@(PTD.Option PTD.Pretty _)
-        = PTP.psdPrint opt

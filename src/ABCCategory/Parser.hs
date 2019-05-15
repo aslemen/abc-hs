@@ -67,7 +67,7 @@ pLiteral
 -}
 pABCCategoryCommented :: Parser (Com.ABCComment ABCC.ABCCategory)
 pABCCategoryCommented
-    = ABCC.ABCComment <$> pABCCategory <*> pCommentOrEmpty
+    = Com.ABCComment <$> pABCCategory <*> pCommentOrEmpty
     where 
         pCommentOrEmpty :: Parser DT.Text
         pCommentOrEmpty

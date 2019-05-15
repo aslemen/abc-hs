@@ -7,7 +7,6 @@ module DepMarking (
 
 import qualified Data.Text as DT
 
-import qualified PTPrintable as PTP
 import qualified PTDumpable as PTD
 
 data DepMarking 
@@ -20,8 +19,6 @@ instance Show DepMarking where
     show Complement = "c"
     show AdjunctControl = "ac"
     show None = "NA"
-
-instance PTP.Printable DepMarking
 
 instance PTD.Dumpable DepMarking
 

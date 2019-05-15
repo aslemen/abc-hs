@@ -12,7 +12,6 @@ import Data.Text.Lazy as DTL
 import Data.Text.Lazy.Builder as DTLB
 import Data.String as DS
 
-import qualified PTPrintable as PTP
 import qualified PTDumpable as PTD
 
 -- # The Data Type
@@ -42,15 +41,6 @@ instance (Show a) => Show (ABCComment a) where
         = if c == ""
             then (show a)
             else (show a) 
-                    <> ".\"" <> (DT.unpack c) <> "\""
-
-instance (PTP.Printable a) => PTP.Printable (ABCComment a) where
-    psdPrint opt@(PTP.Option _ PTP.Minimal) ca
-        = (PTP.psdPrint opt) (content ca)
-    psdPrint opt ca@(ABCComment a c)
-        = if c == ""
-            then (PTP.psdPrint opt a)
-            else (PTP.psdPrint opt a) 
                     <> ".\"" <> (DT.unpack c) <> "\""
 
 instance Functor ABCComment where
