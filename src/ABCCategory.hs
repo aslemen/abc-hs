@@ -13,7 +13,6 @@ module ABCCategory (
     ABCCategory(..),
     -- ** Subsidiaries
     Com.ABCComment(..),
-    ABCCategoryCommented(..),
     ABCStatusFC(..),
     -- * Constants
     strBot,
@@ -29,7 +28,7 @@ module ABCCategory (
     reduceWithLog,
     ) where
 
-import Control.Applicative
+import qualified Control.Monad.State as CMS
 
 import Data.Maybe as DM
 import Data.Char as DCh
@@ -62,19 +61,18 @@ data ABCCategory =
         consequence :: ABCCategory -- ^ The base, corresponding to the @C@ above.
         }
 
--- delete it!
-type ABCCategoryCommented = Com.ABCComment ABCCategory
-
 -- | The text representation of the bottom.
 strBot :: DT.Text
 strBot = "⊥"
 
--- | Compose two categories to form a left functor category.
--- 
---   Example:
--- 
---   >>> (BaseCategory "NP") <\> (BaseCategory "S")
---   LeftFunctor (BaseCategory "NP") (BaseCategory "S")
+{-|
+    Compose two categories to form a left functor category.
+
+    Example:
+
+    >>> (BaseCategory "NP") <\> (BaseCategory "S")
+    LeftFunctor (BaseCategory "NP") (BaseCategory "S")
+-}
 (<\>) :: 
     ABCCategory -- ^ The argument category @X@.
     -> ABCCategory -- ^ The base category @C@
@@ -85,15 +83,27 @@ ant <\> conseq
         consequence = conseq
         }
 
-makeLeftAdjunct :: ABCCategory -> ABCCategory
+{-|
+    Make an endomorphic adjunct @<X\\X>@ from a category @X@.
+
+    Example:
+    
+    >>> makeLeftAdjunct (BaseCategory "S")
+    LeftFunctor (BaseCategory "S") (BaseCategory "S")
+-}
+makeLeftAdjunct :: 
+    ABCCategory     -- ^ The argument category @X@.
+    -> ABCCategory  -- ^ The resulted category @<X\\X>@.
 makeLeftAdjunct c = c <\> c
 
--- | Compose two categories to form a right functor category.
--- 
---   Example:
--- 
---   >>> (BaseCategory "VP") </> (BaseCategory "NP")
---   RightFunctor (BaseCategory "NP") (BaseCategory "VP")
+{-|
+    Compose two categories to form a right functor category.
+
+    Example:
+
+    >>> (BaseCategory "VP") </> (BaseCategory "NP")
+    RightFunctor (BaseCategory "NP") (BaseCategory "VP")
+-}
 (</>) :: 
     ABCCategory -- ^ The base category @C@
     -> ABCCategory -- ^ The argument category @X@.
@@ -104,10 +114,19 @@ conseq </> ant
         consequence = conseq
         }
 
-makeRightAdjunct :: ABCCategory -> ABCCategory
+{-|
+    Make an endomorphic adjunct @<X/X>@ from a category @X@.
+
+    Example:
+    
+    >>> makeRightAdjunct (BaseCategory "S")
+    RightFunctor (BaseCategory "S") (BaseCategory "S")
+-}
+makeRightAdjunct :: 
+    ABCCategory      -- ^ The argument category @X@.
+    -> ABCCategory   -- ^ The resulted category @<X/X>@.
 makeRightAdjunct c = c </> c
 
--- ## Equation
 instance Eq ABCCategory where
     -- | The equation of ABCCategories ignores comments.
     (==) Bottom Bottom 
@@ -121,9 +140,6 @@ instance Eq ABCCategory where
     (==) _ _ 
         = False
 
--- ## Showing
-
--- | Provide a string representation of an ABCCategory.
 instance PTD.Dumpable ABCCategory where
     psdDump _ Bottom 
         = DTLB.fromText strBot
@@ -148,8 +164,26 @@ instance Show ABCCategory where
 instance PTP.Printable ABCCategory where
     psdPrint _ = show
 
--- ## Reduction
-data ABCStatusFC = FCLeft Int | FCRight Int | Failed
+{-
+    'ABCStatusFC' represents the rule which has been used 
+        in a process of reduction.
+-}
+data ABCStatusFC = 
+        {-| 
+            Indicating that
+                a left reduction/functional-composition rule is used.
+        -}
+          FCLeft Int
+        {-| 
+            Indicating that
+                a right reduction/functional-composition rule is used.
+        -}
+        | FCRight Int
+        {-|
+            Indicating that the reduction cannot be achieved.
+        -}
+        | Failed
+
 instance Eq ABCStatusFC where
     (==) (FCLeft n) (FCLeft m) 
         = n == m
@@ -179,68 +213,94 @@ instance PTD.Dumpable ABCStatusFC where
 instance Show ABCStatusFC where
     show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault 
 
+instance Semigroup ABCStatusFC where
+    FCLeft i <> FCLeft j = FCLeft (i + j)
+    FCRight i <> FCRight j = FCRight (i + j)
+    _ <> _ = Failed
 
-catStatFailed :: (ABCCategory, ABCStatusFC)
-catStatFailed = (Bottom, Failed)
+instance Monoid ABCStatusFC where
+    mempty = Failed
 
-reduceWithResult :: ABCCategory -> ABCCategory -> (ABCCategory, ABCStatusFC)
+{-| 
+    Taking two ABC categories, try a reduction from them, 
+        leaving the trace of the used rule.
+-}
+reduceWithResult :: 
+    ABCCategory      -- ^ The category to the left.
+    -> ABCCategory   -- ^ The category to the right.
+    -> CMS.State ABCStatusFC ABCCategory    -- ^ The result.
 reduceWithResult base@(BaseCategory _) (LeftFunctor ant2 conseq2)
     | base == ant2
-        = (conseq2, FCLeft 0)
+        = (CMS.put $ FCLeft 0)
+            >> return conseq2
     | otherwise
-        = catStatFailed
+        = (CMS.put $ Failed) 
+            >> return Bottom
 reduceWithResult (RightFunctor ant1 conseq1) base@(BaseCategory _)
     | ant1 == base
-        = (conseq1, FCRight 0)
+        = (CMS.put $ FCRight 0)
+            >> return conseq1
     | otherwise
-        = catStatFailed
+        = (CMS.put $ Failed) 
+            >> return Bottom
 reduceWithResult 
     left@(LeftFunctor ant1 conseq1)
     right@(LeftFunctor ant2 conseq2)
     | left == ant2
-        = (conseq2, FCLeft 0)
+        = (CMS.put $ FCLeft 0)
+            >> return conseq2
     | otherwise
-        = case dres of
-            FCLeft n
-                -> (ant1 <\> dcat, FCLeft (n + 1))
-            _
-                -> catStatFailed
-            where
-                dcat :: ABCCategory
-                dres :: ABCStatusFC
-                (dcat, dres) = reduceWithResult conseq1 right
+        = reduceWithResult conseq1 right
+            >>= \dcat ->
+                CMS.get
+                >>= \dres ->
+                    case dres of
+                        FCLeft n
+                            -> (CMS.put $ FCLeft (n + 1))
+                                    >> (return $ ant1 <\> dcat)
+                        _
+                            -> (CMS.put $ Failed) 
+                                >> return Bottom
 reduceWithResult 
     left@(RightFunctor ant1 conseq1)
     right@(RightFunctor ant2 conseq2)
     | ant1 == right
-        = (conseq1, FCRight 0)
+        = (CMS.put $ FCRight 0)
+            >> return conseq1
     | otherwise
-        = case dres of
-            FCRight n
-                -> (dcat </> ant2, FCRight (n + 1))
-            _
-                -> catStatFailed
-            where
-                dcat :: ABCCategory
-                dres :: ABCStatusFC
-                (dcat, dres) = reduceWithResult left conseq2
+        = reduceWithResult left conseq2
+            >>= \dcat ->
+                CMS.get
+                >>= \dres ->
+                    case dres of
+                        FCRight n
+                            -> (CMS.put $ FCRight (n + 1))
+                                >> (return $ dcat </> ant2)
+                        _
+                            -> (CMS.put $ Failed) 
+                                >> return Bottom
 reduceWithResult 
     left@(RightFunctor ant1 conseq1)
     right@(LeftFunctor ant2 conseq2) -- conseq1/ant1 ant2\conseq2
     | left == ant2
-        = (conseq2, FCLeft 0)
+        = (CMS.put $ FCLeft 0)
+            >> return conseq2
     | ant1 == right
-        = (conseq1, FCRight 0)
+        = (CMS.put $ FCRight 0)
+            >> return conseq1
     | otherwise
-        = catStatFailed
+        = (CMS.put $ Failed) 
+            >> return Bottom
 reduceWithResult _ _ 
-    = catStatFailed
+    = (CMS.put $ Failed) 
+        >> return Bottom
 
-reduceWithLog :: ABCCategory -> ABCCategory -> ABCCategoryCommented
+reduceWithLog :: ABCCategory -> ABCCategory -> Com.ABCComment ABCCategory
 reduceWithLog left right
     = Com.ABCComment {
         Com.content 
-            = cat, 
+            = cat
+        ,
         Com.comment 
             = DTL.toStrict 
                 $ DTLB.toLazyText 
@@ -249,8 +309,14 @@ reduceWithLog left right
         where
             cat :: ABCCategory
             res :: ABCStatusFC
-            (cat, res) = reduceWithResult left right
+            (cat, res) = CMS.runState (reduceWithResult left right) Failed 
 
-(<^>) :: ABCCategory -> ABCCategory -> ABCCategory
+{-|
+    Taking two ABC categories, try a reduction from them.
+-}
+(<^>) :: 
+    ABCCategory     -- ^ The category to the left.
+    -> ABCCategory  -- ^ The category to the right.
+    -> ABCCategory  -- ^ The result.
 cat1 <^> cat2 
-    = fst (reduceWithResult cat1 cat2)
+    = (reduceWithResult cat1 cat2) `CMS.evalState` Failed

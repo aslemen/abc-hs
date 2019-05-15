@@ -65,7 +65,7 @@ pLiteral
     ABCCategoryCommented
     ------
 -}
-pABCCategoryCommented :: Parser ABCC.ABCCategoryCommented
+pABCCategoryCommented :: Parser (Com.ABCComment ABCC.ABCCategory)
 pABCCategoryCommented
     = ABCC.ABCComment <$> pABCCategory <*> pCommentOrEmpty
     where 
@@ -134,7 +134,7 @@ instance PTP.TermParsable ABCC.ABCCategory where
             PTP.pTermSome = pABCCategory
         }
 
-instance PTP.TermParsable ABCC.ABCCategoryCommented where
+instance PTP.TermParsable (Com.ABCComment ABCC.ABCCategory) where
     getDefaultTermParsers 
         = PTP.TermParsers {
             PTP.pTermMany 
@@ -151,7 +151,11 @@ instance PTP.TermParsable ABCC.ABCCategoryCommented where
             PTP.pTermSome = pABCCategoryCommented
         }
 
-createABCCategoryCommentedFromString :: DT.Text -> Either (TMega.ParseErrorBundle DT.Text DV.Void) ABCC.ABCCategoryCommented
+createABCCategoryCommentedFromString :: 
+    DT.Text 
+    -> Either 
+        (TMega.ParseErrorBundle DT.Text DV.Void)
+        (Com.ABCComment ABCC.ABCCategory)
 createABCCategoryCommentedFromString 
     = TMega.parse pABCCategoryCommented "<internal>"
 

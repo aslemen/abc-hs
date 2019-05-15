@@ -207,10 +207,15 @@ data ABCComment a
 ABCComment :: a -> Text -> ABCComment a
 [content] :: ABCComment a -> a
 [comment] :: ABCComment a -> Text
-type ABCCategoryCommented = ABCComment ABCCategory
 data ABCStatusFC
+
+-- | Indicating that a left reduction/functional-composition rule is used.
 FCLeft :: Int -> ABCStatusFC
+
+-- | Indicating that a right reduction/functional-composition rule is used.
 FCRight :: Int -> ABCStatusFC
+
+-- | Indicating that the reduction cannot be achieved.
 Failed :: ABCStatusFC
 
 -- | The text representation of the bottom.
@@ -225,6 +230,16 @@ strBot :: Text
 --   RightFunctor (BaseCategory "NP") (BaseCategory "VP")
 --   </pre>
 (</>) :: ABCCategory -> ABCCategory -> ABCCategory
+
+-- | Make an endomorphic adjunct <tt><a>X\X</a></tt> from a category
+--   <tt>X</tt>.
+--   
+--   Example:
+--   
+--   <pre>
+--   &gt;&gt;&gt; makeLeftAdjunct (BaseCategory "S")
+--   LeftFunctor (BaseCategory "S") (BaseCategory "S")
+--   </pre>
 makeLeftAdjunct :: ABCCategory -> ABCCategory
 
 -- | Compose two categories to form a left functor category.
@@ -236,13 +251,30 @@ makeLeftAdjunct :: ABCCategory -> ABCCategory
 --   LeftFunctor (BaseCategory "NP") (BaseCategory "S")
 --   </pre>
 (<\>) :: ABCCategory -> ABCCategory -> ABCCategory
+
+-- | Make an endomorphic adjunct <tt><a>X/X</a></tt> from a category
+--   <tt>X</tt>.
+--   
+--   Example:
+--   
+--   <pre>
+--   &gt;&gt;&gt; makeRightAdjunct (BaseCategory "S")
+--   RightFunctor (BaseCategory "S") (BaseCategory "S")
+--   </pre>
 makeRightAdjunct :: ABCCategory -> ABCCategory
+
+-- | Taking two ABC categories, try a reduction from them.
 (<^>) :: ABCCategory -> ABCCategory -> ABCCategory
-reduceWithResult :: ABCCategory -> ABCCategory -> (ABCCategory, ABCStatusFC)
-reduceWithLog :: ABCCategory -> ABCCategory -> ABCCategoryCommented
+
+-- | Taking two ABC categories, try a reduction from them, leaving the
+--   trace of the used rule.
+reduceWithResult :: ABCCategory -> ABCCategory -> State ABCStatusFC ABCCategory
+reduceWithLog :: ABCCategory -> ABCCategory -> ABCComment ABCCategory
 instance GHC.Classes.Eq ABCCategory.ABCStatusFC
 instance PTDumpable.Dumpable ABCCategory.ABCStatusFC
 instance GHC.Show.Show ABCCategory.ABCStatusFC
+instance GHC.Base.Semigroup ABCCategory.ABCStatusFC
+instance GHC.Base.Monoid ABCCategory.ABCStatusFC
 instance GHC.Classes.Eq ABCCategory.ABCCategory
 instance PTDumpable.Dumpable ABCCategory.ABCCategory
 instance GHC.Show.Show ABCCategory.ABCCategory
@@ -305,8 +337,8 @@ instance ParsedTree.Parser.TermParsable (DepMarked.DepMarked Data.Text.Internal.
 
 module ABCCategory.Parser
 pABCCategory :: Parser ABCCategory
-pABCCategoryCommented :: Parser ABCCategoryCommented
-createABCCategoryCommentedFromString :: Text -> Either (ParseErrorBundle Text Void) ABCCategoryCommented
+pABCCategoryCommented :: Parser (ABCComment ABCCategory)
+createABCCategoryCommentedFromString :: Text -> Either (ParseErrorBundle Text Void) (ABCComment ABCCategory)
 createABCCategoryFromString :: Text -> Either (ParseErrorBundle Text Void) ABCCategory
 instance ParsedTree.Parser.TermParsable ABCCategory.ABCCategory
-instance ParsedTree.Parser.TermParsable ABCCategory.ABCCategoryCommented
+instance ParsedTree.Parser.TermParsable (ABCComment.ABCComment ABCCategory.ABCCategory)

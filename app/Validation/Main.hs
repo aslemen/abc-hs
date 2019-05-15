@@ -27,7 +27,7 @@ import qualified Options.Applicative as OPT
 type ABCCat = ABCCat.ABCCategory
 type ABCT = PT.Tree ABCCat
 
-type ABCCom = ABCCat.ABCCategoryCommented
+type ABCCom = ABCCom.ABCComment ABCCat.ABCCategory
 type ABCComT = PT.Tree ABCCom
 
 {-
