@@ -281,6 +281,11 @@ ParseErrorBundle :: NonEmpty (ParseError s e) -> PosState s -> ParseErrorBundle 
 [bundlePosState] :: ParseErrorBundle s e -> PosState s
 instance ParsedTree.Parser.TermParsable Data.Text.Internal.Text
 
+module KaiCat.Parser
+pKaiCat :: Parser KaiCat
+createKaiCatFromString :: Text -> Either (ParseErrorBundle Text Void) KaiCat
+instance ParsedTree.Parser.TermParsable KaiCat.KaiCat
+
 module DepMarked.Parser
 pPlainMarked :: Parser (DepMarked Text)
 instance ParsedTree.Parser.TermParsable (DepMarked.DepMarked Data.Text.Internal.Text)
