@@ -71,8 +71,9 @@ pKaiCat :: Parser Kai.KaiCat
 pKaiCat
     = DT.splitOn "-" <$> pLiteral
         >>= \catICH ->
-            TMega.single ';'
-            >> TMega.takeRest
+            TMega.option 
+                "" 
+                (TMega.single ';' *> TMega.takeRest)
             >>= \sort ->
                 case DTR.decimal (last catICH) of
                     Right (i, "") -> return Kai.KaiCat {
@@ -104,6 +105,19 @@ instance PTP.TermParsable Kai.KaiCat where
             ,
             PTP.pTermSome = pKaiCat
         }
+
+-- | Convert a string into a Kainoki Category.
+-- 
+-- Examples:
+--
+-- >>> createKaiCatFromString $ DT.pack "NP-SBJ"
+-- Right NP-SBJ
+--
+-- >>> createKaiCatFromString $ DT.pack "NP-SBJ-2"
+-- Right NP-SBJ-2
+--
+-- >>> createKaiCatFromString $ DT.pack "NP-SBJ;{ABCDD}"
+-- Right NP-SBJ;{{ABCDD}}
 
 createKaiCatFromString :: 
     DT.Text 

@@ -283,6 +283,15 @@ instance ParsedTree.Parser.TermParsable Data.Text.Internal.Text
 
 module KaiCat.Parser
 pKaiCat :: Parser KaiCat
+
+-- | Convert a string into a Kainoki Category.
+--   
+--   Examples:
+--   
+--   <pre>
+--   &gt;&gt;&gt; createKaiCatFromString "NP-SBJ"
+--   Kai.KaiCat ["NP", "SBJ"] 0 "222"
+--   </pre>
 createKaiCatFromString :: Text -> Either (ParseErrorBundle Text Void) KaiCat
 instance ParsedTree.Parser.TermParsable KaiCat.KaiCat
 
