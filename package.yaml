@@ -31,6 +31,7 @@ dependencies:
 - tree-diff
 - pretty
 - markdown-unlit
+- exceptions
 
 ghc-options:
   - "-pgmL markdown-unlit"
@@ -42,6 +43,16 @@ executables:
   abc-validate:
     main:                Main.hs
     source-dirs:         app/Validation
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is Validation
+    dependencies:
+    - abc-hs
+  kaicheck:
+    main:                Main.hs
+    source-dirs:         app/KaiCheck
     ghc-options:
     - -threaded
     - -rtsopts
