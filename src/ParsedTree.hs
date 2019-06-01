@@ -30,7 +30,7 @@ import qualified Data.Text as DText
 import qualified Data.Text.Lazy as DTextL
 import qualified Data.Text.Lazy.Builder as DTextLB
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
 
 -- ## Function
 getUnary :: (Tree term) -> Maybe (Tree term)
@@ -64,80 +64,9 @@ isFilterNearTerminal cond = DMay.isJust . (filterNearTerminal cond)
     Dumping with Text-builders
     ======
 --}
-data DumpEnv term
-    = DumpEnv {
-        termDumper :: term -> DTextLB.Builder, -- Readonly
-        indent :: Int
-    }
-    
-initEnv :: (PTD.Dumpable term) => DumpEnv term
-initEnv 
-    = DumpEnv {
-        termDumper = PTD.psdDumpDefault,
-        indent = 0
-    } 
-
-dumpPrettyInternal :: 
-    (PTD.Dumpable term) => 
-    (Tree term)
-        -> CMonR.Reader (DumpEnv term) DTextLB.Builder
--- TODO: さらなる高速化を考える：Seqを使うか、CPSを使うか。よく検討（まずは勉強）しなければならない。
-dumpPrettyInternal (Node label [])
-    = CMonR.asks termDumper
-        >>= \dumper ->
-            return $ dumper label
-dumpPrettyInternal (Node label children)
-    = CMonR.ask
-        >>= \env -> case env of 
-            DumpEnv dumper root_indent
-                -> (
-                    CMonR.local 
-                        (
-                            \env -> env {
-                                indent 
-                                    = root_indent
-                                        + 1
-                                        + fromIntegral (
-                                            -- unsafe conversion, Int64 -> Int
-                                            DTextL.length 
-                                            $ DTextLB.toLazyText
-                                            $ dumper label
-                                        )
-                                        + 1
-                            }
-                        )
-                        (
-                            foldr 
-                                (CMonR.liftM2 (<>)) 
-                                (return $ DTextLB.fromText DText.empty)
-                                $ DList.intersperse 
-                                    (
-                                        CMonR.asks indent
-                                            >>= \ind ->
-                                                return $ DTextLB.fromText
-                                                    $ "\n" <> (DText.replicate ind " ")
-                                    )
-                                    $ map dumpPrettyInternal children
-                        )
-                        >>= \text_children ->
-                            return (
-                                DTextLB.singleton '('
-                                <> dumper label
-                                <> DTextLB.singleton ' '
-                                <> text_children
-                                <> DTextLB.singleton ')'
-                            )
-                )
-                                        
-instance (PTD.Dumpable term) => PTD.Dumpable (Tree term) where
-    psdDump opt tree 
-        = (
-            CMonR.runReader (dumpPrettyInternal tree) env
-        ) <> (DTextLB.fromText "\n\n")
-        where
-            env :: DumpEnv term
-            env
-                = DumpEnv {
-                    termDumper = PTD.psdDump opt,
-                    indent = 0
-                    }
+instance (PDoc.Pretty term) => PDoc.Pretty (Tree term) where
+    pretty (Node label []) = PDoc.pretty label
+    pretty (Node label children)
+        = PDoc.parens 
+            $ (PDoc.pretty label)
+                PDoc.<+> (PDoc.align $ PDoc.vsep $ PDoc.pretty <$> children)

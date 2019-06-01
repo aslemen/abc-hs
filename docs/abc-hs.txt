@@ -7,125 +7,13 @@
 @package abc-hs
 @version 20190420
 
-
--- | Provide an type class type of which supports pretty serialization in
---   the munge-trees style, comparable to the Show class in Prelude.
-module PTDumpable
-
--- | <a>TreeStyle</a> specifies the serialization style of trees.
-data TreeStyle
-
--- | Each tree is serialized in one line.
-OneLine :: TreeStyle
-
--- | Each tree is serialized prettily in the same way of munge-trees.
-Pretty :: TreeStyle
-
--- | <a>NodeStyle</a> speficies the serialized style of node labels.
-data NodeStyle
-
--- | Each node is serialized as short as is possible.
-Minimal :: NodeStyle
-
--- | Each node is serialized normally.
-Default :: NodeStyle
-
--- | Each node is serialized with full information.
-Full :: NodeStyle
-
--- | <a>Option</a> bundles all the serialization options mentioned above.
-data Option
-Option :: TreeStyle -> NodeStyle -> Option
-
--- | The serialization style of tree structures.
-[treeStyle] :: Option -> TreeStyle
-
--- | The serialization style of nodes.
-[nodeStyle] :: Option -> NodeStyle
-
--- | <a>Dumpable</a> is a class of types which support the munge-trees
---   style serialization of trees. A tree is serialized with
---   <a>Builder</a>, which needs further conversion to Data.Text or others.
-class (Show a) => Dumpable a
-
--- | Serialize a tree with options.
-psdDump :: Dumpable a => Option -> a -> Builder
-
--- | Serialized a tree with the default option.
---   
---   <ul>
---   <li><a>treeStyle</a>: <a>Pretty</a></li>
---   <li><a>nodeStyle</a>: <a>Default</a></li>
---   </ul>
-psdDumpDefault :: Dumpable a => a -> Builder
-instance GHC.Show.Show PTDumpable.Option
-instance GHC.Classes.Eq PTDumpable.Option
-instance GHC.Show.Show PTDumpable.NodeStyle
-instance GHC.Classes.Eq PTDumpable.NodeStyle
-instance GHC.Show.Show PTDumpable.TreeStyle
-instance GHC.Classes.Eq PTDumpable.TreeStyle
-instance PTDumpable.Dumpable GHC.Base.String
-instance PTDumpable.Dumpable Data.Text.Internal.Text
-instance PTDumpable.Dumpable Data.Text.Internal.Lazy.Text
-instance PTDumpable.Dumpable Data.Text.Internal.Builder.Builder
-
-
--- | Provide an representation of categories of the Kainoki Treebank. The
---   parser is available at the <a>Parser</a> module.
-module KaiCat
-
--- | <a>KaiCat</a> represents Kainoki categories.
-data KaiCat
-
--- | A Kainoki category.
-KaiCat :: [Text] -> Int -> Text -> KaiCat
-
--- | The category name, separated by hyphens.
-[catlist] :: KaiCat -> [Text]
-
--- | The ICH index. 0 for non-indexed cases.
-[iched] :: KaiCat -> Int
-
--- | The sort information. Empty when none.
-[sortInfo] :: KaiCat -> Text
-
--- | Construct a non-indexed, non-sort-infoed Kainoki category.
-createBase :: [Text] -> KaiCat
-instance GHC.Classes.Eq KaiCat.KaiCat
-instance PTDumpable.Dumpable KaiCat.KaiCat
-instance GHC.Show.Show KaiCat.KaiCat
-
-module DepMarking
-data DepMarking
-Head :: DepMarking
-Adjunct :: DepMarking
-Complement :: DepMarking
-AdjunctControl :: DepMarking
-None :: DepMarking
-createMarking :: Text -> DepMarking
-instance GHC.Classes.Eq DepMarking.DepMarking
-instance GHC.Show.Show DepMarking.DepMarking
-instance PTDumpable.Dumpable DepMarking.DepMarking
-
-module DepMarked
-data DepMarked cat
-(:|) :: cat -> DepMarking -> DepMarked cat
-[category] :: DepMarked cat -> cat
-[dependency] :: DepMarked cat -> DepMarking
-markCat :: Text -> cat -> DepMarked cat
-marker :: Text
-instance GHC.Classes.Eq cat => GHC.Classes.Eq (DepMarked.DepMarked cat)
-instance GHC.Show.Show cat => GHC.Show.Show (DepMarked.DepMarked cat)
-instance PTDumpable.Dumpable cat => PTDumpable.Dumpable (DepMarked.DepMarked cat)
-instance GHC.Base.Functor DepMarked.DepMarked
-
 module ABCComment
 data ABCComment a
 ABCComment :: a -> Text -> ABCComment a
 [content] :: ABCComment a -> a
 [comment] :: ABCComment a -> Text
 instance GHC.Classes.Eq a => GHC.Classes.Eq (ABCComment.ABCComment a)
-instance PTDumpable.Dumpable a => PTDumpable.Dumpable (ABCComment.ABCComment a)
+instance Data.Text.Prettyprint.Doc.Internal.Pretty a => Data.Text.Prettyprint.Doc.Internal.Pretty (ABCComment.ABCComment a)
 instance GHC.Show.Show a => GHC.Show.Show (ABCComment.ABCComment a)
 instance GHC.Base.Functor ABCComment.ABCComment
 instance GHC.Base.Applicative ABCComment.ABCComment
@@ -231,13 +119,63 @@ makeRightAdjunct :: ABCCategory -> ABCCategory
 reduceWithResult :: ABCCategory -> ABCCategory -> State ABCStatusFC ABCCategory
 reduceWithLog :: ABCCategory -> ABCCategory -> ABCComment ABCCategory
 instance GHC.Classes.Eq ABCCategory.ABCStatusFC
-instance PTDumpable.Dumpable ABCCategory.ABCStatusFC
+instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCCategory.ABCStatusFC
 instance GHC.Show.Show ABCCategory.ABCStatusFC
 instance GHC.Base.Semigroup ABCCategory.ABCStatusFC
 instance GHC.Base.Monoid ABCCategory.ABCStatusFC
 instance GHC.Classes.Eq ABCCategory.ABCCategory
-instance PTDumpable.Dumpable ABCCategory.ABCCategory
+instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCCategory.ABCCategory
 instance GHC.Show.Show ABCCategory.ABCCategory
+
+module DepMarking
+data DepMarking
+Head :: DepMarking
+Adjunct :: DepMarking
+Complement :: DepMarking
+AdjunctControl :: DepMarking
+None :: DepMarking
+createMarking :: Text -> DepMarking
+instance GHC.Classes.Eq DepMarking.DepMarking
+instance GHC.Show.Show DepMarking.DepMarking
+instance Data.Text.Prettyprint.Doc.Internal.Pretty DepMarking.DepMarking
+
+module DepMarked
+data DepMarked cat
+(:|) :: cat -> DepMarking -> DepMarked cat
+[category] :: DepMarked cat -> cat
+[dependency] :: DepMarked cat -> DepMarking
+markCat :: Text -> cat -> DepMarked cat
+marker :: Text
+instance GHC.Classes.Eq cat => GHC.Classes.Eq (DepMarked.DepMarked cat)
+instance GHC.Show.Show cat => GHC.Show.Show (DepMarked.DepMarked cat)
+instance Data.Text.Prettyprint.Doc.Internal.Pretty cat => Data.Text.Prettyprint.Doc.Internal.Pretty (DepMarked.DepMarked cat)
+instance GHC.Base.Functor DepMarked.DepMarked
+
+
+-- | Provide an representation of categories of the Kainoki Treebank. The
+--   parser is available at the <a>Parser</a> module.
+module KaiCat
+
+-- | <a>KaiCat</a> represents Kainoki categories.
+data KaiCat
+
+-- | A Kainoki category.
+KaiCat :: [Text] -> Int -> Text -> KaiCat
+
+-- | The category name, separated by hyphens.
+[catlist] :: KaiCat -> [Text]
+
+-- | The ICH index. 0 for non-indexed cases.
+[iched] :: KaiCat -> Int
+
+-- | The sort information. Empty when none.
+[sortInfo] :: KaiCat -> Text
+
+-- | Construct a non-indexed, non-sort-infoed Kainoki category.
+createBase :: [Text] -> KaiCat
+instance GHC.Classes.Eq KaiCat.KaiCat
+instance Data.Text.Prettyprint.Doc.Internal.Pretty KaiCat.KaiCat
+instance GHC.Show.Show KaiCat.KaiCat
 
 
 -- | Provide an representation of parsed trees, reexported from Data.Tree
@@ -252,7 +190,7 @@ getNearTerminal :: Tree term -> Maybe term
 isNearTerminal :: Tree term -> Bool
 filterNearTerminal :: (term -> Bool) -> Tree term -> Maybe term
 isFilterNearTerminal :: (term -> Bool) -> Tree term -> Bool
-instance PTDumpable.Dumpable term => PTDumpable.Dumpable (Data.Tree.Tree term)
+instance Data.Text.Prettyprint.Doc.Internal.Pretty term => Data.Text.Prettyprint.Doc.Internal.Pretty (Data.Tree.Tree term)
 
 module ParsedTree.Parser
 data TermParsers term
@@ -289,8 +227,18 @@ pKaiCat :: Parser KaiCat
 --   Examples:
 --   
 --   <pre>
---   &gt;&gt;&gt; createKaiCatFromString "NP-SBJ"
---   Kai.KaiCat ["NP", "SBJ"] 0 "222"
+--   &gt;&gt;&gt; createKaiCatFromString $ DT.pack "NP-SBJ"
+--   Right NP-SBJ
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; createKaiCatFromString $ DT.pack "NP-SBJ-2"
+--   Right NP-SBJ-2
+--   </pre>
+--   
+--   <pre>
+--   &gt;&gt;&gt; createKaiCatFromString $ DT.pack "NP-SBJ;{ABCDD}"
+--   Right NP-SBJ;{{ABCDD}}
 --   </pre>
 createKaiCatFromString :: Text -> Either (ParseErrorBundle Text Void) KaiCat
 instance ParsedTree.Parser.TermParsable KaiCat.KaiCat

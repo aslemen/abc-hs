@@ -23,7 +23,8 @@ import qualified Data.Text.Lazy as DTL
 import qualified Data.Text.Lazy.Builder as DTLB
 import qualified Data.String as DS
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
+import qualified Data.Text.Prettyprint.Doc.Render.String as PDocRS
 
 -- | 'KaiCat' represents Kainoki categories.
 data KaiCat =
@@ -50,39 +51,28 @@ isToBeEscaped :: DT.Text -> Bool
 isToBeEscaped
     = DT.any (\c -> DCh.isSpace c || c `elem` ("()-'" :: [Char]))
 
-dumpCatList :: KaiCat -> DTLB.Builder
-dumpCatList (KaiCat catList _ _)
-    = DTLB.fromText $ DT.intercalate "-" $ escapedCat <$> catList
-    where 
-        escapedCat :: DT.Text -> DT.Text
-        escapedCat str
-            = if isToBeEscaped str
-                then "{" <> str <> "}"
-                else str
-
-dumpCat :: KaiCat -> DTLB.Builder
-dumpCat cat@(KaiCat _ i sort)
-    = dumpCatList cat
-        <> (
-            if i /= 0 
-                then (DTLB.singleton '-' <> (DTLB.fromString $ show i))
-                else mempty
+instance PDoc.Pretty KaiCat where
+    pretty cat@(KaiCat catList i sort)
+        = (
+            PDoc.pretty $ DT.intercalate "-" $ escapedCat <$> catList
+        ) <> (
+                if i /= 0 
+                    then "-" <> PDoc.pretty i
+                    else mempty
             )
-        <> (
-            if sort /= ""
-                then (
-                    DTLB.fromText ";{" 
-                    <> DTLB.fromText sort 
-                    <> DTLB.singleton '}'
-                    )
-                else mempty
-        )
-
-instance PTD.Dumpable KaiCat where
-    psdDump (PTD.Option _ PTD.Minimal) 
-        = dumpCatList
-    psdDump _ 
-        = dumpCat
+            <> (
+                if sort /= ""
+                    then ";" <> (PDoc.braces $ PDoc.pretty sort) 
+                    else mempty
+            )
+        where 
+            escapedCat :: DT.Text -> DT.Text
+            escapedCat str
+                = if isToBeEscaped str
+                    then "{" <> str <> "}"
+                    else str
 
 instance Show KaiCat where
-    show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault
+    show = PDocRS.renderString
+            . PDoc.layoutCompact
+            . PDoc.pretty 

@@ -7,7 +7,7 @@ module DepMarking (
 
 import qualified Data.Text as DT
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
 
 data DepMarking 
     = Head | Adjunct | Complement | AdjunctControl | None
@@ -20,7 +20,7 @@ instance Show DepMarking where
     show AdjunctControl = "ac"
     show None = "NA"
 
-instance PTD.Dumpable DepMarking
+instance PDoc.Pretty DepMarking
 
 createMarking :: DT.Text -> DepMarking 
 createMarking "h" = Head

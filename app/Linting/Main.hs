@@ -15,8 +15,8 @@ import qualified Data.Text.IO as DTIO
 
 import qualified Text.Megaparsec as TMega
 
-import qualified PTDumpable as PTD
-
+import qualified Data.Text.Prettyprint.Doc as PDoc
+import qualified Data.Text.Prettyprint.Doc.Render.Text as PDocRT
 -- # Type Aliases
 type PlainTree = PT.Tree DT.Text
 
@@ -88,10 +88,8 @@ main :: IO ()
 main 
     = DTIO.getContents
         >>= parseDoc
-        >>= mapM_  
+        >>= mapM_
             (
-                DTIO.putStrLn 
-                . DTL.toStrict 
-                . DTLB.toLazyText 
-                . PTD.psdDumpDefault
+                PDocRT.putDoc 
+                . PDoc.pretty
             )

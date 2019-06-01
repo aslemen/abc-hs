@@ -33,7 +33,9 @@ import qualified ABCCategory as ABCC
 import qualified ParsedTree as PT
 import qualified ParsedTree.Parser as PTP
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
+import qualified Data.Text.Prettyprint.Doc.Render.Text as PDocRT
+
 ```
 
 ## 略記
@@ -556,10 +558,8 @@ main
         >>= parseDoc
         >>= mapM_ 
             (
-                DTIO.putStrLn 
-                . DTL.toStrict
-                . DTLB.toLazyText
-                . PTD.psdDumpDefault
+                PDocRT.putDoc
+                . PDoc.pretty
                 . relabel
             )
 ```

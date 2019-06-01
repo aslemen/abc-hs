@@ -12,7 +12,7 @@ import Data.Text.Lazy as DTL
 import Data.Text.Lazy.Builder as DTLB
 import Data.String as DS
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
 
 -- # The Data Type
 data ABCComment a 
@@ -25,16 +25,13 @@ instance (Eq a) => Eq (ABCComment a) where
     (==) (ABCComment a _) (ABCComment b _)
         = (a == b) -- ignore comments
 
-instance (PTD.Dumpable a) => PTD.Dumpable (ABCComment a) where
-    psdDump opt@(PTD.Option _ PTD.Minimal) ca
-        = (PTD.psdDump opt) (content ca)
-    psdDump opt ca@(ABCComment a c)
-        = if c == ""
-            then (PTD.psdDump opt a)
-            else (PTD.psdDump opt a) 
-                    <> (DTLB.fromText ".\"")
-                    <> (DTLB.fromText c)
-                    <> (DTLB.singleton '\"')
+instance (PDoc.Pretty a) => PDoc.Pretty (ABCComment a) where
+    pretty (ABCComment a c)
+        = (PDoc.pretty a) <> (
+            if c == ""
+                then mempty
+                else ".\"" <> (PDoc.pretty c) <> "\""
+        )
 
 instance (Show a) => Show (ABCComment a) where
     show (ABCComment a c)

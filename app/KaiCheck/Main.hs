@@ -15,10 +15,9 @@ import qualified Control.Monad.State as CMS
 import qualified Control.Monad.Catch as CMC
 
 import qualified KaiCat as Kai
+import qualified KaiCat.Parser as KaiP
 import qualified ParsedTree as PT
 import qualified ParsedTree.Parser as PTP
-
-import qualified PTDumpable as PTD
 
 import qualified Options.Applicative as OPT
 
@@ -45,11 +44,11 @@ runParserDoc = PTP.createDoc PTP.getDefaultTermParsers
 -- 並列処理とかできればもっと嬉しい。
 data Options 
     = Options {
-    inputPath :: [FilePath]
+    inputPaths :: [FilePath]
     } deriving (Show)
 
-parserInputPath :: OPT.Parser FilePath
-parserInputPath
+parserInputPaths :: OPT.Parser [FilePath]
+parserInputPaths
     = OPT.many 
         $ OPT.strArgument 
         $ mconcat [
@@ -61,7 +60,7 @@ parserInputPath
 parserOptions :: OPT.Parser Options
 parserOptions
     = (<*>) OPT.helper (
-        Options <$> parserInputPath <*> parserOutputPath
+        Options <$> parserInputPaths
     )
         
 
@@ -78,7 +77,7 @@ parserOptionsWithInfo
     ======
 -}
 checkIPMAT :: [KaiT] -> Bool
-checkIPMAT li = check' $ rootLabel <$> li
+checkIPMAT li = check' $ PT.rootLabel <$> li
     where
         check' :: [KaiCat] -> Bool
         check' (x:xs)
@@ -89,7 +88,7 @@ checkIPMAT li = check' $ rootLabel <$> li
                 Kai.KaiCat _ _ _ -> check' xs
 
 check :: KaiT -> Bool
-check (PT.Tree rootLabel@(Kai.KaiCat catlist iched sortinfo) subForest)
+check (PT.Node rootLabel@(Kai.KaiCat catlist iched sortinfo) subForest)
     = case checkLocal of 
         _ -> checkLocal
     where
@@ -117,7 +116,7 @@ main
         >>= mapM_ 
             (
                 DTIO.putStrLn 
-                . DTL.pack
+                . DT.pack
                 . show
                 . check
             )

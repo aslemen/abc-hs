@@ -19,7 +19,8 @@ import qualified ABCComment as ABCCom
 import qualified ParsedTree as PT
 import qualified ParsedTree.Parser as PTP
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
+import qualified Data.Text.Prettyprint.Doc.Render.Text as PDocRT
 
 import qualified Options.Applicative as OPT
 
@@ -132,9 +133,7 @@ main
     = DTIO.getContents
         >>= parseDoc
         >>= mapM_ (
-            DTIO.putStrLn
-            . DTL.toStrict
-            . DTLB.toLazyText
-            . PTD.psdDumpDefault
-            .relabel 
+            PDocRT.putDoc
+            . PDoc.pretty
+            . relabel 
             )

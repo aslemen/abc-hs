@@ -36,7 +36,9 @@ import qualified Data.Text.Lazy as DTL
 import qualified Data.Text.Lazy.Builder as DTLB
 import qualified Data.String as DS
 
-import qualified PTDumpable as PTD
+import qualified Data.Text.Prettyprint.Doc as PDoc
+import qualified Data.Text.Prettyprint.Doc.Render.String as PDocRS
+import qualified Data.Text.Prettyprint.Doc.Render.Text as PDocRT
 
 import qualified ABCComment as Com
 
@@ -138,27 +140,24 @@ instance Eq ABCCategory where
     (==) _ _ 
         = False
 
-instance PTD.Dumpable ABCCategory where
-    psdDump _ Bottom 
-        = DTLB.fromText strBot
-    psdDump _ (BaseCategory name) 
-        = DTLB.fromText name
-    psdDump opt (LeftFunctor ant conseq)
-        = (DTLB.singleton '<')
-            <> (PTD.psdDump opt ant)
-            <> (DTLB.singleton '\\')
-            <> (PTD.psdDump opt conseq)
-            <> (DTLB.singleton '>')
-    psdDump opt (RightFunctor ant conseq)
-        = (DTLB.singleton '<')
-            <> (PTD.psdDump opt conseq)
-            <> (DTLB.singleton '/')
-            <> (PTD.psdDump opt ant)
-            <> (DTLB.singleton '>')
+instance PDoc.Pretty ABCCategory where
+    pretty Bottom =  PDoc.pretty strBot
+    pretty (BaseCategory name) = PDoc.pretty name
+    pretty (LeftFunctor ant conseq)
+        = PDoc.angles $
+            PDoc.pretty ant
+                <> "\\"
+                <> (PDoc.pretty conseq)
+    pretty (RightFunctor ant conseq)
+        = PDoc.angles $
+            (PDoc.pretty conseq)
+                <> "/"
+                <> (PDoc.pretty ant)
 
 instance Show ABCCategory where
-    show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault
-
+    show = PDocRS.renderString 
+            . PDoc.layoutCompact
+            . PDoc.pretty
 {-
     'ABCStatusFC' represents the rule which has been used 
         in a process of reduction.
@@ -190,23 +189,24 @@ instance Eq ABCStatusFC where
     (==) _ _
         = False
 
-instance PTD.Dumpable ABCStatusFC where
-    psdDump _ (FCLeft n)
+instance PDoc.Pretty ABCStatusFC where
+    pretty (FCLeft n)
         | n > 0 
-            = (DTLB.fromText "FCLeft")
-                <> (DTLB.fromString $ show n)
+            = "FCLeft" <> PDoc.pretty n
         | otherwise
-            = DTLB.singleton 'L'
-    psdDump _ (FCRight n)
+            = "L"
+    pretty (FCRight n)
         | n > 0
-            = (DTLB.fromText "FCRight")
-                <> (DTLB.fromString $ show n)
+            = "FCRight" <> PDoc.pretty n
         | otherwise
-            = DTLB.singleton 'R'
-    psdDump _ Failed
-        = DTLB.fromText "FAIL"
+            = "R"
+    pretty Failed
+        = "FAIL"
+
 instance Show ABCStatusFC where
-    show = DTL.unpack . DTLB.toLazyText . PTD.psdDumpDefault 
+    show = PDocRS.renderString 
+            . PDoc.layoutCompact
+            . PDoc.pretty
 
 instance Semigroup ABCStatusFC where
     FCLeft i <> FCLeft j = FCLeft (i + j)
@@ -297,9 +297,9 @@ reduceWithLog left right
             = cat
         ,
         Com.comment 
-            = DTL.toStrict 
-                $ DTLB.toLazyText 
-                $ PTD.psdDumpDefault res 
+            = (PDocRT.renderStrict
+                $ PDoc.layoutCompact
+                $ PDoc.pretty res )
         }
         where
             cat :: ABCCategory
