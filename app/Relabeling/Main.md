@@ -556,10 +556,5 @@ main :: IO ()
 main 
     = DTIO.getContents
         >>= parseDoc
-        >>= mapM_ 
-            (
-                PDocRT.putDoc
-                . PDoc.pretty
-                . relabel
-            )
+        >>= (PDocRT.putDoc . PDoc.vsep . (map PDoc.pretty))
 ```
