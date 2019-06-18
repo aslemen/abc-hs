@@ -14,10 +14,10 @@
 ```haskell
 module Relabeling where
 
+import qualified System.IO as S
+
 import qualified Data.Text as DT
 import qualified Data.Text.IO as DTIO
-import qualified Data.Text.Lazy as DTL
-import qualified Data.Text.Lazy.Builder as DTLB
 import qualified Data.Void as DV
 import qualified Data.Set as DS
 
@@ -544,7 +544,7 @@ parseDoc :: DT.Text -> IO [PlainTMarked]
 parseDoc text
     = case runParserDoc "<STDIN>" text of
         Left errors
-            -> DTIO.putStrLn (
+            -> DTIO.hPutStrLn S.stderr (
                 DT.pack
                     $ TMega.errorBundlePretty errors
             )
