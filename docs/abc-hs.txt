@@ -5,7 +5,7 @@
 -- | Please see the README on GitHub at
 --   <a>https://github.com/aslemen/abc-hs#readme</a>
 @package abc-hs
-@version 20190420
+@version 20190618
 
 module ABCComment
 data ABCComment a
