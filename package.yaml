@@ -1,5 +1,5 @@
 name:                abc-hs
-version:             20190618
+version:             20190917
 github:              "aslemen/abc-hs"
 license:             BSD3
 author:              "T. N. Hayashi"
@@ -29,7 +29,6 @@ dependencies:
 - optparse-applicative
 - split
 - tree-diff
-- pretty
 - prettyprinter
 - markdown-unlit
 - exceptions
