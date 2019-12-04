@@ -48,6 +48,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is Validation
+    - -optl-pthread
+    - -optl-static
     dependencies:
     - abc-hs
   kaicheck:
@@ -58,6 +60,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is KaiCheck
+    - -optl-pthread
+    - -optl-static
     dependencies:
     - abc-hs
   abc-lint:
@@ -68,6 +72,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is Linting
+    - -optl-pthread
+    - -optl-static
     dependencies:
     - abc-hs
   abc-relabel:
@@ -78,6 +84,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is Relabeling
+    - -optl-pthread
+    - -optl-static
     dependencies:
     - abc-hs
   ptdiff:
@@ -88,6 +96,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is PTDiff
+    - -optl-pthread
+    - -optl-static
     dependencies:
     - abc-hs
 tests:
