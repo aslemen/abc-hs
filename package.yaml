@@ -80,10 +80,10 @@ executables:
     source-dirs:        app/Relabeling
     main:               Main.hs
     ghc-options:
+    - -main-is Relabeling
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -main-is Relabeling
     - -optl-pthread
     - -optl-static
     dependencies:

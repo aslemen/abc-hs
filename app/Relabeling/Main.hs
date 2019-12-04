@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK show-extensions #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
@@ -11,7 +12,6 @@
 
 A program that converts normalized and dependency-marked Keyaki Treebank trees to ABC Treebank trees.
 -}
-
 module Relabeling where
 
 import qualified System.IO as S
@@ -37,13 +37,31 @@ import qualified ParsedTree.Parser as PTP
 import qualified Data.Text.Prettyprint.Doc as PDoc
 import qualified Data.Text.Prettyprint.Doc.Render.Text as PDocRT
 
+-- | = Data Types
 
+-- | == Categories
 
-type ABCCat = ABCC.ABCCategory
-type PlainMarked = DMed.DepMarked DT.Text
-type ABCCatMarked = DMed.DepMarked ABCCat
+-- | The type of categories on source tree nodes.
+type PlainCat = DT.Text 
 
+-- | The type of dependency-marked categories on source tree nodes.
+type PlainMarked = DMed.DepMarked PlainCat
+
+-- | The type of ABC categories.
+type ABCCat = ABCC.ABCCategory 
+
+-- | The type of resulting ABC Treebank keeping dependency markings.
+type ABCCatMakred = DMed.DepMarked ABCCat
+
+-- | The type of resulting ABC Treebank categories with fallback to original categories.
+type ABCOrPlainCat = Either PlainCat ABCCat
+
+-- | == Trees
+
+-- | The type of source trees.
 type PlainTMarked = PT.Tree PlainMarked
+
+-- | The type of resulting trees keeping dependency markings.
 type ABCTMarked = PT.Tree ABCCatMarked
 
 matchTerminalNode :: ABCTMarked -> (DS.Set DT.Text) -> Bool
@@ -225,6 +243,6 @@ parseDoc text
 
 main :: IO ()
 main 
-    = DTIO.getContents
-        >>= parseDoc
-        >>= (PDocRT.putDoc . PDoc.vsep . (map (PDoc.pretty . relabel)))
+= DTIO.getContents
+    >>= parseDoc
+    >>= (PDocRT.putDoc . PDoc.vsep . (map (PDoc.pretty . RV1.relabel)))
