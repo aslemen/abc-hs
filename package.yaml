@@ -77,8 +77,8 @@ executables:
     dependencies:
     - abc-hs
   abc-relabel:
-    main:               Main.lhs
     source-dirs:        app/Relabeling
+    main:               Main.hs
     ghc-options:
     - -threaded
     - -rtsopts
