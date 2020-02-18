@@ -279,7 +279,8 @@ runWithOptions (Option _  isOneLine)
         >>= return . (map (PDoc.pretty . relabel))
         >>= return . (map (if isOneLine then PDoc.group else id))
         >>= return . PDoc.vsep
-        >>= PDocRT.putDoc
+        >>= return . PDoc.layoutPretty (PDoc.LayoutOptions PDoc.Unbounded) 
+        >>= PDocRT.renderIO S.stdout
 
 main :: IO ()
 main = OA.execParser optionParserInfo >>= runWithOptions
