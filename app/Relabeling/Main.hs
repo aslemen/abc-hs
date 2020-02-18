@@ -14,7 +14,11 @@ A program that converts normalized and dependency-marked Keyaki Treebank trees t
 -}
 module Relabeling where
 
+import qualified Paths_abc_hs as Paths
+import qualified Data.Version as DVer
+
 import qualified System.IO as S
+import qualified Options.Applicative as OA
 
 import qualified Data.Text as DT
 import qualified Data.Text.IO as DTIO
@@ -51,7 +55,7 @@ type PlainMarked = DMed.DepMarked PlainCat
 type ABCCat = ABCC.ABCCategory 
 
 -- | The type of resulting ABC Treebank keeping dependency markings.
-type ABCCatMakred = DMed.DepMarked ABCCat
+type ABCCatMarked = DMed.DepMarked ABCCat
 
 -- | The type of resulting ABC Treebank categories with fallback to original categories.
 type ABCOrPlainCat = Either PlainCat ABCCat
@@ -241,8 +245,41 @@ parseDoc text
         Right res 
             -> return res
 
+------------------------------------------------
+
+data Option = Option {
+    calledVersion :: Bool,
+    isOneLine :: Bool
+}
+
+optionParser :: OA.Parser Option
+optionParser
+    = Option
+        <$> (
+            OA.switch (OA.long "version" <> OA.short 'v')
+        )
+        <*> (
+            OA.switch (OA.long "oneline" <> OA.short 'w')
+        )
+
+optionParserInfo :: OA.ParserInfo Option
+optionParserInfo
+    = OA.info (optionParser OA.<**> OA.helper)
+        $ OA.briefDesc 
+            <> OA.progDesc "The relabel program for the ABC Treebank"
+
+runWithOptions :: Option -> IO ()
+runWithOptions Option { calledVersion = True }
+    = putStr "App \"Relabeling\" in abc-hs "
+        >> putStrLn (DVer.showVersion Paths.version)
+
+runWithOptions (Option _  isOneLine)
+    = DTIO.getContents
+        >>= parseDoc
+        >>= return . (map (PDoc.pretty . relabel))
+        >>= return . (map (if isOneLine then PDoc.group else id))
+        >>= return . PDoc.vsep
+        >>= PDocRT.putDoc
+
 main :: IO ()
-main 
-= DTIO.getContents
-    >>= parseDoc
-    >>= (PDocRT.putDoc . PDoc.vsep . (map (PDoc.pretty . RV1.relabel)))
+main = OA.execParser optionParserInfo >>= runWithOptions
