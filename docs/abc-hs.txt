@@ -5,56 +5,68 @@
 -- | Please see the README on GitHub at
 --   <a>https://github.com/aslemen/abc-hs#readme</a>
 @package abc-hs
-@version 20200219
-
-module ABCComment
-data ABCComment a
-ABCComment :: a -> Text -> ABCComment a
-[content] :: ABCComment a -> a
-[comment] :: ABCComment a -> Text
-instance GHC.Classes.Eq a => GHC.Classes.Eq (ABCComment.ABCComment a)
-instance Data.Text.Prettyprint.Doc.Internal.Pretty a => Data.Text.Prettyprint.Doc.Internal.Pretty (ABCComment.ABCComment a)
-instance GHC.Show.Show a => GHC.Show.Show (ABCComment.ABCComment a)
-instance GHC.Base.Functor ABCComment.ABCComment
-instance GHC.Base.Applicative ABCComment.ABCComment
-instance GHC.Base.Monad ABCComment.ABCComment
+@version 20200520
 
 
--- | Provide an representation of categories of the ABC Grammar. The parser
---   is available at the <a>Parser</a> module.
-module ABCCategory
+-- | Provide an representation of categories of the ABC Grammar.
+module ABCCat
 
--- | <a>ABCCategory</a> represents ABC categories.
-data ABCCategory
+-- | <a>ABCCat</a> represents ABC categories.
+data ABCCat
 
 -- | The Bottom ⊥.
-Bottom :: ABCCategory
+Bottom :: ABCCat
 
 -- | An atomic catetory.
-BaseCategory :: Text -> ABCCategory
+BaseCategory :: Text -> ABCCat
 
 -- | The name of the category.
-[name] :: ABCCategory -> Text
+[name] :: ABCCat -> Text
 
 -- | A functor category <tt><a>X\C</a></tt> which takes an <tt>X</tt> to
 --   its left as its argument.
-LeftFunctor :: ABCCategory -> ABCCategory -> ABCCategory
+LeftFunctor :: ABCCat -> ABCCat -> ABCCat
 
 -- | The argument, corresponding to the <tt>X</tt> above.
-[antecedent] :: ABCCategory -> ABCCategory
+[antecedent] :: ABCCat -> ABCCat
 
 -- | The base, corresponding to the <tt>C</tt> above.
-[consequence] :: ABCCategory -> ABCCategory
+[consequence] :: ABCCat -> ABCCat
 
 -- | A functor category <tt><a>C/X</a></tt> which takes an X to its right
 --   as its argument.
-RightFunctor :: ABCCategory -> ABCCategory -> ABCCategory
+RightFunctor :: ABCCat -> ABCCat -> ABCCat
 
 -- | The argument, corresponding to the <tt>X</tt> above.
-[antecedent] :: ABCCategory -> ABCCategory
+[antecedent] :: ABCCat -> ABCCat
 
 -- | The base, corresponding to the <tt>C</tt> above.
-[consequence] :: ABCCategory -> ABCCategory
+[consequence] :: ABCCat -> ABCCat
+
+-- | Compose two categories to form a left functor category.
+--   
+--   Example:
+--   
+--   <pre>
+--   &gt;&gt;&gt; (BaseCategory "NP") :\: (BaseCategory "S")
+--   LeftFunctor (BaseCategory "NP") (BaseCategory "S")
+--   </pre>
+pattern (:\:) :: ABCCat -> ABCCat -> ABCCat
+
+-- | Compose two categories to form a right functor category.
+--   
+--   Example:
+--   
+--   <pre>
+--   &gt;&gt;&gt; (BaseCategory "VP") :/: (BaseCategory "NP")
+--   RightFunctor (BaseCategory "NP") (BaseCategory "VP")
+--   </pre>
+pattern (:/:) :: ABCCat -> ABCCat -> ABCCat
+infixl 9 :\:
+infixl 9 :/:
+
+-- | <a>ABCStatusFC</a> represents the rule which has been used in a
+--   process of reduction.
 data ABCStatusFC
 
 -- | Indicating that a left reduction/functional-composition rule is used.
@@ -69,188 +81,88 @@ Failed :: ABCStatusFC
 -- | The text representation of the bottom.
 strBot :: Text
 
--- | Compose two categories to form a right functor category.
---   
---   Example:
---   
---   <pre>
---   &gt;&gt;&gt; (BaseCategory "VP") &lt;/&gt; (BaseCategory "NP")
---   RightFunctor (BaseCategory "NP") (BaseCategory "VP")
---   </pre>
-(</>) :: ABCCategory -> ABCCategory -> ABCCategory
-
--- | Make an endomorphic adjunct <tt><a>X\X</a></tt> from a category
---   <tt>X</tt>.
---   
---   Example:
---   
---   <pre>
---   &gt;&gt;&gt; makeLeftAdjunct (BaseCategory "S")
---   LeftFunctor (BaseCategory "S") (BaseCategory "S")
---   </pre>
-makeLeftAdjunct :: ABCCategory -> ABCCategory
-
--- | Compose two categories to form a left functor category.
---   
---   Example:
---   
---   <pre>
---   &gt;&gt;&gt; (BaseCategory "NP") &lt;\&gt; (BaseCategory "S")
---   LeftFunctor (BaseCategory "NP") (BaseCategory "S")
---   </pre>
-(<\>) :: ABCCategory -> ABCCategory -> ABCCategory
-
--- | Make an endomorphic adjunct <tt><a>X/X</a></tt> from a category
---   <tt>X</tt>.
---   
---   Example:
---   
---   <pre>
---   &gt;&gt;&gt; makeRightAdjunct (BaseCategory "S")
---   RightFunctor (BaseCategory "S") (BaseCategory "S")
---   </pre>
-makeRightAdjunct :: ABCCategory -> ABCCategory
-
--- | Taking two ABC categories, try a reduction from them.
-(<^>) :: ABCCategory -> ABCCategory -> ABCCategory
-
 -- | Taking two ABC categories, try a reduction from them, leaving the
 --   trace of the used rule.
-reduceWithResult :: ABCCategory -> ABCCategory -> State ABCStatusFC ABCCategory
-reduceWithLog :: ABCCategory -> ABCCategory -> ABCComment ABCCategory
-instance GHC.Classes.Eq ABCCategory.ABCStatusFC
-instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCCategory.ABCStatusFC
-instance GHC.Show.Show ABCCategory.ABCStatusFC
-instance GHC.Base.Semigroup ABCCategory.ABCStatusFC
-instance GHC.Base.Monoid ABCCategory.ABCStatusFC
-instance GHC.Classes.Eq ABCCategory.ABCCategory
-instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCCategory.ABCCategory
-instance GHC.Show.Show ABCCategory.ABCCategory
+(<^#>) :: ABCCat -> ABCCat -> (ABCStatusFC, ABCCat)
+infix 6 <^#>
 
-module DepMarking
+-- | Taking two ABC categories, try a reduction from them.
+(<^>) :: ABCCat -> ABCCat -> ABCCat
+infixr 6 <^>
+instance GHC.Classes.Eq ABCCat.ABCStatusFC
+instance GHC.Show.Show ABCCat.ABCStatusFC
+instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCCat.ABCStatusFC
+instance GHC.Base.Semigroup ABCCat.ABCStatusFC
+instance GHC.Base.Monoid ABCCat.ABCStatusFC
+instance GHC.Classes.Eq ABCCat.ABCCat
+instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCCat.ABCCat
+instance GHC.Show.Show ABCCat.ABCCat
+instance Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text ABCCat.ABCCat
+
+
+-- | Provide an representation of categories of the Kainoki Treebank. The
+--   parser is available at the <a>Parser</a> module.
+module ABCDepMarking
 data DepMarking
 Head :: DepMarking
 Adjunct :: DepMarking
 Complement :: DepMarking
 AdjunctControl :: DepMarking
 None :: DepMarking
-createMarking :: Text -> DepMarking
-instance GHC.Classes.Eq DepMarking.DepMarking
-instance GHC.Show.Show DepMarking.DepMarking
-instance Data.Text.Prettyprint.Doc.Internal.Pretty DepMarking.DepMarking
-
-module DepMarked
-data DepMarked cat
-(:|) :: cat -> DepMarking -> DepMarked cat
-[category] :: DepMarked cat -> cat
-[dependency] :: DepMarked cat -> DepMarking
-markCat :: Text -> cat -> DepMarked cat
-marker :: Text
-instance GHC.Classes.Eq cat => GHC.Classes.Eq (DepMarked.DepMarked cat)
-instance GHC.Show.Show cat => GHC.Show.Show (DepMarked.DepMarked cat)
-instance Data.Text.Prettyprint.Doc.Internal.Pretty cat => Data.Text.Prettyprint.Doc.Internal.Pretty (DepMarked.DepMarked cat)
-instance GHC.Base.Functor DepMarked.DepMarked
+parseDepMarking :: Ord e => ParsecT e Text m DepMarking
+instance GHC.Classes.Eq ABCDepMarking.DepMarking
+instance GHC.Show.Show ABCDepMarking.DepMarking
+instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCDepMarking.DepMarking
 
 
 -- | Provide an representation of categories of the Kainoki Treebank. The
 --   parser is available at the <a>Parser</a> module.
-module KaiCat
+module CatPlus
 
--- | <a>KaiCat</a> represents Kainoki categories.
-data KaiCat
+-- | Record structure that represents Keyaki categories which augmented
+--   with our own additional attributes.
+data CatPlus cat
+Term :: Text -> CatPlus cat
+[word] :: CatPlus cat -> Text
+NonTerm :: cat -> Maybe Int -> DepMarking -> Text -> [Int] -> [(Int, cat)] -> Map Text Text -> CatPlus cat
+[cat] :: CatPlus cat -> cat
+[index] :: CatPlus cat -> Maybe Int
+[role] :: CatPlus cat -> DepMarking
+[deriv] :: CatPlus cat -> Text
+[scope] :: CatPlus cat -> [Int]
+[covertArgs] :: CatPlus cat -> [(Int, cat)]
+[attrs] :: CatPlus cat -> Map Text Text
+pattern (:#:) :: cat -> (cat -> CatPlus cat) -> CatPlus cat
+pattern (:#||:) :: (cat, DepMarking) -> (cat -> DepMarking -> CatPlus cat) -> CatPlus cat
+infix 9 :#:
+infix 9 :#||:
 
--- | A Kainoki category.
-KaiCat :: [Text] -> Int -> Text -> KaiCat
+-- | Smart constructor that generates a non-terminal categorial
+--   representation without attributes, given a Keyaki category.
+newNonTerm :: cat -> CatPlus cat
+getCat :: CatPlus cat -> (Maybe cat, cat -> CatPlus cat)
+instance GHC.Classes.Eq cat => GHC.Classes.Eq (CatPlus.CatPlus cat)
+instance GHC.Base.Functor CatPlus.CatPlus
+instance Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text cat => Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text (CatPlus.CatPlus cat)
+instance Data.Text.Prettyprint.Doc.Internal.Pretty cat => Data.Text.Prettyprint.Doc.Internal.Pretty (CatPlus.CatPlus cat)
+instance GHC.Show.Show cat => GHC.Show.Show (CatPlus.CatPlus cat)
 
--- | The category name, separated by hyphens.
-[catlist] :: KaiCat -> [Text]
 
--- | The ICH index. 0 for non-indexed cases.
-[iched] :: KaiCat -> Int
+-- | Provide an representation of categories of the Kainoki Treebank. The
+--   parser is available at the <a>Parser</a> module.
+module KeyakiCat
 
--- | The sort information. Empty when none.
-[sortInfo] :: KaiCat -> Text
-
--- | Construct a non-indexed, non-sort-infoed Kainoki category.
-createBase :: [Text] -> KaiCat
-instance GHC.Classes.Eq KaiCat.KaiCat
-instance Data.Text.Prettyprint.Doc.Internal.Pretty KaiCat.KaiCat
-instance GHC.Show.Show KaiCat.KaiCat
+-- | Record structure that represents simple Keyaki categories.
+newtype KeyakiCat
+KeyakiCat :: [Text] -> KeyakiCat
+[unwrapCat] :: KeyakiCat -> [Text]
+instance Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text KeyakiCat.KeyakiCat
+instance GHC.Show.Show KeyakiCat.KeyakiCat
+instance Data.Text.Prettyprint.Doc.Internal.Pretty KeyakiCat.KeyakiCat
 
 
 -- | Provide an representation of parsed trees, reexported from Data.Tree
 --   (provided by containers). The parser is available at the
 --   <tt>ParseParser</tt> module.
 module ParsedTree
-getUnary :: Tree term -> Maybe (Tree term)
-isUnary :: Tree term -> Bool
-justTerminal :: Tree term -> Maybe term
-isTerminal :: Tree term -> Bool
-getNearTerminal :: Tree term -> Maybe term
-isNearTerminal :: Tree term -> Bool
-filterNearTerminal :: (term -> Bool) -> Tree term -> Maybe term
-isFilterNearTerminal :: (term -> Bool) -> Tree term -> Bool
 instance Data.Text.Prettyprint.Doc.Internal.Pretty term => Data.Text.Prettyprint.Doc.Internal.Pretty (Data.Tree.Tree term)
-
-module ParsedTree.Parser
-data TermParsers term
-TermParsers :: Parser term -> Parser term -> TermParsers term
-[pTermMany] :: TermParsers term -> Parser term
-[pTermSome] :: TermParsers term -> Parser term
-class TermParsable term
-getDefaultTermParsers :: TermParsable term => TermParsers term
-parser :: forall term. TermParsers term -> Parser (Tree term)
-pBracketedString :: Parser (Tokens Text)
-createFromString :: TermParsers term -> String -> Text -> Either (ParseErrorBundle Text Void) (Tree term)
-parserDoc :: TermParsers term -> Parser [Tree term]
-createDoc :: TermParsers term -> String -> Text -> Either (ParseErrorBundle Text Void) [Tree term]
-
--- | A non-empty collection of <a>ParseError</a>s equipped with
---   <a>PosState</a> that allows to pretty-print the errors efficiently and
---   correctly.
-data ParseErrorBundle s e
-ParseErrorBundle :: NonEmpty (ParseError s e) -> PosState s -> ParseErrorBundle s e
-
--- | A collection of <a>ParseError</a>s that is sorted by parse error
---   offsets
-[bundleErrors] :: ParseErrorBundle s e -> NonEmpty (ParseError s e)
-
--- | State that is used for line/column calculation
-[bundlePosState] :: ParseErrorBundle s e -> PosState s
-instance ParsedTree.Parser.TermParsable Data.Text.Internal.Text
-
-module KaiCat.Parser
-pKaiCat :: Parser KaiCat
-
--- | Convert a string into a Kainoki Category.
---   
---   Examples:
---   
---   <pre>
---   &gt;&gt;&gt; createKaiCatFromString $ DT.pack "NP-SBJ"
---   Right NP-SBJ
---   </pre>
---   
---   <pre>
---   &gt;&gt;&gt; createKaiCatFromString $ DT.pack "NP-SBJ-2"
---   Right NP-SBJ-2
---   </pre>
---   
---   <pre>
---   &gt;&gt;&gt; createKaiCatFromString $ DT.pack "NP-SBJ;{ABCDD}"
---   Right NP-SBJ;{{ABCDD}}
---   </pre>
-createKaiCatFromString :: Text -> Either (ParseErrorBundle Text Void) KaiCat
-instance ParsedTree.Parser.TermParsable KaiCat.KaiCat
-
-module DepMarked.Parser
-pPlainMarked :: Parser (DepMarked Text)
-instance ParsedTree.Parser.TermParsable (DepMarked.DepMarked Data.Text.Internal.Text)
-
-module ABCCategory.Parser
-pABCCategory :: Parser ABCCategory
-pABCCategoryCommented :: Parser (ABCComment ABCCategory)
-createABCCategoryCommentedFromString :: Text -> Either (ParseErrorBundle Text Void) (ABCComment ABCCategory)
-createABCCategoryFromString :: Text -> Either (ParseErrorBundle Text Void) ABCCategory
-instance ParsedTree.Parser.TermParsable ABCCategory.ABCCategory
-instance ParsedTree.Parser.TermParsable (ABCComment.ABCComment ABCCategory.ABCCategory)
