@@ -315,7 +315,6 @@ runWithOptions (Option _  isOneLine) = do
                 )   
             return []
         Right ts -> return ts
-    forM_ trees $ \tree -> tree & show & putStrLn
     forM_ trees $ \tree ->
         tree 
         & relabel 
