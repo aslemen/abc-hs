@@ -47,19 +47,36 @@ import Data.Tree.Parser.Penn.Megaparsec.Char (
 import ABCDepMarking
 
 {-|
-    Record structure that represents Keyaki categories
-        which augmented with our own additional attributes.
+    Record structure that represents (Keyaki) tree node labels
+        which are augmented with our own additional attributes.
 -}
 data CatPlus cat =
-    Term { word :: Text }
+    -- | A terminal node label, which contains nothing other than a word.
+    Term { 
+        word :: Text -- ^ A word.
+    }
+    {-| 
+        A non-terminal node label 
+        comprised of a (Keyaki or ABC) category 
+        and additional optional information for the ABC relabeling.
+    -}
     | NonTerm { 
-        cat :: cat
-        , index :: Maybe Int
-        , role :: DepMarking
+        cat :: cat              -- ^ A (Keyaki / ABC) category.
+        , index :: Maybe Int    -- ^ An ICH index on overt parts of ICH configufations.
+        , role :: DepMarking    -- ^ A grammatical role in the ABC Grammar.
+        {-|
+            The special ABC derivational rule (e.g. unary rules),
+            if any, invoked by this node.
+            Empty as default.
+        -}
         , deriv :: Text
         , scope :: [Int]
-        , covertArgs :: [(Int, cat)]
-        , attrs :: Map Text Text
+        {-|
+            A list of covert arguments (@*pro*@ in Keyaki), 
+            each specified with its scopal rank in the clause and its category.
+        -}
+        , covertArgs :: [(Int, cat)] 
+        , attrs :: Map Text Text    -- ^ Other attributes.
         }
     deriving (Eq)
 

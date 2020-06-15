@@ -119,18 +119,39 @@ instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCDepMarking.DepMarking
 --   parser is available at the <a>Parser</a> module.
 module CatPlus
 
--- | Record structure that represents Keyaki categories which augmented
---   with our own additional attributes.
+-- | Record structure that represents (Keyaki) tree node labels which are
+--   augmented with our own additional attributes.
 data CatPlus cat
+
+-- | A terminal node label, which contains nothing other than a word.
 Term :: Text -> CatPlus cat
+
+-- | A word.
 [word] :: CatPlus cat -> Text
+
+-- | A non-terminal node label comprised of a (Keyaki or ABC) category and
+--   additional optional information for the ABC relabeling.
 NonTerm :: cat -> Maybe Int -> DepMarking -> Text -> [Int] -> [(Int, cat)] -> Map Text Text -> CatPlus cat
+
+-- | A (Keyaki / ABC) category.
 [cat] :: CatPlus cat -> cat
+
+-- | An ICH index on overt parts of ICH configufations.
 [index] :: CatPlus cat -> Maybe Int
+
+-- | A grammatical role in the ABC Grammar.
 [role] :: CatPlus cat -> DepMarking
+
+-- | The special ABC derivational rule (e.g. unary rules), if any, invoked
+--   by this node. Empty as default.
 [deriv] :: CatPlus cat -> Text
 [scope] :: CatPlus cat -> [Int]
+
+-- | A list of covert arguments (<tt>*pro*</tt> in Keyaki), each specified
+--   with its scopal rank in the clause and its category.
 [covertArgs] :: CatPlus cat -> [(Int, cat)]
+
+-- | Other attributes.
 [attrs] :: CatPlus cat -> Map Text Text
 pattern (:#:) :: cat -> (cat -> CatPlus cat) -> CatPlus cat
 pattern (:#||:) :: (cat, DepMarking) -> (cat -> DepMarking -> CatPlus cat) -> CatPlus cat
