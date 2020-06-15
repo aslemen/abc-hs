@@ -4,6 +4,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
 
+
 {- |
     Module      : Relabeling
     Copyright   : Copyright (c) 2018-2020 Noritsugu Hayashi
@@ -21,14 +22,21 @@ import Paths_abc_hs (version)
 import Data.Version (showVersion)
 
 import System.IO (stdout, stderr)
+import qualified System.IO as SIO
 import qualified Options.Applicative as OA
 
 import Data.Function ((&))
 import Control.Monad (forM_)
+import Control.Monad.Catch (
+        MonadThrow(..)
+        , MonadCatch(..)
+        , Exception(..)
+        , SomeException
+    )
+import Data.Typeable (Typeable)
 
 import Data.Text (Text)
 import qualified Data.Text as DT
-import Data.Text.IO (hPutStrLn)
 import qualified Data.Text.IO as DTIO
 import Data.Void (Void)
 import Data.Set (Set)
@@ -122,26 +130,48 @@ splitChildren oldChildren@(oldChildFirst:oldChildrenRest)
             Nothing -> Nothing
 splitChildren [] = Nothing
 
---------------------------
+-- | = Exceptions 
+
+data (Show cat) =>
+    IllegalTerminalException cat 
+    = IllegalTerminalException { illegalCat :: cat }
+    deriving (Show)
+
+instance (Show cat, Typeable cat) 
+    => Exception (IllegalTerminalException cat)
+
+---------------------------
 
 genABCCat :: KeyakiCat -> ABCCat
 {-# INLINE genABCCat #-}
 genABCCat = BaseCategory . DT.pack . show
 
-relabel :: KeyakiTree -> ABCTree
-relabel (Node nt@(NonTerm {}) oldTreeChildren)
-    = let newCatPlus = genABCCat <$> nt
-      in case newCatPlus of 
+relabel :: (MonadThrow m) => KeyakiTree -> m ABCTree
+relabel (Node nt@(NonTerm {}) oldTreeChildren) = do
+    case genABCCat <$> nt of 
         newCat :#: attrs
             -> relabelRouting newCat attrs oldTreeChildren
                 -- @newCat@: The parent (root) label candidate for the new tree
                 -- @attrs@: The dependency marking of the new parent (root) label
                 -- @oldTreeChildren@: The immediate children of the root
-        Term w -> Node (Term w) (relabel <$> oldTreeChildren)
-relabel (Node (Term w) oldTreeChildren) 
-    = Node (Term w) (relabel <$> oldTreeChildren)
+        Term w -> do 
+            relabeledChildren <- mapM relabel oldTreeChildren
+            return $ Node {
+                rootLabel = Term w
+                , subForest = relabeledChildren
+            }
+relabel (Node (Term w) oldTreeChildren) = do
+    relabeledChildren <- mapM relabel oldTreeChildren
+    return $ Node {
+        rootLabel = Term w
+        , subForest = relabeledChildren
+    }
 
-relabelRouting :: RelabelFunc [KeyakiTree] 
+relabelRouting :: (MonadThrow m)
+    => ABCCat 
+    -> (ABCCat -> CatPlus ABCCat) 
+    -> [KeyakiTree] 
+    -> m ABCTree
 relabelRouting newParentCandidate newParentPlus oldChildren
     = case oldChildren of
         _:_:_ -- If it has more than 1 children
@@ -151,120 +181,161 @@ relabelRouting newParentCandidate newParentPlus oldChildren
         _ -> relabelTrivial newParentCandidate newParentPlus oldChildren
             -- otherwise
 
-relabelTrivial :: RelabelFunc [KeyakiTree] 
-relabelTrivial newParentCandidate newParentPlus oldChildren
-    = Node {
+relabelTrivial :: (MonadThrow m)
+    => ABCCat 
+    -> (ABCCat -> CatPlus ABCCat) 
+    -> [KeyakiTree] 
+    -> m ABCTree
+relabelTrivial newParentCandidate newParentPlus oldChildren = do
+    relabeledChildren <- mapM relabel oldChildren -- RECURSION
+    return $ Node {
         rootLabel = newParentPlus newParentCandidate
-        , subForest = relabel <$> oldChildren -- RECURSION
+        , subForest = relabeledChildren
     }
 
-relabelHeaded :: RelabelFunc SeparatedChildren
+relabelHeaded :: (MonadThrow m)
+    => ABCCat 
+    -> (ABCCat -> CatPlus ABCCat) 
+    -> SeparatedChildren
+    -> m ABCTree 
 relabelHeaded 
     newParentCandidate 
     newParentPlus
-    (oldFirstChild :-|: oldRestChildren) 
-    = case oldFirstChild & rootLabel of
-        (oldFirstChildCat, Complement) :#||: attrs ->  
-            -- 1. Complementを先に変換
-            let newFirstChild = relabel oldFirstChild
-            in case newFirstChild & rootLabel of
-                (newFirstChildCat, _) :#||: attrs -> 
-                -- 2. VSST Categoryを計算して，次に渡す
-                    let newVSSTCat = newFirstChildCat :\: newParentCandidate
-                        newVSST    = relabelHeaded 
-                                        newVSSTCat 
-                                        (\y -> fmap (const y) $ attrs undefined Head)
-                                        oldRestChildren 
-                    -- 3. Binarizationを行う．もし*PRO*があるならばそれをdropする．
-                    in if isKTPRO newFirstChild -- TODO: 先頭にないPROをdropするのはまずいことなので，避けるべし．
-                        then newVSST -- dropping newFirstChild (*PRO*)
-                        else Node {
-                            rootLabel   = newParentPlus newParentCandidate 
-                            , subForest = [newFirstChild, newVSST]
-                        }
-                Term {} -> undefined
-        (oldFirstChildCat, _) :#||: attrs ->
-            -- 1. Adjunctを変換．
-            let newFirstChildCat = newParentCandidate :/: newParentCandidate 
-                newFirstChild = 
-                    relabelRouting 
-                        newFirstChildCat
-                        (\y -> fmap (const y) $ attrs undefined Adjunct)
-                        (subForest oldFirstChild) 
-            -- 2. 同時に，Headも変換．
-                newVSSTCat = newParentCandidate
-                newVSST = 
-                    relabelHeaded 
-                        newVSSTCat
-                        (\x -> (newNonTerm x) { role = Head })
-                        oldRestChildren 
-            -- 3. Binarizationを行う
-            in if isKTPRO newFirstChild
-                then newVSST -- dropping newFirstChild (*PRO*)
-                else Node {
-                    rootLabel   = newParentPlus newParentCandidate 
-                    , subForest = [newFirstChild, newVSST]
-                }
-        Term {} -> undefined
-relabelHeaded 
-    newParentCandidate 
-    newParentPlus
-    (oldRestChildren :|-: oldLastChild) 
-    = case rootLabel oldLastChild of
-        (_, Complement) :#||: attrs ->
-            -- 1. Complementを先に変換
-            let newLastChild = relabel oldLastChild
-                newLastChildCat = newLastChild & rootLabel & cat
+    (
+        oldFirstChild@Node {
+            rootLabel = (oldFirstChildCat, Complement) :#||: attrs
+        }
+        :-|: oldRestChildren
+    ) = do 
+        -- 1. Complementを先に変換
+        newFirstChild <- relabel oldFirstChild
+        case newFirstChild & rootLabel of
+            (newFirstChildCat, _) :#||: attrs -> do
             -- 2. VSST Categoryを計算して，次に渡す
-                newVSSTCat = newParentCandidate :/: newLastChildCat
-                newVSST = 
-                    relabelHeaded 
-                        newVSSTCat 
-                        (\x -> (newNonTerm x) { role = Head }) 
-                        oldRestChildren 
-            -- 3. Binarizationを行う
-            in Node {
-                rootLabel   = newParentPlus newParentCandidate
-                , subForest = [newVSST, newLastChild]
+                let newVSSTCat = newFirstChildCat :\: newParentCandidate
+                newVSST <- relabelHeaded 
+                            newVSSTCat 
+                            (\y -> fmap (const y) $ attrs undefined Head)
+                            oldRestChildren
+                -- 3. Binarizationを行う．もし*PRO*があるならばそれをdropする．
+                return $ if isKTPRO newFirstChild
+                    then newVSST
+                    else Node {
+                        rootLabel = newParentPlus newParentCandidate
+                        , subForest = [newFirstChild, newVSST]
+                    }
+            Term w -> throwM $ IllegalTerminalException w
+relabelHeaded 
+    newParentCandidate 
+    newParentPlus
+    (
+        Node {
+            rootLabel = (oldFirstChildCat, _) :#||: attrs
+            , subForest = oldFirstChildChildren
+        }
+        :-|: oldRestChildren
+    ) = do 
+        -- 1. Adjunctを変換．
+        let newFirstChildCat = newParentCandidate :/: newParentCandidate
+        newFirstChild <- relabelRouting 
+                            newFirstChildCat
+                            (\y -> fmap (const y) $ attrs undefined Adjunct)
+                            oldFirstChildChildren
+        -- 2. 同時に，Headも変換．
+        let newVSSTCat = newParentCandidate
+        newVSST <- relabelHeaded 
+                    newVSSTCat
+                    (\x -> (newNonTerm x) { role = Head })
+                    oldRestChildren 
+        -- 3. Binarizationを行う
+        return $ if isKTPRO newFirstChild 
+            then newVSST -- dropping newFirstChild (*PRO*)
+            else Node {
+                rootLabel = newParentPlus newParentCandidate
+                , subForest = [newFirstChild, newVSST]
             }
-        (_, AdjunctControl) :#||: attrs -> 
-            -- 1. Adjunctを変換．
-            let newLastChildCatBase = dropAnt [BaseCategory "PPs", BaseCategory "PPs2"] newParentCandidate
-                newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
-                newLastChild = relabelRouting 
-                    newLastChildCat 
-                    (\y -> fmap (const y) $ attrs undefined AdjunctControl)
-                    (subForest oldLastChild) 
-            -- 2. 同時に，Headも変換．
-                newVSSTCat = newParentCandidate
-                newVSST = relabelHeaded 
+relabelHeaded _ _ (Node {rootLabel = Term w} :-|: _)
+    = throwM $ IllegalTerminalException w
+relabelHeaded 
+    newParentCandidate 
+    newParentPlus
+    (
+        oldRestChildren 
+        :|-: oldLastChild@Node {
+            rootLabel = (_, Complement) :#||: attrs
+        }
+    ) = do 
+        -- 1. Complementを先に変換
+        newLastChild <- relabel oldLastChild
+        let newLastChildCat = newLastChild & rootLabel & cat
+        -- 2. VSST Categoryを計算して，次に渡す
+            newVSSTCat = newParentCandidate :/: newLastChildCat
+        newVSST <- relabelHeaded 
                     newVSSTCat 
                     (\x -> (newNonTerm x) { role = Head }) 
                     oldRestChildren 
-            -- 3. Binarizationを行う
-            in Node {
-                rootLabel   = newParentPlus newParentCandidate
-                , subForest = [newVSST, newLastChild]
-            }
-        _ :#: attrs -> 
-            -- 1. Adjunctを変換．
-            let newLastChildCat = newParentCandidate :\: newParentCandidate
-                newLastChild = 
-                    relabelRouting 
-                        newLastChildCat 
-                       (\y -> fmap (const y) $ attrs undefined)
-                        (subForest oldLastChild) 
-            -- 2. 同時に，Headも変換．
-                newVSSTCat = newParentCandidate
-                newVSST = relabelHeaded 
+        -- 3. Binarizationを行う
+        return $ Node {
+            rootLabel = newParentPlus newParentCandidate
+            , subForest = [newVSST, newLastChild]
+        }
+relabelHeaded 
+    newParentCandidate 
+    newParentPlus
+    (
+        oldRestChildren 
+        :|-: oldLastChild@Node {
+            rootLabel = (_, AdjunctControl) :#||: attrs
+            , subForest = oldLastChildChildren
+        }
+    ) = do 
+        -- 1. Adjunctを変換．
+        let newLastChildCatBase = dropAnt [BaseCategory "PPs", BaseCategory "PPs2"] newParentCandidate
+            newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
+        newLastChild <- relabelRouting 
+                            newLastChildCat 
+                            (\y -> 
+                                fmap (const y) $ attrs undefined AdjunctControl)
+                            oldLastChildChildren
+        let newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
+        -- 2. 同時に，Headも変換．
+            newVSSTCat = newParentCandidate
+        newVSST <- relabelHeaded 
+                    newVSSTCat 
+                    (\x -> (newNonTerm x) { role = Head }) 
+                    oldRestChildren
+        -- 3. Binarizationを行う
+        return $ Node {
+            rootLabel = newParentPlus newParentCandidate
+            , subForest = [newVSST, newLastChild]
+        }
+relabelHeaded 
+    newParentCandidate 
+    newParentPlus
+    (
+        oldRestChildren 
+        :|-: oldLastChild@Node {
+            rootLabel = (_, r) :#||: attrs
+            , subForest = oldLastChildChildren
+        }
+    ) = do 
+        -- 1. Adjunctを変換．
+        let newLastChildCat = newParentCandidate :\: newParentCandidate
+        newLastChild <- relabelRouting
+                            newLastChildCat 
+                            (\y -> fmap (const y) $ attrs undefined r)
+                            oldLastChildChildren
+        -- 2. 同時に，Headも変換．
+        let newVSSTCat = newParentCandidate
+        newVSST <- relabelHeaded 
                     newVSSTCat 
                     (\x -> (newNonTerm x) { role = Head })  
                     oldRestChildren 
-            -- 3. Binarizationを行う
-            in Node {
-                rootLabel   = newParentPlus newParentCandidate
-                , subForest = [newVSST, newLastChild]
-            }
+        -- 3. Binarizationを行う
+        return $ Node {
+            rootLabel = newParentPlus newParentCandidate
+            , subForest = [newVSST, newLastChild]
+        }
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -310,19 +381,36 @@ runWithOptions (Option _  isOneLine) = do
     parsedRaw <- DTIO.getContents >>= runParserT pDocument "<STDIN>"
     trees <- case parsedRaw of
         Left errors -> do
-            hPutStrLn stderr (
+            DTIO.hPutStrLn stderr (
                 DT.pack $ errorBundlePretty errors
                 )   
             return []
         Right ts -> return ts
-    forM_ trees $ \tree ->
-        tree 
-        & relabel 
-        & PDoc.pretty 
-        & (if isOneLine then PDoc.group else id)
-        & (if isOneLine then (<> PDoc.line <> PDoc.line) else (<> PDoc.line))
-        & PDoc.layoutPretty (PDoc.LayoutOptions PDoc.Unbounded)
-        & PDocRT.renderIO stdout
+    forM_ trees $ \tree -> processTree tree `catch` processExecptions tree
+    where
+        printTree :: _ -> IO ()
+        printTree tree = tree 
+            & PDoc.pretty
+            & (if isOneLine then PDoc.group else id)
+            & (if isOneLine   
+                    then (<> PDoc.line <> PDoc.line) 
+                    else (<> PDoc.line)
+                )
+            & PDoc.layoutPretty (PDoc.LayoutOptions PDoc.Unbounded)
+            & PDocRT.renderIO stdout
+        processTree :: _ -> IO ()
+        processTree tree = 
+            relabel tree -- IO ABCTree
+            >>= printTree
+        processExecptions :: _ -> SomeException -> IO ()
+        processExecptions tree e = do
+            SIO.hPutStr stderr "Exception: "
+            SIO.hPutStrLn stderr $ show e
+            SIO.hPutStrLn stderr "Tree:"
+            tree & PDoc.pretty 
+                 & PDoc.layoutPretty (PDoc.LayoutOptions PDoc.Unbounded)
+                 & PDocRT.renderIO stderr
+            SIO.hPutStrLn stderr ""
 
 main :: IO ()
 main = OA.execParser optionParserInfo >>= runWithOptions
