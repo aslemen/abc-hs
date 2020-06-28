@@ -147,25 +147,22 @@ genABCCat :: KeyakiCat -> ABCCat
 genABCCat = BaseCategory . DT.pack . show
 
 relabel :: (MonadThrow m) => KeyakiTree -> m ABCTree
-relabel (Node nt@(NonTerm {}) oldTreeChildren) = do
+relabel Node {
+    rootLabel = nt@(NonTerm { deriv = "" }) -- filter out special derivations
+    , subForest = oldTreeChildren
+} = do
     case genABCCat <$> nt of 
         newCat :#: attrs
             -> relabelRouting newCat attrs oldTreeChildren
                 -- @newCat@: The parent (root) label candidate for the new tree
                 -- @attrs@: The dependency marking of the new parent (root) label
                 -- @oldTreeChildren@: The immediate children of the root
-        Term w -> do 
-            relabeledChildren <- mapM relabel oldTreeChildren
-            return $ Node {
-                rootLabel = Term w
-                , subForest = relabeledChildren
-            }
-relabel (Node (Term w) oldTreeChildren) = do
-    relabeledChildren <- mapM relabel oldTreeChildren
-    return $ Node {
-        rootLabel = Term w
-        , subForest = relabeledChildren
-    }
+        Term w ->
+            relabelTrivial (Term w) oldTreeChildren
+relabel Node {
+    rootLabel = oldParent
+    , subForest = oldTreeChildren
+} = relabelTrivial (genABCCat <$> oldParent) oldTreeChildren
 
 relabelRouting :: (MonadThrow m)
     => ABCCat 
@@ -177,19 +174,21 @@ relabelRouting newParentCandidate newParentPlus oldChildren
         _:_:_ -- If it has more than 1 children
             -> case splitChildren oldChildren of
                 Just sc -> relabelHeaded newParentCandidate newParentPlus sc
-                Nothing -> relabelTrivial newParentCandidate newParentPlus oldChildren
-        _ -> relabelTrivial newParentCandidate newParentPlus oldChildren
+                Nothing -> relabelTrivial newParent oldChildren
+        _ -> relabelTrivial newParent oldChildren
             -- otherwise
+    where
+        newParent :: CatPlus ABCCat
+        newParent = newParentPlus newParentCandidate
 
 relabelTrivial :: (MonadThrow m)
-    => ABCCat 
-    -> (ABCCat -> CatPlus ABCCat) 
+    => CatPlus ABCCat 
     -> [KeyakiTree] 
     -> m ABCTree
-relabelTrivial newParentCandidate newParentPlus oldChildren = do
+relabelTrivial newParent oldChildren = do
     relabeledChildren <- mapM relabel oldChildren -- RECURSION
     return $ Node {
-        rootLabel = newParentPlus newParentCandidate
+        rootLabel = newParent
         , subForest = relabeledChildren
     }
 
