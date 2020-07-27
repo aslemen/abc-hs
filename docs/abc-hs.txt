@@ -5,7 +5,7 @@
 -- | Please see the README on GitHub at
 --   <a>https://github.com/aslemen/abc-hs#readme</a>
 @package abc-hs
-@version 20200616
+@version 20200727
 
 
 -- | Provide an representation of categories of the ABC Grammar.
@@ -162,8 +162,8 @@ infix 9 :#||:
 --   representation without attributes, given a Keyaki category.
 newNonTerm :: cat -> CatPlus cat
 getCat :: CatPlus cat -> (Maybe cat, cat -> CatPlus cat)
-instance GHC.Classes.Eq cat => GHC.Classes.Eq (CatPlus.CatPlus cat)
 instance GHC.Base.Functor CatPlus.CatPlus
+instance GHC.Classes.Eq cat => GHC.Classes.Eq (CatPlus.CatPlus cat)
 instance Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text cat => Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text (CatPlus.CatPlus cat)
 instance Data.Text.Prettyprint.Doc.Internal.Pretty cat => Data.Text.Prettyprint.Doc.Internal.Pretty (CatPlus.CatPlus cat)
 instance GHC.Show.Show cat => GHC.Show.Show (CatPlus.CatPlus cat)

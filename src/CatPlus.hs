@@ -5,6 +5,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 {-|
     Module:     CatPlus
@@ -78,7 +79,7 @@ data CatPlus cat =
         , covertArgs :: [(Int, cat)] 
         , attrs :: Map Text Text    -- ^ Other attributes.
         }
-    deriving (Eq)
+    deriving (Eq, Functor)
 
 getCat :: CatPlus cat -> (Maybe cat, cat -> CatPlus cat)
 getCat t@(Term w) 
@@ -119,26 +120,6 @@ newNonTerm cs = NonTerm {
     , scope = []
     , covertArgs = []
     , attrs = DMap.empty 
-    }
-
-instance Functor CatPlus where
-    fmap _ (Term w) = Term w
-    fmap f NonTerm {
-        cat = cs 
-        , index = idx
-        , role = r
-        , deriv = d
-        , scope = s
-        , covertArgs = cA
-        , attrs = as
-    } = NonTerm {
-        cat = f cs
-        , index = idx
-        , role = r
-        , deriv = d
-        , scope = s
-        , covertArgs = fmap (\(i, c2) -> (i, f c2)) cA 
-        , attrs = as
     }
 ----------------------------------
 
