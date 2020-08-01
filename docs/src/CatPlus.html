@@ -51,7 +51,7 @@
     Record structure that represents (Keyaki) tree node labels
         which are augmented with our own additional attributes.
 -}</span><span>
-</span><span id="line-54"></span><span class="hs-keyword">data</span><span> </span><span id="CatPlus"><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-var">CatPlus</span></a></span></span><span> </span><span id="local-6989586621679086471"><span class="annot"><a href="#local-6989586621679086471"><span class="hs-identifier hs-type">cat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-54"></span><span class="hs-keyword">data</span><span> </span><span id="CatPlus"><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-var">CatPlus</span></a></span></span><span> </span><span id="local-6989586621679086444"><span class="annot"><a href="#local-6989586621679086444"><span class="hs-identifier hs-type">cat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-55"></span><span>    </span><span class="hs-comment">-- | A terminal node label, which contains nothing other than a word.</span><span>
 </span><span id="line-56"></span><span>    </span><span id="Term"><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-var">Term</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span>
 </span><span id="line-57"></span><span>        </span><span id="word"><span class="annot"><span class="annottext">CatPlus cat -&gt; Text
@@ -64,7 +64,7 @@
     -}</span><span>
 </span><span id="line-64"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="NonTerm"><span class="annot"><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-var">NonTerm</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span>
 </span><span id="line-65"></span><span>        </span><span id="cat"><span class="annot"><span class="annottext">CatPlus cat -&gt; cat
-</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var hs-var">cat</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086471"><span class="hs-identifier hs-type">cat</span></a></span><span>              </span><span class="hs-comment">-- ^ A (Keyaki / ABC) category.</span><span>
+</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var hs-var">cat</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086444"><span class="hs-identifier hs-type">cat</span></a></span><span>              </span><span class="hs-comment">-- ^ A (Keyaki / ABC) category.</span><span>
 </span><span id="line-66"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="index"><span class="annot"><span class="annottext">CatPlus cat -&gt; Maybe Int
 </span><a href="CatPlus.html#index"><span class="hs-identifier hs-var hs-var">index</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>    </span><span class="hs-comment">-- ^ An ICH index on overt parts of ICH configufations.</span><span>
 </span><span id="line-67"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="role"><span class="annot"><span class="annottext">CatPlus cat -&gt; DepMarking
@@ -83,11 +83,11 @@
             each specified with its scopal rank in the clause and its category.
         -}</span><span>
 </span><span id="line-79"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="covertArgs"><span class="annot"><span class="annottext">CatPlus cat -&gt; [(Int, cat)]
-</span><a href="CatPlus.html#covertArgs"><span class="hs-identifier hs-var hs-var">covertArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086471"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span>
+</span><a href="CatPlus.html#covertArgs"><span class="hs-identifier hs-var hs-var">covertArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086444"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span>
 </span><span id="line-80"></span><span>        </span><span class="hs-special">,</span><span> </span><span id="attrs"><span class="annot"><span class="annottext">CatPlus cat -&gt; Map Text Text
 </span><a href="CatPlus.html#attrs"><span class="hs-identifier hs-var hs-var">attrs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>    </span><span class="hs-comment">-- ^ Other attributes.</span><span>
 </span><span id="line-81"></span><span>        </span><span class="hs-special">}</span><span>
-</span><span id="line-82"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679086355"><span id="local-6989586621679086357"><span class="annot"><span class="annottext">CatPlus cat -&gt; CatPlus cat -&gt; Bool
+</span><span id="line-82"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679086328"><span id="local-6989586621679086330"><span class="annot"><span class="annottext">CatPlus cat -&gt; CatPlus cat -&gt; Bool
 (CatPlus cat -&gt; CatPlus cat -&gt; Bool)
 -&gt; (CatPlus cat -&gt; CatPlus cat -&gt; Bool) -&gt; Eq (CatPlus cat)
 forall cat. Eq cat =&gt; CatPlus cat -&gt; CatPlus cat -&gt; Bool
@@ -96,7 +96,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: forall cat. Eq cat =&gt; CatPlus cat -&gt; CatPlus cat -&gt; Bool
 == :: CatPlus cat -&gt; CatPlus cat -&gt; Bool
 $c== :: forall cat. Eq cat =&gt; CatPlus cat -&gt; CatPlus cat -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086350"><span id="local-6989586621679086352"><span class="annot"><span class="annottext">a -&gt; CatPlus b -&gt; CatPlus a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086323"><span id="local-6989586621679086325"><span class="annot"><span class="annottext">a -&gt; CatPlus b -&gt; CatPlus a
 (a -&gt; b) -&gt; CatPlus a -&gt; CatPlus b
 (forall a b. (a -&gt; b) -&gt; CatPlus a -&gt; CatPlus b)
 -&gt; (forall a b. a -&gt; CatPlus b -&gt; CatPlus a) -&gt; Functor CatPlus
@@ -111,50 +111,50 @@ fmap :: (a -&gt; b) -&gt; CatPlus a -&gt; CatPlus b
 $cfmap :: forall a b. (a -&gt; b) -&gt; CatPlus a -&gt; CatPlus b
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span id="local-6989586621679086348"><span class="annot"><a href="CatPlus.html#getCat"><span class="hs-identifier hs-type">getCat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086348"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679086348"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086348"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086348"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-84"></span><span id="local-6989586621679086321"><span class="annot"><a href="CatPlus.html#getCat"><span class="hs-identifier hs-type">getCat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086321"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679086321"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086321"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086321"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-85"></span><span id="getCat"><span class="annot"><span class="annottext">getCat :: CatPlus cat -&gt; (Maybe cat, cat -&gt; CatPlus cat)
-</span><a href="CatPlus.html#getCat"><span class="hs-identifier hs-var hs-var">getCat</span></a></span></span><span> </span><span id="local-6989586621679086347"><span class="annot"><span class="annottext">t :: CatPlus cat
-</span><a href="#local-6989586621679086347"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-type">Term</span></a></span><span> </span><span id="local-6989586621679086346"><span class="annot"><span class="annottext">w :: Text
-</span><a href="#local-6989586621679086346"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span>
+</span><a href="CatPlus.html#getCat"><span class="hs-identifier hs-var hs-var">getCat</span></a></span></span><span> </span><span id="local-6989586621679086320"><span class="annot"><span class="annottext">t :: CatPlus cat
+</span><a href="#local-6989586621679086320"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-type">Term</span></a></span><span> </span><span id="local-6989586621679086319"><span class="annot"><span class="annottext">w :: Text
+</span><a href="#local-6989586621679086319"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-86"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe cat
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CatPlus cat -&gt; cat -&gt; CatPlus cat
 forall a b. a -&gt; b -&gt; a
 </span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086347"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span class="annot"><a href="CatPlus.html#getCat"><span class="hs-identifier hs-var">getCat</span></a></span><span> </span><span id="local-6989586621679086344"><span class="annot"><span class="annottext">nt :: CatPlus cat
-</span><a href="#local-6989586621679086344"><span class="hs-identifier hs-var">nt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-type">NonTerm</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: forall cat. CatPlus cat -&gt; cat
-</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086343"><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086343"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span>
+</span><a href="#local-6989586621679086320"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span class="annot"><a href="CatPlus.html#getCat"><span class="hs-identifier hs-var">getCat</span></a></span><span> </span><span id="local-6989586621679086317"><span class="annot"><span class="annottext">nt :: CatPlus cat
+</span><a href="#local-6989586621679086317"><span class="hs-identifier hs-var">nt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-type">NonTerm</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: forall cat. CatPlus cat -&gt; cat
+</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086316"><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086316"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-88"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">cat -&gt; Maybe cat
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086343"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086342"><span class="annot"><span class="annottext">cnew :: cat
-</span><a href="#local-6989586621679086342"><span class="hs-identifier hs-var">cnew</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086344"><span class="hs-identifier hs-var">nt</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: cat
+</span><a href="#local-6989586621679086316"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086315"><span class="annot"><span class="annottext">cnew :: cat
+</span><a href="#local-6989586621679086315"><span class="hs-identifier hs-var">cnew</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat
+</span><a href="#local-6989586621679086317"><span class="hs-identifier hs-var">nt</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: cat
 </span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086342"><span class="hs-identifier hs-var">cnew</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086315"><span class="hs-identifier hs-var">cnew</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span>
-</span><span id="line-90"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="#local-6989586621679086341"><span class="hs-identifier hs-type">cs</span></a></span><span> </span><span id="%24b%3A%23%3A"><span id="%24m%3A%23%3A"><span id="%3A%23%3A"><span class="annot"><span class="annottext">$b:#: :: cat -&gt; (cat -&gt; CatPlus cat) -&gt; CatPlus cat
+</span><span id="line-90"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="#local-6989586621679086314"><span class="hs-identifier hs-type">cs</span></a></span><span> </span><span id="%24b%3A%23%3A"><span id="%24m%3A%23%3A"><span id="%3A%23%3A"><span class="annot"><span class="annottext">$b:#: :: cat -&gt; (cat -&gt; CatPlus cat) -&gt; CatPlus cat
 $m:#: :: forall r cat.
 CatPlus cat
 -&gt; (cat -&gt; (cat -&gt; CatPlus cat) -&gt; r) -&gt; (Void# -&gt; r) -&gt; r
-</span><a href="CatPlus.html#%24b%3A%23%3A"><span class="hs-operator hs-var hs-var hs-var hs-var">:#:</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679086338"><span class="hs-identifier hs-type">attr</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#getCat"><span class="hs-identifier hs-type">getCat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086341"><span class="annot"><a href="#local-6989586621679086341"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086338"><span class="annot"><a href="#local-6989586621679086338"><span class="hs-identifier hs-var">attr</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="CatPlus.html#%24b%3A%23%3A"><span class="hs-operator hs-var hs-var hs-var hs-var">:#:</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">attr</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#getCat"><span class="hs-identifier hs-type">getCat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086314"><span class="annot"><a href="#local-6989586621679086314"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086311"><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-var">attr</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-91"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-92"></span><span>        </span><span id="local-6989586621679086337"><span class="annot"><span class="annottext">cs :: cat
-</span><a href="#local-6989586621679086337"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="annot"><a href="CatPlus.html#%3A%23%3A"><span class="hs-operator hs-var">:#:</span></a></span><span> </span><span id="local-6989586621679086336"><span class="annot"><span class="annottext">attr :: cat -&gt; CatPlus cat
-</span><a href="#local-6989586621679086336"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat -&gt; CatPlus cat
-</span><a href="#local-6989586621679086336"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086337"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-92"></span><span>        </span><span id="local-6989586621679086310"><span class="annot"><span class="annottext">cs :: cat
+</span><a href="#local-6989586621679086310"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="annot"><a href="CatPlus.html#%3A%23%3A"><span class="hs-operator hs-var">:#:</span></a></span><span> </span><span id="local-6989586621679086309"><span class="annot"><span class="annottext">attr :: cat -&gt; CatPlus cat
+</span><a href="#local-6989586621679086309"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat -&gt; CatPlus cat
+</span><a href="#local-6989586621679086309"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086310"><span class="hs-identifier hs-var">cs</span></a></span><span>
 </span><span id="line-93"></span><span class="hs-keyword">infix</span><span> </span><span class="hs-number">9</span><span> </span><span class="annot"><a href="CatPlus.html#%3A%23%3A"><span class="hs-operator hs-type">:#:</span></a></span><span>
 </span><span id="line-94"></span><span>
-</span><span id="line-95"></span><span id="local-6989586621679086335"><span class="annot"><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-type">getCatRule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086335"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span>
-</span><span id="line-96"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679086335"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="ABCDepMarking.html#DepMarking"><span class="hs-identifier hs-type">DepMarking</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086335"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="ABCDepMarking.html#DepMarking"><span class="hs-identifier hs-type">DepMarking</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086335"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-95"></span><span id="local-6989586621679086308"><span class="annot"><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-type">getCatRule</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086308"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679086308"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="ABCDepMarking.html#DepMarking"><span class="hs-identifier hs-type">DepMarking</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086308"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="ABCDepMarking.html#DepMarking"><span class="hs-identifier hs-type">DepMarking</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086308"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-97"></span><span id="getCatRule"><span class="annot"><span class="annottext">getCatRule :: CatPlus cat
 -&gt; (Maybe (cat, DepMarking), cat -&gt; DepMarking -&gt; CatPlus cat)
-</span><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-var hs-var">getCatRule</span></a></span></span><span> </span><span id="local-6989586621679086333"><span class="annot"><span class="annottext">t :: CatPlus cat
-</span><a href="#local-6989586621679086333"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-type">Term</span></a></span><span> </span><span id="local-6989586621679086332"><span class="annot"><span class="annottext">w :: Text
-</span><a href="#local-6989586621679086332"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-var hs-var">getCatRule</span></a></span></span><span> </span><span id="local-6989586621679086306"><span class="annot"><span class="annottext">t :: CatPlus cat
+</span><a href="#local-6989586621679086306"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-type">Term</span></a></span><span> </span><span id="local-6989586621679086305"><span class="annot"><span class="annottext">w :: Text
+</span><a href="#local-6989586621679086305"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-98"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (cat, DepMarking)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(DepMarking -&gt; CatPlus cat) -&gt; cat -&gt; DepMarking -&gt; CatPlus cat
@@ -165,42 +165,42 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat -&gt; DepMarking -&gt; CatPlus cat
 forall a b. a -&gt; b -&gt; a
 </span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086333"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-99"></span><span class="annot"><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-var">getCatRule</span></a></span><span> </span><span id="local-6989586621679086331"><span class="annot"><span class="annottext">nt :: CatPlus cat
-</span><a href="#local-6989586621679086331"><span class="hs-identifier hs-var">nt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-type">NonTerm</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: forall cat. CatPlus cat -&gt; cat
-</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086330"><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086330"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">role :: forall cat. CatPlus cat -&gt; DepMarking
-</span><a href="CatPlus.html#role"><span class="hs-keyword hs-var">role</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086329"><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086329"><span class="hs-identifier hs-var">rs</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086306"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span class="annot"><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-var">getCatRule</span></a></span><span> </span><span id="local-6989586621679086304"><span class="annot"><span class="annottext">nt :: CatPlus cat
+</span><a href="#local-6989586621679086304"><span class="hs-identifier hs-var">nt</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-type">NonTerm</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: forall cat. CatPlus cat -&gt; cat
+</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086303"><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086303"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">role :: forall cat. CatPlus cat -&gt; DepMarking
+</span><a href="CatPlus.html#role"><span class="hs-keyword hs-var">role</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086302"><span class="annot"><span class="annottext">DepMarking
+</span><a href="#local-6989586621679086302"><span class="hs-identifier hs-var">rs</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-100"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(cat, DepMarking) -&gt; Maybe (cat, DepMarking)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086330"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086329"><span class="hs-identifier hs-var">rs</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086328"><span class="annot"><span class="annottext">cnew :: cat
-</span><a href="#local-6989586621679086328"><span class="hs-identifier hs-var">cnew</span></a></span></span><span> </span><span id="local-6989586621679086327"><span class="annot"><span class="annottext">rnew :: DepMarking
-</span><a href="#local-6989586621679086327"><span class="hs-identifier hs-var">rnew</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086331"><span class="hs-identifier hs-var">nt</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: cat
+</span><a href="#local-6989586621679086303"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DepMarking
+</span><a href="#local-6989586621679086302"><span class="hs-identifier hs-var">rs</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086301"><span class="annot"><span class="annottext">cnew :: cat
+</span><a href="#local-6989586621679086301"><span class="hs-identifier hs-var">cnew</span></a></span></span><span> </span><span id="local-6989586621679086300"><span class="annot"><span class="annottext">rnew :: DepMarking
+</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">rnew</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat
+</span><a href="#local-6989586621679086304"><span class="hs-identifier hs-var">nt</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cat :: cat
 </span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086328"><span class="hs-identifier hs-var">cnew</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">role :: DepMarking
+</span><a href="#local-6989586621679086301"><span class="hs-identifier hs-var">cnew</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">role :: DepMarking
 </span><a href="CatPlus.html#role"><span class="hs-keyword hs-var">role</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086327"><span class="hs-identifier hs-var">rnew</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">rnew</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-101"></span><span>
-</span><span id="line-102"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="#local-6989586621679086326"><span class="hs-identifier hs-type">cr</span></a></span><span> </span><span id="%24b%3A%23%7C%7C%3A"><span id="%24m%3A%23%7C%7C%3A"><span id="%3A%23%7C%7C%3A"><span class="annot"><span class="annottext">$b:#||: :: (cat, DepMarking)
+</span><span id="line-102"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="#local-6989586621679086299"><span class="hs-identifier hs-type">cr</span></a></span><span> </span><span id="%24b%3A%23%7C%7C%3A"><span id="%24m%3A%23%7C%7C%3A"><span id="%3A%23%7C%7C%3A"><span class="annot"><span class="annottext">$b:#||: :: (cat, DepMarking)
 -&gt; (cat -&gt; DepMarking -&gt; CatPlus cat) -&gt; CatPlus cat
 $m:#||: :: forall r cat.
 CatPlus cat
 -&gt; ((cat, DepMarking) -&gt; (cat -&gt; DepMarking -&gt; CatPlus cat) -&gt; r)
 -&gt; (Void# -&gt; r)
 -&gt; r
-</span><a href="CatPlus.html#%24b%3A%23%7C%7C%3A"><span class="hs-operator hs-var hs-var hs-var hs-var">:#||:</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679086323"><span class="hs-identifier hs-type">attr</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-type">getCatRule</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086326"><span class="annot"><a href="#local-6989586621679086326"><span class="hs-identifier hs-var">cr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086323"><span class="annot"><a href="#local-6989586621679086323"><span class="hs-identifier hs-var">attr</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="CatPlus.html#%24b%3A%23%7C%7C%3A"><span class="hs-operator hs-var hs-var hs-var hs-var">:#||:</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679086296"><span class="hs-identifier hs-type">attr</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#getCatRule"><span class="hs-identifier hs-type">getCatRule</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086299"><span class="annot"><a href="#local-6989586621679086299"><span class="hs-identifier hs-var">cr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086296"><span class="annot"><a href="#local-6989586621679086296"><span class="hs-identifier hs-var">attr</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span>
-</span><span id="line-104"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679086322"><span class="annot"><span class="annottext">c :: cat
-</span><a href="#local-6989586621679086322"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086321"><span class="annot"><span class="annottext">r :: DepMarking
-</span><a href="#local-6989586621679086321"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="CatPlus.html#%3A%23%7C%7C%3A"><span class="hs-operator hs-var">:#||:</span></a></span><span> </span><span id="local-6989586621679086320"><span class="annot"><span class="annottext">attr :: cat -&gt; DepMarking -&gt; CatPlus cat
-</span><a href="#local-6989586621679086320"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat -&gt; DepMarking -&gt; CatPlus cat
-</span><a href="#local-6989586621679086320"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086322"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086321"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-104"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679086295"><span class="annot"><span class="annottext">c :: cat
+</span><a href="#local-6989586621679086295"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086294"><span class="annot"><span class="annottext">r :: DepMarking
+</span><a href="#local-6989586621679086294"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="CatPlus.html#%3A%23%7C%7C%3A"><span class="hs-operator hs-var">:#||:</span></a></span><span> </span><span id="local-6989586621679086293"><span class="annot"><span class="annottext">attr :: cat -&gt; DepMarking -&gt; CatPlus cat
+</span><a href="#local-6989586621679086293"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat -&gt; DepMarking -&gt; CatPlus cat
+</span><a href="#local-6989586621679086293"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086295"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">DepMarking
+</span><a href="#local-6989586621679086294"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-105"></span><span>
 </span><span id="line-106"></span><span class="hs-keyword">infix</span><span> </span><span class="hs-number">9</span><span> </span><span class="annot"><a href="CatPlus.html#%3A%23%7C%7C%3A"><span class="hs-operator hs-type">:#||:</span></a></span><span>
 </span><span id="line-107"></span><span>
@@ -209,11 +209,11 @@ CatPlus cat
         a non-terminal categorial representation without attributes, 
         given a Keyaki category.
 -}</span><span>
-</span><span id="line-113"></span><span id="local-6989586621679086444"><span class="annot"><a href="CatPlus.html#newNonTerm"><span class="hs-identifier hs-type">newNonTerm</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086444"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086444"><span class="hs-identifier hs-type">cat</span></a></span></span><span>
+</span><span id="line-113"></span><span id="local-6989586621679086417"><span class="annot"><a href="CatPlus.html#newNonTerm"><span class="hs-identifier hs-type">newNonTerm</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086417"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086417"><span class="hs-identifier hs-type">cat</span></a></span></span><span>
 </span><span id="line-114"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="CatPlus.html#newNonTerm"><span class="hs-pragma hs-type">newNonTerm</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-115"></span><span id="newNonTerm"><span class="annot"><span class="annottext">newNonTerm :: cat -&gt; CatPlus cat
-</span><a href="CatPlus.html#newNonTerm"><span class="hs-identifier hs-var hs-var">newNonTerm</span></a></span></span><span> </span><span id="local-6989586621679086319"><span class="annot"><span class="annottext">cs :: cat
-</span><a href="#local-6989586621679086319"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonTerm :: forall cat.
+</span><a href="CatPlus.html#newNonTerm"><span class="hs-identifier hs-var hs-var">newNonTerm</span></a></span></span><span> </span><span id="local-6989586621679086292"><span class="annot"><span class="annottext">cs :: cat
+</span><a href="#local-6989586621679086292"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonTerm :: forall cat.
 cat
 -&gt; Maybe Int
 -&gt; DepMarking
@@ -225,7 +225,7 @@ cat
 </span><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-type hs-type">NonTerm</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span>
 </span><span id="line-116"></span><span>    </span><span class="annot"><span class="annottext">cat :: cat
 </span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086319"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span>
+</span><a href="#local-6989586621679086292"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span>
 </span><span id="line-117"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">index :: Maybe Int
 </span><a href="CatPlus.html#index"><span class="hs-identifier hs-var">index</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int
 forall a. Maybe a
@@ -247,12 +247,12 @@ forall k a. Map k a
 </span><span id="line-124"></span><span class="hs-comment">----------------------------------</span><span>
 </span><span id="line-125"></span><span>
 </span><span id="line-126"></span><span class="hs-keyword">instance</span><span> </span><span class="hs-pragma">{-# OVERLAPS</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span>
-</span><span id="line-127"></span><span>    </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679086311"><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnsafelyParsableAsTerm</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span>
-</span><span id="line-128"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnsafelyParsableAsTerm</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-129"></span><span>    </span><span id="local-6989586621679086310"><span class="annot"><span class="annottext">pUnsafeNonTerm :: ParsecT err Text m (CatPlus cat)
+</span><span id="line-127"></span><span>    </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679086284"><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnsafelyParsableAsTerm</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span>
+</span><span id="line-128"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnsafelyParsableAsTerm</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>    </span><span id="local-6989586621679086283"><span class="annot"><span class="annottext">pUnsafeNonTerm :: ParsecT err Text m (CatPlus cat)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">pUnsafeNonTerm</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-130"></span><span>            </span><span id="local-6989586621679086308"><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086308"><span class="hs-identifier hs-var">cat</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m cat
+</span><span id="line-130"></span><span>            </span><span id="local-6989586621679086281"><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086281"><span class="hs-identifier hs-var">cat</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m cat
 forall str term err (m :: * -&gt; *).
 (UnsafelyParsableAsTerm str term, Ord err) =&gt;
 ParsecT err str m term
@@ -260,20 +260,20 @@ ParsecT err str m term
 </span><span id="line-131"></span><span>            </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *).
 CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
-</span><a href="#local-6989586621679086307"><span class="hs-identifier hs-var">pManyAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">(CatPlus cat -&gt; ParsecT err Text m (CatPlus cat))
+</span><a href="#local-6989586621679086280"><span class="hs-identifier hs-var">pManyAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">(CatPlus cat -&gt; ParsecT err Text m (CatPlus cat))
 -&gt; CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">cat -&gt; CatPlus cat
 forall cat. cat -&gt; CatPlus cat
 </span><a href="CatPlus.html#newNonTerm"><span class="hs-identifier hs-var">newNonTerm</span></a></span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086308"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span>
+</span><a href="#local-6989586621679086281"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span>
 </span><span id="line-132"></span><span>        </span><span class="hs-keyword">where</span><span>
-</span><span id="line-133"></span><span>            </span><span id="local-6989586621679086417"><span id="local-6989586621679086418"><span class="annot"><a href="#local-6989586621679086306"><span class="hs-identifier hs-type">pNumCat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679086418"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span>
-</span><span id="line-134"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParsecT</span></span><span> </span><span class="annot"><a href="#local-6989586621679086418"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086417"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-135"></span><span>            </span><span id="local-6989586621679086306"><span class="annot"><span class="annottext">pNumCat :: ParsecT e Text m (Int, cat)
-</span><a href="#local-6989586621679086306"><span class="hs-identifier hs-var hs-var">pNumCat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-136"></span><span>                </span><span id="local-6989586621679086305"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679086305"><span class="hs-identifier hs-var">index</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT e Text m Int
+</span><span id="line-133"></span><span>            </span><span id="local-6989586621679086390"><span id="local-6989586621679086391"><span class="annot"><a href="#local-6989586621679086279"><span class="hs-identifier hs-type">pNumCat</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679086391"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span> </span><span>
+</span><span id="line-134"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParsecT</span></span><span> </span><span class="annot"><a href="#local-6989586621679086391"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086390"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-135"></span><span>            </span><span id="local-6989586621679086279"><span class="annot"><span class="annottext">pNumCat :: ParsecT e Text m (Int, cat)
+</span><a href="#local-6989586621679086279"><span class="hs-identifier hs-var hs-var">pNumCat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-136"></span><span>                </span><span id="local-6989586621679086278"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679086278"><span class="hs-identifier hs-var">index</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT e Text m Int
 forall e s (m :: * -&gt; *) a.
 (MonadParsec e s m, Token s ~ Char, Num a) =&gt;
 m a
@@ -284,8 +284,8 @@ MonadParsec e s m =&gt;
 Token s -&gt; m (Token s)
 </span><span class="hs-identifier hs-var">single</span></span><span> </span><span class="annot"><span class="annottext">Token Text
 </span><span class="hs-char">'^'</span></span><span>
-</span><span id="line-138"></span><span>                </span><span id="local-6989586621679086303"><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086303"><span class="hs-identifier hs-var">cat</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT e Text m cat
+</span><span id="line-138"></span><span>                </span><span id="local-6989586621679086276"><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086276"><span class="hs-identifier hs-var">cat</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT e Text m cat
 forall str term err (m :: * -&gt; *).
 (UnsafelyParsableAsTerm str term, Ord err) =&gt;
 ParsecT err str m term
@@ -293,20 +293,20 @@ ParsecT err str m term
 </span><span id="line-139"></span><span>                </span><span class="annot"><span class="annottext">(Int, cat) -&gt; ParsecT e Text m (Int, cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679086305"><span class="hs-identifier hs-var">index</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086303"><span class="hs-identifier hs-var">cat</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-140"></span><span>            </span><span id="local-6989586621679086302"><span class="annot"><a href="#local-6989586621679086301"><span class="hs-identifier hs-type">pAttrVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParsecT</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086302"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-141"></span><span>            </span><span id="local-6989586621679086301"><span class="annot"><span class="annottext">pAttrVal :: CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
-</span><a href="#local-6989586621679086301"><span class="hs-identifier hs-var hs-var">pAttrVal</span></a></span></span><span> </span><span id="local-6989586621679086300"><span class="annot"><span class="annottext">kc :: CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="#local-6989586621679086278"><span class="hs-identifier hs-var">index</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086276"><span class="hs-identifier hs-var">cat</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>            </span><span id="local-6989586621679086275"><span class="annot"><a href="#local-6989586621679086274"><span class="hs-identifier hs-type">pAttrVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParsecT</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086275"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-141"></span><span>            </span><span id="local-6989586621679086274"><span class="annot"><span class="annottext">pAttrVal :: CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
+</span><a href="#local-6989586621679086274"><span class="hs-identifier hs-var hs-var">pAttrVal</span></a></span></span><span> </span><span id="local-6989586621679086273"><span class="annot"><span class="annottext">kc :: CatPlus cat
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-142"></span><span>                </span><span class="annot"><span class="annottext">Token Text -&gt; ParsecT err Text m (Token Text)
 forall e s (m :: * -&gt; *).
 MonadParsec e s m =&gt;
 Token s -&gt; m (Token s)
 </span><span class="hs-identifier hs-var">single</span></span><span> </span><span class="annot"><span class="annottext">Token Text
 </span><span class="hs-char">'#'</span></span><span>
-</span><span id="line-143"></span><span>                </span><span id="local-6989586621679086299"><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086299"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
+</span><span id="line-143"></span><span>                </span><span id="local-6989586621679086272"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679086272"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
 -&gt; (Token Text -&gt; Bool) -&gt; ParsecT err Text m (Tokens Text)
 forall e s (m :: * -&gt; *).
 MonadParsec e s m =&gt;
@@ -316,29 +316,29 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Attribute&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Token Text -&gt; Bool) -&gt; ParsecT err Text m Text)
 -&gt; (Token Text -&gt; Bool) -&gt; ParsecT err Text m Text
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086297"><span class="annot"><span class="annottext">c :: Token Text
-</span><a href="#local-6989586621679086297"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086270"><span class="annot"><span class="annottext">c :: Token Text
+</span><a href="#local-6989586621679086270"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span>
 </span><span id="line-144"></span><span>                            </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086297"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086270"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">'('</span></span><span>
 </span><span id="line-145"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086297"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086270"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">')'</span></span><span>
 </span><span id="line-146"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086297"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086270"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">'#'</span></span><span>
 </span><span id="line-147"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086297"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086270"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">'='</span></span><span>
 </span><span id="line-148"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
@@ -346,7 +346,7 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isSpace</span></span><span> </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086297"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span>
+</span><a href="#local-6989586621679086270"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-149"></span><span>                </span><span class="annot"><span class="annottext">Token Text -&gt; ParsecT err Text m (Token Text)
 forall e s (m :: * -&gt; *).
 MonadParsec e s m =&gt;
@@ -354,10 +354,10 @@ Token s -&gt; m (Token s)
 </span><span class="hs-identifier hs-var">single</span></span><span> </span><span class="annot"><span class="annottext">Token Text
 </span><span class="hs-char">'='</span></span><span>
 </span><span id="line-150"></span><span>                </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086299"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679086272"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-151"></span><span>                    </span><span class="hs-string">&quot;index&quot;</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
-</span><span id="line-152"></span><span>                        </span><span id="local-6989586621679086293"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679086293"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m Int
+</span><span id="line-152"></span><span>                        </span><span id="local-6989586621679086266"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679086266"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m Int
 forall e s (m :: * -&gt; *) a.
 (MonadParsec e s m, Token s ~ Char, Num a) =&gt;
 m a
@@ -365,25 +365,25 @@ m a
 </span><span id="line-153"></span><span>                        </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">index :: Maybe Int
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">index :: Maybe Int
 </span><a href="CatPlus.html#index"><span class="hs-identifier hs-var">index</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe Int
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679086293"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span>
+</span><a href="#local-6989586621679086266"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">}</span><span> </span><span>
 </span><span id="line-154"></span><span>                    </span><span class="hs-string">&quot;role&quot;</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
-</span><span id="line-155"></span><span>                        </span><span id="local-6989586621679086292"><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086292"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m DepMarking
+</span><span id="line-155"></span><span>                        </span><span id="local-6989586621679086265"><span class="annot"><span class="annottext">DepMarking
+</span><a href="#local-6989586621679086265"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m DepMarking
 forall e (m :: * -&gt; *). Ord e =&gt; ParsecT e Text m DepMarking
 </span><a href="ABCDepMarking.html#parseDepMarking"><span class="hs-identifier hs-var">parseDepMarking</span></a></span><span>
 </span><span id="line-156"></span><span>                        </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">role :: DepMarking
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">role :: DepMarking
 </span><a href="CatPlus.html#role"><span class="hs-keyword hs-var">role</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086292"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><a href="#local-6989586621679086265"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">}</span><span>
 </span><span id="line-157"></span><span>                    </span><span class="hs-string">&quot;deriv&quot;</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-158"></span><span>                        </span><span id="local-6989586621679086290"><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086290"><span class="hs-identifier hs-var">dv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
+</span><span id="line-158"></span><span>                        </span><span id="local-6989586621679086263"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679086263"><span class="hs-identifier hs-var">dv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
 -&gt; (Token Text -&gt; Bool) -&gt; ParsecT err Text m (Tokens Text)
 forall e s (m :: * -&gt; *).
 MonadParsec e s m =&gt;
@@ -394,19 +394,19 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Value of Attribute: Derivation Rule&quot;</span></span><span class="hs-special">)</span><span>
 </span><span id="line-160"></span><span>                                </span><span class="annot"><span class="annottext">Char -&gt; Bool
 Token Text -&gt; Bool
-</span><a href="#local-6989586621679086289"><span class="hs-identifier hs-var">checkCharValue</span></a></span><span> </span><span>
+</span><a href="#local-6989586621679086262"><span class="hs-identifier hs-var">checkCharValue</span></a></span><span> </span><span>
 </span><span id="line-161"></span><span>                        </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(CatPlus cat -&gt; ParsecT err Text m (CatPlus cat))
 -&gt; CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">deriv :: Text
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">deriv :: Text
 </span><a href="CatPlus.html#deriv"><span class="hs-identifier hs-var">deriv</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086290"><span class="hs-identifier hs-var">dv</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><a href="#local-6989586621679086263"><span class="hs-identifier hs-var">dv</span></a></span><span> </span><span class="hs-special">}</span><span>
 </span><span id="line-162"></span><span>                    </span><span class="hs-string">&quot;scope&quot;</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
-</span><span id="line-163"></span><span>                        </span><span id="local-6989586621679086288"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679086288"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m Int
+</span><span id="line-163"></span><span>                        </span><span id="local-6989586621679086261"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679086261"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m Int
 forall e s (m :: * -&gt; *) a.
 (MonadParsec e s m, Token s ~ Char, Num a) =&gt;
 m a
@@ -425,16 +425,16 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 -&gt; CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-165"></span><span>                            </span><span class="annot"><span class="annottext">scope :: [Int]
 </span><a href="CatPlus.html#scope"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679086288"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><a href="#local-6989586621679086261"><span class="hs-identifier hs-var">res</span></a></span><span>
 </span><span id="line-166"></span><span>                        </span><span class="hs-special">}</span><span>
 </span><span id="line-167"></span><span>                    </span><span class="hs-string">&quot;covertArgs&quot;</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-168"></span><span>                        </span><span id="local-6989586621679086286"><span class="annot"><span class="annottext">[(Int, cat)]
-</span><a href="#local-6989586621679086286"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m (Int, cat)
+</span><span id="line-168"></span><span>                        </span><span id="local-6989586621679086259"><span class="annot"><span class="annottext">[(Int, cat)]
+</span><a href="#local-6989586621679086259"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m (Int, cat)
 forall e (m :: * -&gt; *). Ord e =&gt; ParsecT e Text m (Int, cat)
-</span><a href="#local-6989586621679086306"><span class="hs-identifier hs-var">pNumCat</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m (Int, cat)
+</span><a href="#local-6989586621679086279"><span class="hs-identifier hs-var">pNumCat</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m (Int, cat)
 -&gt; ParsecT err Text m Char -&gt; ParsecT err Text m [(Int, cat)]
 forall (m :: * -&gt; *) a sep. MonadPlus m =&gt; m a -&gt; m sep -&gt; m [a]
 </span><span class="hs-operator hs-var">`sepBy1`</span></span><span> </span><span class="annot"><span class="annottext">Token Text -&gt; ParsecT err Text m (Token Text)
@@ -449,15 +449,15 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 -&gt; CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-170"></span><span>                            </span><span class="annot"><span class="annottext">covertArgs :: [(Int, cat)]
 </span><a href="CatPlus.html#covertArgs"><span class="hs-identifier hs-var">covertArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Int, cat)]
-</span><a href="#local-6989586621679086286"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><a href="#local-6989586621679086259"><span class="hs-identifier hs-var">res</span></a></span><span>
 </span><span id="line-171"></span><span>                        </span><span class="hs-special">}</span><span>
-</span><span id="line-172"></span><span>                    </span><span id="local-6989586621679086285"><span class="annot"><span class="annottext">otherAttr :: Text
-</span><a href="#local-6989586621679086285"><span class="hs-identifier hs-var">otherAttr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-173"></span><span>                        </span><span id="local-6989586621679086284"><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086284"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
+</span><span id="line-172"></span><span>                    </span><span id="local-6989586621679086258"><span class="annot"><span class="annottext">otherAttr :: Text
+</span><a href="#local-6989586621679086258"><span class="hs-identifier hs-var">otherAttr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-173"></span><span>                        </span><span id="local-6989586621679086257"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679086257"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
 -&gt; (Token Text -&gt; Bool) -&gt; ParsecT err Text m (Tokens Text)
 forall e s (m :: * -&gt; *).
 MonadParsec e s m =&gt;
@@ -468,54 +468,54 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Value of Some Attribute&quot;</span></span><span class="hs-special">)</span><span>
 </span><span id="line-175"></span><span>                            </span><span class="annot"><span class="annottext">Char -&gt; Bool
 Token Text -&gt; Bool
-</span><a href="#local-6989586621679086289"><span class="hs-identifier hs-var">checkCharValue</span></a></span><span>
+</span><a href="#local-6989586621679086262"><span class="hs-identifier hs-var">checkCharValue</span></a></span><span>
 </span><span id="line-176"></span><span>                        </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(CatPlus cat -&gt; ParsecT err Text m (CatPlus cat))
 -&gt; CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-177"></span><span>                            </span><span class="annot"><span class="annottext">attrs :: Map Text Text
 </span><a href="CatPlus.html#attrs"><span class="hs-identifier hs-var">attrs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Map Text Text -&gt; Map Text Text
 forall k a. Ord k =&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
 </span><span class="hs-identifier hs-var">DMap.insert</span></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086285"><span class="hs-identifier hs-var">otherAttr</span></a></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086284"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CatPlus cat -&gt; Map Text Text
+</span><a href="#local-6989586621679086258"><span class="hs-identifier hs-var">otherAttr</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679086257"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CatPlus cat -&gt; Map Text Text
 forall cat. CatPlus cat -&gt; Map Text Text
 </span><a href="CatPlus.html#attrs"><span class="hs-identifier hs-var hs-var">attrs</span></a></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086300"><span class="hs-identifier hs-var">kc</span></a></span><span class="hs-special">)</span><span> </span><span>
+</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">kc</span></a></span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-178"></span><span>                            </span><span class="hs-special">}</span><span>
 </span><span id="line-179"></span><span>                    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-180"></span><span>                        </span><span class="annot"><a href="#local-6989586621679086289"><span class="hs-identifier hs-type">checkCharValue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-181"></span><span>                        </span><span id="local-6989586621679086289"><span class="annot"><span class="annottext">checkCharValue :: Char -&gt; Bool
-</span><a href="#local-6989586621679086289"><span class="hs-identifier hs-var hs-var">checkCharValue</span></a></span></span><span> </span><span id="local-6989586621679086282"><span class="annot"><span class="annottext">c :: Char
-</span><a href="#local-6989586621679086282"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span>
+</span><span id="line-180"></span><span>                        </span><span class="annot"><a href="#local-6989586621679086262"><span class="hs-identifier hs-type">checkCharValue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-181"></span><span>                        </span><span id="local-6989586621679086262"><span class="annot"><span class="annottext">checkCharValue :: Char -&gt; Bool
+</span><a href="#local-6989586621679086262"><span class="hs-identifier hs-var hs-var">checkCharValue</span></a></span></span><span> </span><span id="local-6989586621679086255"><span class="annot"><span class="annottext">c :: Char
+</span><a href="#local-6989586621679086255"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span>
 </span><span id="line-182"></span><span>                            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679086282"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086255"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">'('</span></span><span>
 </span><span id="line-183"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679086282"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086255"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">')'</span></span><span>
 </span><span id="line-184"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679086282"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086255"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">'#'</span></span><span>
 </span><span id="line-185"></span><span>                            </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isSpace</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679086282"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-186"></span><span>            </span><span id="local-6989586621679086281"><span class="annot"><a href="#local-6989586621679086307"><span class="hs-identifier hs-type">pManyAttrVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParsecT</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086281"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086311"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-187"></span><span>            </span><span id="local-6989586621679086307"><span class="annot"><span class="annottext">pManyAttrVal :: CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
-</span><a href="#local-6989586621679086307"><span class="hs-identifier hs-var hs-var">pManyAttrVal</span></a></span></span><span> </span><span id="local-6989586621679086280"><span class="annot"><span class="annottext">kc :: CatPlus cat
-</span><a href="#local-6989586621679086280"><span class="hs-identifier hs-var">kc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-188"></span><span>                </span><span id="local-6989586621679086279"><span class="annot"><span class="annottext">Maybe (CatPlus cat)
-</span><a href="#local-6989586621679086279"><span class="hs-identifier hs-var">kcModRaw</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m (CatPlus cat)
+</span><a href="#local-6989586621679086255"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-186"></span><span>            </span><span id="local-6989586621679086254"><span class="annot"><a href="#local-6989586621679086280"><span class="hs-identifier hs-type">pManyAttrVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ParsecT</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679086254"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086284"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-187"></span><span>            </span><span id="local-6989586621679086280"><span class="annot"><span class="annottext">pManyAttrVal :: CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
+</span><a href="#local-6989586621679086280"><span class="hs-identifier hs-var hs-var">pManyAttrVal</span></a></span></span><span> </span><span id="local-6989586621679086253"><span class="annot"><span class="annottext">kc :: CatPlus cat
+</span><a href="#local-6989586621679086253"><span class="hs-identifier hs-var">kc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-188"></span><span>                </span><span id="local-6989586621679086252"><span class="annot"><span class="annottext">Maybe (CatPlus cat)
+</span><a href="#local-6989586621679086252"><span class="hs-identifier hs-var">kcModRaw</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecT err Text m (CatPlus cat)
 -&gt; ParsecT err Text m (Maybe (CatPlus cat))
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f (Maybe a)
 </span><span class="hs-identifier hs-var">optional</span></span><span> </span><span class="annot"><span class="annottext">(ParsecT err Text m (CatPlus cat)
@@ -526,22 +526,22 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *).
 CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
-</span><a href="#local-6989586621679086301"><span class="hs-identifier hs-var">pAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086280"><span class="hs-identifier hs-var">kc</span></a></span><span>
+</span><a href="#local-6989586621679086274"><span class="hs-identifier hs-var">pAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
+</span><a href="#local-6989586621679086253"><span class="hs-identifier hs-var">kc</span></a></span><span>
 </span><span id="line-189"></span><span>                </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe (CatPlus cat)
-</span><a href="#local-6989586621679086279"><span class="hs-identifier hs-var">kcModRaw</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span>
+</span><a href="#local-6989586621679086252"><span class="hs-identifier hs-var">kcModRaw</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span>
 </span><span id="line-190"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086280"><span class="hs-identifier hs-var">kc</span></a></span><span>
-</span><span id="line-191"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086277"><span class="annot"><span class="annottext">kcMod :: CatPlus cat
-</span><a href="#local-6989586621679086277"><span class="hs-identifier hs-var">kcMod</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
-</span><a href="#local-6989586621679086307"><span class="hs-identifier hs-var">pManyAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
-</span><a href="#local-6989586621679086277"><span class="hs-identifier hs-var">kcMod</span></a></span><span>
-</span><span id="line-192"></span><span>    </span><span id="local-6989586621679086276"><span class="annot"><span class="annottext">pUnsafeTerm :: ParsecT err Text m (CatPlus cat)
+</span><a href="#local-6989586621679086253"><span class="hs-identifier hs-var">kc</span></a></span><span>
+</span><span id="line-191"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086250"><span class="annot"><span class="annottext">kcMod :: CatPlus cat
+</span><a href="#local-6989586621679086250"><span class="hs-identifier hs-var">kcMod</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
+</span><a href="#local-6989586621679086280"><span class="hs-identifier hs-var">pManyAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">CatPlus cat
+</span><a href="#local-6989586621679086250"><span class="hs-identifier hs-var">kcMod</span></a></span><span>
+</span><span id="line-192"></span><span>    </span><span id="local-6989586621679086249"><span class="annot"><span class="annottext">pUnsafeTerm :: ParsecT err Text m (CatPlus cat)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">pUnsafeTerm</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-193"></span><span>        </span><span id="local-6989586621679086274"><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086274"><span class="hs-identifier hs-var">word</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
+</span><span id="line-193"></span><span>        </span><span id="local-6989586621679086247"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679086247"><span class="hs-identifier hs-var">word</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe String
 -&gt; (Token Text -&gt; Bool) -&gt; ParsecT err Text m (Tokens Text)
 forall e s (m :: * -&gt; *).
 MonadParsec e s m =&gt;
@@ -551,17 +551,17 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Terminal Label&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Token Text -&gt; Bool) -&gt; ParsecT err Text m Text)
 -&gt; (Token Text -&gt; Bool) -&gt; ParsecT err Text m Text
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086273"><span class="annot"><span class="annottext">c :: Token Text
-</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679086246"><span class="annot"><span class="annottext">c :: Token Text
+</span><a href="#local-6989586621679086246"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span>
 </span><span id="line-194"></span><span>                    </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086246"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">'('</span></span><span> </span><span>
 </span><span id="line-195"></span><span>                    </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679086246"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="hs-char">')'</span></span><span> </span><span>
 </span><span id="line-196"></span><span>                    </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
@@ -569,7 +569,7 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isSpace</span></span><span> </span><span class="annot"><span class="annottext">Char
 Token Text
-</span><a href="#local-6989586621679086273"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086246"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-197"></span><span>        </span><span class="annot"><span class="annottext">CatPlus cat -&gt; ParsecT err Text m (CatPlus cat)
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(CatPlus cat -&gt; ParsecT err Text m (CatPlus cat))
@@ -578,62 +578,62 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; CatPlus cat
 forall cat. Text -&gt; CatPlus cat
 </span><a href="CatPlus.html#Term"><span class="hs-identifier hs-var">Term</span></a></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086274"><span class="hs-identifier hs-var">word</span></a></span><span>
+</span><a href="#local-6989586621679086247"><span class="hs-identifier hs-var">word</span></a></span><span>
 </span><span id="line-198"></span><span>
 </span><span id="line-199"></span><span class="hs-comment">----------------------------------</span><span>
 </span><span id="line-200"></span><span>
-</span><span id="line-201"></span><span id="local-6989586621679086272"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679086269"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="annot"><a href="#local-6989586621679086272"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086272"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-202"></span><span>    </span><span id="local-6989586621679086267"><span class="annot"><span class="annottext">pretty :: CatPlus cat -&gt; Doc ann
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-type">Term</span></a></span><span> </span><span id="local-6989586621679086265"><span class="annot"><span class="annottext">word :: Text
-</span><a href="#local-6989586621679086265"><span class="hs-identifier hs-var">word</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Doc ann
+</span><span id="line-201"></span><span id="local-6989586621679086245"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679086242"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="annot"><a href="#local-6989586621679086245"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086245"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-202"></span><span>    </span><span id="local-6989586621679086240"><span class="annot"><span class="annottext">pretty :: CatPlus cat -&gt; Doc ann
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#Term"><span class="hs-identifier hs-type">Term</span></a></span><span> </span><span id="local-6989586621679086238"><span class="annot"><span class="annottext">word :: Text
+</span><a href="#local-6989586621679086238"><span class="hs-identifier hs-var">word</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086265"><span class="hs-identifier hs-var">word</span></a></span><span>
+</span><a href="#local-6989586621679086238"><span class="hs-identifier hs-var">word</span></a></span><span>
 </span><span id="line-203"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><a href="CatPlus.html#NonTerm"><span class="hs-identifier hs-type">NonTerm</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-204"></span><span>            </span><span class="annot"><span class="annottext">cat :: forall cat. CatPlus cat -&gt; cat
-</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086264"><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086264"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="CatPlus.html#cat"><span class="hs-identifier hs-var">cat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086237"><span class="annot"><span class="annottext">cat
+</span><a href="#local-6989586621679086237"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-205"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">index :: forall cat. CatPlus cat -&gt; Maybe Int
-</span><a href="CatPlus.html#index"><span class="hs-identifier hs-var">index</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086263"><span class="annot"><span class="annottext">Maybe Int
-</span><a href="#local-6989586621679086263"><span class="hs-identifier hs-var">idx</span></a></span></span><span>
+</span><a href="CatPlus.html#index"><span class="hs-identifier hs-var">index</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086236"><span class="annot"><span class="annottext">Maybe Int
+</span><a href="#local-6989586621679086236"><span class="hs-identifier hs-var">idx</span></a></span></span><span>
 </span><span id="line-206"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">role :: forall cat. CatPlus cat -&gt; DepMarking
-</span><a href="CatPlus.html#role"><span class="hs-keyword hs-var">role</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086262"><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086262"><span class="hs-identifier hs-var">r</span></a></span></span><span>
+</span><a href="CatPlus.html#role"><span class="hs-keyword hs-var">role</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086235"><span class="annot"><span class="annottext">DepMarking
+</span><a href="#local-6989586621679086235"><span class="hs-identifier hs-var">r</span></a></span></span><span>
 </span><span id="line-207"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">deriv :: forall cat. CatPlus cat -&gt; Text
-</span><a href="CatPlus.html#deriv"><span class="hs-identifier hs-var">deriv</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086261"><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086261"><span class="hs-identifier hs-var">d</span></a></span></span><span>
+</span><a href="CatPlus.html#deriv"><span class="hs-identifier hs-var">deriv</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086234"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679086234"><span class="hs-identifier hs-var">d</span></a></span></span><span>
 </span><span id="line-208"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">scope :: forall cat. CatPlus cat -&gt; [Int]
-</span><a href="CatPlus.html#scope"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086260"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679086260"><span class="hs-identifier hs-var">s</span></a></span></span><span>
+</span><a href="CatPlus.html#scope"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086233"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679086233"><span class="hs-identifier hs-var">s</span></a></span></span><span>
 </span><span id="line-209"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">covertArgs :: forall cat. CatPlus cat -&gt; [(Int, cat)]
-</span><a href="CatPlus.html#covertArgs"><span class="hs-identifier hs-var">covertArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086259"><span class="annot"><span class="annottext">[(Int, cat)]
-</span><a href="#local-6989586621679086259"><span class="hs-identifier hs-var">cA</span></a></span></span><span>
+</span><a href="CatPlus.html#covertArgs"><span class="hs-identifier hs-var">covertArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086232"><span class="annot"><span class="annottext">[(Int, cat)]
+</span><a href="#local-6989586621679086232"><span class="hs-identifier hs-var">cA</span></a></span></span><span>
 </span><span id="line-210"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">attrs :: forall cat. CatPlus cat -&gt; Map Text Text
-</span><a href="CatPlus.html#attrs"><span class="hs-identifier hs-var">attrs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086258"><span class="annot"><span class="annottext">Map Text Text
-</span><a href="#local-6989586621679086258"><span class="hs-keyword hs-var">as</span></a></span></span><span>
+</span><a href="CatPlus.html#attrs"><span class="hs-identifier hs-var">attrs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679086231"><span class="annot"><span class="annottext">Map Text Text
+</span><a href="#local-6989586621679086231"><span class="hs-keyword hs-var">as</span></a></span></span><span>
 </span><span id="line-211"></span><span>        </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cat -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086264"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621679086237"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-212"></span><span>        </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-213"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Int
-</span><a href="#local-6989586621679086263"><span class="hs-identifier hs-var">idx</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-214"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086257"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679086257"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;#index=&quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
+</span><a href="#local-6989586621679086236"><span class="hs-identifier hs-var">idx</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-214"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679086230"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679086230"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-string">&quot;#index=&quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679086257"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621679086230"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-215"></span><span>                </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc ann
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
 </span><span id="line-216"></span><span>        </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086262"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">DepMarking -&gt; DepMarking -&gt; Bool
+</span><a href="#local-6989586621679086235"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">DepMarking -&gt; DepMarking -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">DepMarking
 </span><a href="ABCDepMarking.html#None"><span class="hs-identifier hs-var">None</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Doc ann
@@ -643,23 +643,23 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">DepMarking -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">DepMarking
-</span><a href="#local-6989586621679086262"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086235"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-217"></span><span>        </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086261"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Bool
+</span><a href="#local-6989586621679086234"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="hs-string">&quot;#deriv=&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086261"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086234"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-218"></span><span>        </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-219"></span><span>            </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679086260"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679086233"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Doc ann
 forall a. Monoid a =&gt; a
@@ -680,12 +680,12 @@ forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Doc ann) -&gt; [Int] -&gt; [Doc ann]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679086260"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086233"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-222"></span><span>        </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-223"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[(Int, cat)]
-</span><a href="#local-6989586621679086259"><span class="hs-identifier hs-var">cA</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679086232"><span class="hs-identifier hs-var">cA</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-224"></span><span>                </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc ann
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
@@ -702,10 +702,10 @@ forall a. a -&gt; [a] -&gt; [a]
 forall ann. Doc ann
 </span><span class="hs-identifier hs-var">comma</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int, cat) -&gt; Doc ann
 forall a. Pretty cat =&gt; (Int, cat) -&gt; Doc a
-</span><a href="#local-6989586621679086254"><span class="hs-identifier hs-var">makeArg</span></a></span><span> </span><span class="annot"><span class="annottext">((Int, cat) -&gt; Doc ann) -&gt; [(Int, cat)] -&gt; [Doc ann]
+</span><a href="#local-6989586621679086227"><span class="hs-identifier hs-var">makeArg</span></a></span><span> </span><span class="annot"><span class="annottext">((Int, cat) -&gt; Doc ann) -&gt; [(Int, cat)] -&gt; [Doc ann]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[(Int, cat)]
-</span><a href="#local-6989586621679086259"><span class="hs-identifier hs-var">cA</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086232"><span class="hs-identifier hs-var">cA</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-227"></span><span>        </span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-228"></span><span>        </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
@@ -716,42 +716,42 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Text -&gt; Text) -&gt; Map Text Text -&gt; Text
 forall m k a. Monoid m =&gt; (k -&gt; a -&gt; m) -&gt; Map k a -&gt; m
 </span><span class="hs-identifier hs-var">foldMapWithKey</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
-</span><a href="#local-6989586621679086253"><span class="hs-identifier hs-var">makeAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">Map Text Text
-</span><a href="#local-6989586621679086258"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086226"><span class="hs-identifier hs-var">makeAttrVal</span></a></span><span> </span><span class="annot"><span class="annottext">Map Text Text
+</span><a href="#local-6989586621679086231"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-229"></span><span>        </span><span class="hs-keyword">where</span><span> </span><span>
-</span><span id="line-230"></span><span>            </span><span id="local-6989586621679086394"><span class="annot"><a href="#local-6989586621679086254"><span class="hs-identifier hs-type">makeArg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="annot"><a href="#local-6989586621679086272"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086272"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Doc</span></span><span> </span><span class="annot"><a href="#local-6989586621679086394"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-231"></span><span>            </span><span id="local-6989586621679086254"><span class="annot"><span class="annottext">makeArg :: (Int, cat) -&gt; Doc a
-</span><a href="#local-6989586621679086254"><span class="hs-identifier hs-var hs-var">makeArg</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679086252"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679086252"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086251"><span class="annot"><span class="annottext">c :: cat
-</span><a href="#local-6989586621679086251"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Doc a
+</span><span id="line-230"></span><span>            </span><span id="local-6989586621679086367"><span class="annot"><a href="#local-6989586621679086227"><span class="hs-identifier hs-type">makeArg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="annot"><a href="#local-6989586621679086245"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679086245"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Doc</span></span><span> </span><span class="annot"><a href="#local-6989586621679086367"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-231"></span><span>            </span><span id="local-6989586621679086227"><span class="annot"><span class="annottext">makeArg :: (Int, cat) -&gt; Doc a
+</span><a href="#local-6989586621679086227"><span class="hs-identifier hs-var hs-var">makeArg</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679086225"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679086225"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679086224"><span class="annot"><span class="annottext">c :: cat
+</span><a href="#local-6989586621679086224"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Doc a
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679086252"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Doc a -&gt; Doc a -&gt; Doc a
+</span><a href="#local-6989586621679086225"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Doc a -&gt; Doc a -&gt; Doc a
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-string">&quot;^&quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc a -&gt; Doc a -&gt; Doc a
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">cat -&gt; Doc a
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">cat
-</span><a href="#local-6989586621679086251"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Doc a -&gt; Doc a -&gt; Doc a
+</span><a href="#local-6989586621679086224"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Doc a -&gt; Doc a -&gt; Doc a
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-string">&quot;,&quot;</span></span><span>
-</span><span id="line-232"></span><span>            </span><span class="annot"><a href="#local-6989586621679086253"><span class="hs-identifier hs-type">makeAttrVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
-</span><span id="line-233"></span><span>            </span><span id="local-6989586621679086253"><span class="annot"><span class="annottext">makeAttrVal :: Text -&gt; Text -&gt; Text
-</span><a href="#local-6989586621679086253"><span class="hs-identifier hs-var hs-var">makeAttrVal</span></a></span></span><span> </span><span id="local-6989586621679086250"><span class="annot"><span class="annottext">attr :: Text
-</span><a href="#local-6989586621679086250"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span id="local-6989586621679086249"><span class="annot"><span class="annottext">val :: Text
-</span><a href="#local-6989586621679086249"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;#&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+</span><span id="line-232"></span><span>            </span><span class="annot"><a href="#local-6989586621679086226"><span class="hs-identifier hs-type">makeAttrVal</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-233"></span><span>            </span><span id="local-6989586621679086226"><span class="annot"><span class="annottext">makeAttrVal :: Text -&gt; Text -&gt; Text
+</span><a href="#local-6989586621679086226"><span class="hs-identifier hs-var hs-var">makeAttrVal</span></a></span></span><span> </span><span id="local-6989586621679086223"><span class="annot"><span class="annottext">attr :: Text
+</span><a href="#local-6989586621679086223"><span class="hs-identifier hs-var">attr</span></a></span></span><span> </span><span id="local-6989586621679086222"><span class="annot"><span class="annottext">val :: Text
+</span><a href="#local-6989586621679086222"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-string">&quot;#&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086250"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+</span><a href="#local-6989586621679086223"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="hs-string">&quot;=&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
-</span><a href="#local-6989586621679086249"><span class="hs-identifier hs-var">val</span></a></span></span><span>
+</span><a href="#local-6989586621679086222"><span class="hs-identifier hs-var">val</span></a></span></span><span>
 </span><span id="line-234"></span><span>
-</span><span id="line-235"></span><span id="local-6989586621679086248"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679086243"><span id="local-6989586621679086246"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679086248"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086248"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-236"></span><span>    </span><span id="local-6989586621679086241"><span class="annot"><span class="annottext">show :: CatPlus cat -&gt; String
+</span><span id="line-235"></span><span id="local-6989586621679086221"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679086216"><span id="local-6989586621679086219"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679086221"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="CatPlus.html#CatPlus"><span class="hs-identifier hs-type">CatPlus</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679086221"><span class="hs-identifier hs-type">cat</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-236"></span><span>    </span><span id="local-6989586621679086214"><span class="annot"><span class="annottext">show :: CatPlus cat -&gt; String
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimpleDocStream Any -&gt; String
 forall ann. SimpleDocStream ann -&gt; String
 </span><span class="hs-identifier hs-var">renderString</span></span><span> </span><span class="annot"><span class="annottext">(SimpleDocStream Any -&gt; String)

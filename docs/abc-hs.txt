@@ -5,7 +5,7 @@
 -- | Please see the README on GitHub at
 --   <a>https://github.com/aslemen/abc-hs#readme</a>
 @package abc-hs
-@version 20200727
+@version 20200801
 
 
 -- | Provide an representation of categories of the ABC Grammar.

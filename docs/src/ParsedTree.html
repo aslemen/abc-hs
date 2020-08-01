@@ -22,16 +22,16 @@
     Dumping with Text-builders
     ======
 --}</span><span>
-</span><span id="line-25"></span><span id="local-6989586621679086615"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679086612"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PDoc.Pretty</span></span><span> </span><span class="annot"><a href="#local-6989586621679086615"><span class="hs-identifier hs-type">term</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PDoc.Pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679086615"><span class="hs-identifier hs-type">term</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>    </span><span id="local-6989586621679086610"><span class="annot"><span class="annottext">pretty :: Tree term -&gt; Doc ann
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621679086607"><span class="annot"><span class="annottext">label :: term
-</span><a href="#local-6989586621679086607"><span class="hs-keyword hs-var">label</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">term -&gt; Doc ann
+</span><span id="line-25"></span><span id="local-6989586621679086588"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679086585"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PDoc.Pretty</span></span><span> </span><span class="annot"><a href="#local-6989586621679086588"><span class="hs-identifier hs-type">term</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PDoc.Pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Tree</span></span><span> </span><span class="annot"><a href="#local-6989586621679086588"><span class="hs-identifier hs-type">term</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>    </span><span id="local-6989586621679086583"><span class="annot"><span class="annottext">pretty :: Tree term -&gt; Doc ann
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621679086580"><span class="annot"><span class="annottext">label :: term
+</span><a href="#local-6989586621679086580"><span class="hs-keyword hs-var">label</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">term -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">PDoc.pretty</span></span><span> </span><span class="annot"><span class="annottext">term
-</span><a href="#local-6989586621679086607"><span class="hs-keyword hs-var">label</span></a></span><span>
-</span><span id="line-27"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621679086606"><span class="annot"><span class="annottext">label :: term
-</span><a href="#local-6989586621679086606"><span class="hs-keyword hs-var">label</span></a></span></span><span> </span><span id="local-6989586621679086605"><span class="annot"><span class="annottext">children :: [Tree term]
-</span><a href="#local-6989586621679086605"><span class="hs-identifier hs-var">children</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086580"><span class="hs-keyword hs-var">label</span></a></span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Node</span></span><span> </span><span id="local-6989586621679086579"><span class="annot"><span class="annottext">label :: term
+</span><a href="#local-6989586621679086579"><span class="hs-keyword hs-var">label</span></a></span></span><span> </span><span id="local-6989586621679086578"><span class="annot"><span class="annottext">children :: [Tree term]
+</span><a href="#local-6989586621679086578"><span class="hs-identifier hs-var">children</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-28"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann
 forall ann. Doc ann -&gt; Doc ann
 </span><span class="hs-identifier hs-var">PDoc.parens</span></span><span> </span><span>
@@ -40,7 +40,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">term -&gt; Doc ann
 forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">PDoc.pretty</span></span><span> </span><span class="annot"><span class="annottext">term
-</span><a href="#local-6989586621679086606"><span class="hs-keyword hs-var">label</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679086579"><span class="hs-keyword hs-var">label</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-30"></span><span>                </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
 forall ann. Doc ann -&gt; Doc ann -&gt; Doc ann
 </span><span class="hs-operator hs-var">PDoc.&lt;+&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann
@@ -56,4 +56,4 @@ forall a ann. Pretty a =&gt; a -&gt; Doc ann
 </span><span class="hs-identifier hs-var">PDoc.pretty</span></span><span> </span><span class="annot"><span class="annottext">(Tree term -&gt; Doc ann) -&gt; [Tree term] -&gt; [Doc ann]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Tree term]
-</span><a href="#local-6989586621679086605"><span class="hs-identifier hs-var">children</span></a></span><span class="hs-special">)</span></span></pre></body></html>
+</span><a href="#local-6989586621679086578"><span class="hs-identifier hs-var">children</span></a></span><span class="hs-special">)</span></span></pre></body></html>

@@ -214,7 +214,7 @@ relabelHeaded
                 let newVSSTCat = newFirstChildCat :\: newParentCandidate
                 newVSST <- relabelHeaded 
                             newVSSTCat 
-                            (\y -> fmap (const y) $ attrs undefined Head)
+                            (\y -> (newNonTerm y) { role = Head })
                             oldRestChildren
                 -- 3. Binarizationを行う．もし*PRO*があるならばそれをdropする．
                 return $ if isKTPRO newFirstChild
@@ -238,7 +238,7 @@ relabelHeaded
         let newFirstChildCat = newParentCandidate :/: newParentCandidate
         newFirstChild <- relabelRouting 
                             newFirstChildCat
-                            (\y -> fmap (const y) $ attrs undefined Adjunct)
+                            (\y -> (newNonTerm y) { role = Adjunct })
                             oldFirstChildChildren
         -- 2. 同時に，Headも変換．
         let newVSSTCat = newParentCandidate
@@ -293,8 +293,7 @@ relabelHeaded
             newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
         newLastChild <- relabelRouting 
                             newLastChildCat 
-                            (\y -> 
-                                fmap (const y) $ attrs undefined AdjunctControl)
+                            (\y -> (newNonTerm y) { role = AdjunctControl })
                             oldLastChildChildren
         let newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
         -- 2. 同時に，Headも変換．
@@ -322,7 +321,7 @@ relabelHeaded
         let newLastChildCat = newParentCandidate :\: newParentCandidate
         newLastChild <- relabelRouting
                             newLastChildCat 
-                            (\y -> fmap (const y) $ attrs undefined r)
+                            (\y -> (newNonTerm y) { role = r })
                             oldLastChildChildren
         -- 2. 同時に，Headも変換．
         let newVSSTCat = newParentCandidate
