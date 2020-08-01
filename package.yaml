@@ -31,11 +31,7 @@ dependencies:
 - split
 - tree-diff
 - prettyprinter
-- markdown-unlit
 - exceptions
-
-ghc-options:
-  - "-pgmL markdown-unlit"
 
 library:
   source-dirs: src
