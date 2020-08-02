@@ -23,6 +23,7 @@ module CatPlus (
     , newNonTerm
     -- * Viewers
     , getCat
+    , getCatRule
     ) where
 
 import qualified Data.List as DList
