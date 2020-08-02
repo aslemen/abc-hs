@@ -103,12 +103,27 @@ instance Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.
 -- | Provide an representation of categories of the Kainoki Treebank. The
 --   parser is available at the <a>Parser</a> module.
 module ABCDepMarking
+
+-- | A data type representing grammatical roles of non-terminal nodes in
+--   the ABC Treebank.
 data DepMarking
+
+-- | The head grammatical role, marked with <tt>#role=h</tt>
 Head :: DepMarking
+
+-- | The adjunct, marked with <tt>#role=a</tt>
 Adjunct :: DepMarking
+
+-- | The complement, marked with <tt>#role=c</tt> | The role for control
+--   predicates, marked with <tt>#role=ac</tt>
 Complement :: DepMarking
 AdjunctControl :: DepMarking
+
+-- | The vacuous role
 None :: DepMarking
+
+-- | A <a>Text.Megaparsec</a> parser for the values (i.e. the hole in
+--   <tt>#role=_</tt>) of grammatical role features.
 parseDepMarking :: Ord e => ParsecT e Text m DepMarking
 instance GHC.Classes.Eq ABCDepMarking.DepMarking
 instance GHC.Show.Show ABCDepMarking.DepMarking
@@ -119,8 +134,8 @@ instance Data.Text.Prettyprint.Doc.Internal.Pretty ABCDepMarking.DepMarking
 --   parser is available at the <a>Parser</a> module.
 module CatPlus
 
--- | Record structure that represents (Keyaki) tree node labels which are
---   augmented with our own additional attributes.
+-- | A record structure that represents (Keyaki) tree node labels which are
+--   annotated with our own additional attributes.
 data CatPlus cat
 
 -- | A terminal node label, which contains nothing other than a word.
@@ -130,7 +145,7 @@ Term :: Text -> CatPlus cat
 [word] :: CatPlus cat -> Text
 
 -- | A non-terminal node label comprised of a (Keyaki or ABC) category and
---   additional optional information for the ABC relabeling.
+--   extra annotations for the ABC relabeling.
 NonTerm :: cat -> Maybe Int -> DepMarking -> Text -> [Int] -> [(Int, cat)] -> Map Text Text -> CatPlus cat
 
 -- | A (Keyaki / ABC) category.
@@ -145,23 +160,55 @@ NonTerm :: cat -> Maybe Int -> DepMarking -> Text -> [Int] -> [(Int, cat)] -> Ma
 -- | The special ABC derivational rule (e.g. unary rules), if any, invoked
 --   by this node. Empty as default.
 [deriv] :: CatPlus cat -> Text
+
+-- | To be abolished.
 [scope] :: CatPlus cat -> [Int]
 
--- | A list of covert arguments (<tt>*pro*</tt> in Keyaki), each specified
---   with its scopal rank in the clause and its category.
+-- | <ul>
+--   <li><i>To be abolished</i> A list of covert arguments (<tt>*pro*</tt>
+--   in Keyaki), each specified with its scopal rank in the clause and its
+--   category.</li>
+--   </ul>
 [covertArgs] :: CatPlus cat -> [(Int, cat)]
 
 -- | Other attributes.
 [attrs] :: CatPlus cat -> Map Text Text
+
+-- | A bidirectional pattern synonym that matches the (non-terminal)
+--   category of an annotated label (of type <tt><a>Maybe</a> cat</tt>) and
+--   its context (of type <tt>cat -&gt; <a>CatPlus</a> cat</tt>)). This is
+--   can be seen as a wrapper of <a>getCat</a>.
 pattern (:#:) :: cat -> (cat -> CatPlus cat) -> CatPlus cat
+
+-- | A bidirectional pattern synonym that matches the (non-terminal)
+--   category and the grammatical role of an annotated label (of type
+--   <tt><a>Maybe</a> (cat, <a>DepMarking</a>)</tt>) and its context (of
+--   type <tt>cat -&gt; <a>DepMarking</a> -&gt; <a>CatPlus</a> cat</tt>)).
+--   This is can be seen as a wrapper of <a>getCatRule</a>.
 pattern (:#||:) :: (cat, DepMarking) -> (cat -> DepMarking -> CatPlus cat) -> CatPlus cat
 infix 9 :#:
 infix 9 :#||:
 
--- | Smart constructor that generates a non-terminal categorial
+-- | A smart constructor that generates a non-terminal categorial
 --   representation without attributes, given a Keyaki category.
 newNonTerm :: cat -> CatPlus cat
+
+-- | Extract from an annotated (non-terminal) node label a costate wrt its
+--   category, i.e. a pair of its category (of type <tt><a>Maybe</a>
+--   cat</tt>) and the annotational remainder (aka. the context of the
+--   category, an annotated node label <tt><a>CatPlus</a> cat</tt> missing
+--   a category <tt>cat</tt>). For annotated terminal node labels, the
+--   resulting category is <a>Nothing</a>.
 getCat :: CatPlus cat -> (Maybe cat, cat -> CatPlus cat)
+
+-- | Extract from an annotated (non-terminal) node label a costate wrt its
+--   category and its grammatical rule (i.e. a pair than consists of the
+--   pair of its category and its grammatical rule (of type
+--   <tt><a>Maybe</a> (cat, <a>DepMarking</a>)</tt>) and the annotational
+--   remainder (aka. the context of the abovementioned two, of type <tt>cat
+--   -&gt; <a>DepMarking</a> -&gt; <a>CatPlus</a> cat</tt>)). For annotated
+--   terminal node labels, the resulting category is <a>Nothing</a>.
+getCatRule :: CatPlus cat -> (Maybe (cat, DepMarking), cat -> DepMarking -> CatPlus cat)
 instance GHC.Base.Functor CatPlus.CatPlus
 instance GHC.Classes.Eq cat => GHC.Classes.Eq (CatPlus.CatPlus cat)
 instance Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text cat => Data.Tree.Parser.Penn.Megaparsec.Char.UnsafelyParsableAsTerm Data.Text.Internal.Text (CatPlus.CatPlus cat)

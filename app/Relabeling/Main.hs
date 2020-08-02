@@ -63,6 +63,10 @@ matchTerminalNode :: Tree (CatPlus a) -> (Set Text) -> Bool
 matchTerminalNode (Node (Term w) []) li = w `elem` li
 matchTerminalNode _ _                   = False 
 
+{-|
+    Tell whether a subtree contains only a terminal node 
+        that is exactly an empty category.
+-}
 isKTPRO tree = matchTerminalNode tree (DS.fromList ["*PRO*", "*T*"])
 
 dropAnt :: [ABCCat] -> ABCCat -> ABCCat
@@ -82,16 +86,28 @@ type RelabelFunc children
 type KeyakiTree = Tree (CatPlus KeyakiCat)
 type ABCTree    = Tree (CatPlus ABCCat)
 
+{-|
+    A data structure that represents a way of segmentation of 
+        children of a 'KeyakiTree' node
+        based on their grammatical roles (of type 'DepMarking').
+-}
 data SeparatedChildren
     = SeparatedChildren {
-        preHead :: [KeyakiTree]
-        , head :: KeyakiTree
-        , postHeadRev :: [KeyakiTree]
+        preHead :: [KeyakiTree] -- ^ The children that precede the head
+        , head :: KeyakiTree    -- ^ The child that is the head of the (sub)tree
+        , postHeadRev :: [KeyakiTree] -- ^ The children that follow the head 
     }
 
+{-|
+    Peel off from a 'SeparatedChilren' list 
+        a leftmost child that precedes the head.
+-}
 getPreHead :: 
-    SeparatedChildren 
-    -> Either SeparatedChildren (KeyakiTree, SeparatedChildren) 
+    SeparatedChildren -- ^ A segmented list of 'KeyakiTree's.
+    -- | If it has a pre-head element, the result is 
+    --          the element and the remainder.
+    --      If not, the given list is just returned untouched.
+    -> Either SeparatedChildren (KeyakiTree, SeparatedChildren) -- 
 getPreHead sc
     = case preHead sc of 
         x:xs -> Right (x, (sc {preHead = xs}))

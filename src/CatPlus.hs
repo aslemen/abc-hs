@@ -49,8 +49,8 @@ import Data.Tree.Parser.Penn.Megaparsec.Char (
 import ABCDepMarking
 
 {-|
-    Record structure that represents (Keyaki) tree node labels
-        which are augmented with our own additional attributes.
+    A record structure that represents (Keyaki) tree node labels
+        which are annotated with our own additional attributes.
 -}
 data CatPlus cat =
     -- | A terminal node label, which contains nothing other than a word.
@@ -60,7 +60,7 @@ data CatPlus cat =
     {-| 
         A non-terminal node label 
         comprised of a (Keyaki or ABC) category 
-        and additional optional information for the ABC relabeling.
+        and extra annotations for the ABC relabeling.
     -}
     | NonTerm { 
         cat :: cat              -- ^ A (Keyaki / ABC) category.
@@ -72,34 +72,79 @@ data CatPlus cat =
             Empty as default.
         -}
         , deriv :: Text
+        {-|
+            To be abolished.
+        -}
         , scope :: [Int]
         {-|
+            [To be abolished]
             A list of covert arguments (@*pro*@ in Keyaki), 
             each specified with its scopal rank in the clause and its category.
         -}
         , covertArgs :: [(Int, cat)] 
         , attrs :: Map Text Text    -- ^ Other attributes.
         }
-    deriving (Eq, Functor)
+    deriving (
+        Eq
+        , Functor -- ^ A default 'Functor' instance wrt the type variable @cat@.
+    )
 
-getCat :: CatPlus cat -> (Maybe cat, cat -> CatPlus cat)
+{-|
+    Extract from an annotated (non-terminal) node label 
+        a costate wrt its category,
+        i.e. a pair of its category (of type @'Maybe' cat@)
+        and the annotational remainder 
+        (aka. the context of the category, 
+            an annotated node label @'CatPlus' cat@ missing a category @cat@).
+    For annotated terminal node labels, the resulting category is 'Nothing'. 
+-}
+getCat :: CatPlus cat -- ^ An annotated node label
+    -> (Maybe cat, cat -> CatPlus cat) -- ^ Its category and the context.
 getCat t@(Term w) 
     = (Nothing, const t)
 getCat nt@(NonTerm { cat = cs }) 
     = (Just cs, \cnew -> nt { cat = cnew })
 
+{-| 
+    A bidirectional pattern synonym that 
+        matches the (non-terminal) category of an annotated label
+        (of type @'Maybe' cat@)
+        and its context (of type @cat -> 'CatPlus' cat@)).
+    This is can be seen as a wrapper of 'getCat'.
+-}
 pattern cs :#: attr <- (getCat -> (Just cs, attr))
     where
         cs :#: attr = attr cs
 infix 9 :#:
 
-getCatRule :: CatPlus cat 
+{-|
+    Extract from an annotated (non-terminal) node label 
+        a costate wrt its category and its grammatical rule
+        (i.e. a pair than consists of 
+            the pair of its category and 
+                its grammatical rule (of type @'Maybe' (cat, 'DepMarking')@)
+        and the annotational remainder 
+        (aka. the context of the abovementioned two,
+            of type @cat -> 'DepMarking' -> 'CatPlus' cat@)).
+    For annotated terminal node labels, the resulting category is 'Nothing'. 
+-}
+getCatRule :: CatPlus cat -- ^ An annotated node label
+    -- | The pair of its category and its grammatical role,
+    --      accompanied with their context.
     -> (Maybe (cat, DepMarking), cat -> DepMarking -> CatPlus cat)
 getCatRule t@(Term w)
     = (Nothing, const $ const t)
 getCatRule nt@(NonTerm { cat = cs, role = rs })
     = (Just (cs, rs), \cnew rnew -> nt { cat = cnew, role = rnew })
 
+{-| 
+    A bidirectional pattern synonym that 
+        matches the (non-terminal) category and the grammatical role 
+        of an annotated label
+        (of type @'Maybe' (cat, 'DepMarking')@)
+        and its context (of type @cat -> 'DepMarking' -> 'CatPlus' cat@)).
+    This is can be seen as a wrapper of 'getCatRule'.
+-}
 pattern cr :#||: attr <- (getCatRule -> (Just cr, attr))
     where 
         (c, r) :#||: attr = attr c r
@@ -107,7 +152,7 @@ pattern cr :#||: attr <- (getCatRule -> (Just cr, attr))
 infix 9 :#||:
 
 {-|
-    Smart constructor that generates 
+    A smart constructor that generates 
         a non-terminal categorial representation without attributes, 
         given a Keyaki category.
 -}
