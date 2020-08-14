@@ -245,7 +245,7 @@ relabelHeaded
     newParentPlus
     (
         Node {
-            rootLabel = (oldFirstChildCat, _) :#||: attrs
+            rootLabel = oldFirstChildLabel
             , subForest = oldFirstChildChildren
         }
         :-|: oldRestChildren
@@ -254,7 +254,7 @@ relabelHeaded
         let newFirstChildCat = newParentCandidate :/: newParentCandidate
         newFirstChild <- relabelRouting 
                             newFirstChildCat
-                            (\y -> (newNonTerm y) { role = Adjunct })
+                            (\y -> ((const y) <$> oldFirstChildLabel) { role = Adjunct })
                             oldFirstChildChildren
         -- 2. 同時に，Headも変換．
         let newVSSTCat = newParentCandidate
@@ -300,7 +300,7 @@ relabelHeaded
     (
         oldRestChildren 
         :|-: oldLastChild@Node {
-            rootLabel = (_, AdjunctControl) :#||: attrs
+            rootLabel = oldFirstChildLabel@((_, AdjunctControl) :#||: attrs)
             , subForest = oldLastChildChildren
         }
     ) = do 
@@ -309,7 +309,7 @@ relabelHeaded
             newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
         newLastChild <- relabelRouting 
                             newLastChildCat 
-                            (\y -> (newNonTerm y) { role = AdjunctControl })
+                            (\y -> ((const y) <$> oldFirstChildLabel))
                             oldLastChildChildren
         let newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
         -- 2. 同時に，Headも変換．
@@ -329,15 +329,15 @@ relabelHeaded
     (
         oldRestChildren 
         :|-: oldLastChild@Node {
-            rootLabel = (_, r) :#||: attrs
+            rootLabel = oldLastChildLabel@((_, r) :#||: attrs)
             , subForest = oldLastChildChildren
         }
     ) = do 
         -- 1. Adjunctを変換．
         let newLastChildCat = newParentCandidate :\: newParentCandidate
         newLastChild <- relabelRouting
-                            newLastChildCat 
-                            (\y -> (newNonTerm y) { role = r })
+                            newLastChildCat
+                            (\y -> ((const y) <$> oldLastChildLabel) { role = r })
                             oldLastChildChildren
         -- 2. 同時に，Headも変換．
         let newVSSTCat = newParentCandidate
