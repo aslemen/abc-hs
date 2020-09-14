@@ -60,8 +60,10 @@ import ParsedTree
 -- | == Categories
 
 matchTerminalNode :: Tree (CatPlus a) -> (Set Text) -> Bool
-matchTerminalNode (Node (Term w) []) li = w `elem` li
-matchTerminalNode _ _                   = False 
+matchTerminalNode (Node _ ((Node (Term w) []):[])) li 
+    = w `elem` li
+matchTerminalNode _ _
+    = False 
 
 {-|
     Tell whether a subtree contains only a terminal node 
@@ -132,19 +134,20 @@ splitChildren ::
     -> Maybe SeparatedChildren
 splitChildren oldChildren@(oldChildFirst:oldChildrenRest)
     = case rootLabel oldChildFirst of
-        NonTerm { role = Head } -> Just SeparatedChildren {
+        NonTerm { role = Head } 
+            -> Just SeparatedChildren {
                 preHead = []
-                ,
-                Relabeling.head = oldChildFirst
-                ,
-                postHeadRev = reverse oldChildrenRest
+                , Relabeling.head = oldChildFirst
+                , postHeadRev = reverse oldChildrenRest
             }
-        _ -> case splitChildren oldChildrenRest of
-            Just sc -> Just sc {
-                preHead = oldChildFirst:(preHead sc)
-            }
-            Nothing -> Nothing
-splitChildren [] = Nothing
+        _ 
+            -> case splitChildren oldChildrenRest of -- RECURSION
+                Just sc -> Just sc {
+                    preHead = oldChildFirst:(preHead sc)
+                }
+                Nothing -> Nothing
+splitChildren [] 
+    = Nothing
 
 -- | = Exceptions 
 
@@ -162,6 +165,9 @@ genABCCat :: KeyakiCat -> ABCCat
 {-# INLINE genABCCat #-}
 genABCCat = BaseCategory . DT.pack . show
 
+{-|
+    Convert a Keyaki tree to an ABC Grammar one.
+-}
 relabel :: (MonadThrow m) => KeyakiTree -> m ABCTree
 relabel Node {
     rootLabel = nt@(NonTerm { deriv = "" }) -- filter out special derivations
@@ -180,6 +186,12 @@ relabel Node {
     , subForest = oldTreeChildren
 } = relabelTrivial (genABCCat <$> oldParent) oldTreeChildren
 
+{-| 
+    (Internal conversion function) 
+    A routing function that detects the head in a (sub)tree and 
+        directs to `relabelHeaded` if found,
+        or `relabelTrivial` if not.
+-}
 relabelRouting :: (MonadThrow m)
     => ABCCat 
     -> (ABCCat -> CatPlus ABCCat) 
@@ -197,6 +209,12 @@ relabelRouting newParentCandidate newParentPlus oldChildren
         newParent :: CatPlus ABCCat
         newParent = newParentPlus newParentCandidate
 
+{-|
+    (Internal conversion function) 
+    A trivial conversion function that 
+        does nothing to the topmost layer of the given tree
+        but reinitiate conversion processes `relabel` at each children.
+-}
 relabelTrivial :: (MonadThrow m)
     => CatPlus ABCCat 
     -> [KeyakiTree] 
@@ -212,7 +230,9 @@ relabelHeaded :: (MonadThrow m)
     => ABCCat 
     -> (ABCCat -> CatPlus ABCCat) 
     -> SeparatedChildren
-    -> m ABCTree 
+    -> m ABCTree
+
+-- Case 1a: Pre-head, Head-Complement
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -240,6 +260,8 @@ relabelHeaded
                         , subForest = [newFirstChild, newVSST]
                     }
             Term w -> throwM $ IllegalTerminalException w
+
+-- Case 1c: Pre-head, other cases (default to Head-Adjunct)
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -269,8 +291,12 @@ relabelHeaded
                 rootLabel = newParentPlus newParentCandidate
                 , subForest = [newFirstChild, newVSST]
             }
+
+-- Case 1x: Pre-head, unexpected terminal node
 relabelHeaded _ _ (Node {rootLabel = Term w} :-|: _)
     = throwM $ IllegalTerminalException w
+
+-- Case 2a: Post-head, Head-Complement
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -294,6 +320,8 @@ relabelHeaded
             rootLabel = newParentPlus newParentCandidate
             , subForest = [newVSST, newLastChild]
         }
+
+-- Case 2b: Post-head, Head-AdjunctControl
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -311,9 +339,8 @@ relabelHeaded
                             newLastChildCat 
                             (\y -> ((const y) <$> oldFirstChildLabel))
                             oldLastChildChildren
-        let newLastChildCat = newLastChildCatBase :\: newLastChildCatBase
         -- 2. 同時に，Headも変換．
-            newVSSTCat = newParentCandidate
+        let newVSSTCat = newParentCandidate
         newVSST <- relabelHeaded 
                     newVSSTCat 
                     (\x -> (newNonTerm x) { role = Head }) 
@@ -323,6 +350,9 @@ relabelHeaded
             rootLabel = newParentPlus newParentCandidate
             , subForest = [newVSST, newLastChild]
         }
+        -- TODO: FCの深さについても言えるようにする．
+
+-- Case 2c: Post-head, elsewhere (default to Head-Adjunct)
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -334,7 +364,8 @@ relabelHeaded
         }
     ) = do 
         -- 1. Adjunctを変換．
-        let newLastChildCat = newParentCandidate :\: newParentCandidate
+        let newLastChildCatBase = dropAnt [] newParentCandidate
+            newLastChildCat     = newLastChildCatBase :\: newLastChildCatBase
         newLastChild <- relabelRouting
                             newLastChildCat
                             (\y -> ((const y) <$> oldLastChildLabel) { role = r })
@@ -350,6 +381,8 @@ relabelHeaded
             rootLabel = newParentPlus newParentCandidate
             , subForest = [newVSST, newLastChild]
         }
+
+-- Case 3: Reached the very head
 relabelHeaded 
     newParentCandidate 
     newParentPlus
@@ -359,13 +392,19 @@ relabelHeaded
         newParentPlus
         (subForest $ Relabeling.head finalChildList) 
 
-------------------------------------------------
+-- | = Execution routines
 
+{-|
+    The collection of program options.
+-}
 data Option = Option {
-    calledVersion :: Bool
-    , isOneLine :: Bool
+    calledVersion :: Bool -- ^ Whether the version information is inquired.
+    , isOneLine :: Bool -- ^ Whether the output trees are each printed in one line.
 }
 
+{-|
+    The underlying command option parser.
+-}
 optionParser :: OA.Parser Option
 optionParser
     = Option
@@ -376,16 +415,25 @@ optionParser
             OA.switch (OA.long "oneline" <> OA.short 'w')
         )
 
+{-|
+    An command option parser augumented with a program description.
+-}
 optionParserInfo :: OA.ParserInfo Option
 optionParserInfo
     = OA.info (optionParser OA.<**> OA.helper)
         $ OA.briefDesc 
             <> OA.progDesc "The relabel program for the ABC Treebank"
 
+{-|
+    A Keyaki tree document parser.
+-}
 pDocument :: (Monad m) => PennDocParserT Text m (CatPlus KeyakiCat)
 {-# INLINE pDocument #-}
 pDocument = pUnsafeDoc
 
+{-|
+    The main program routine that runs depending on a given set of options.
+-}
 runWithOptions :: Option -> IO ()
 runWithOptions Option { calledVersion = True } = do
     putStr "App \"Relabeling\" in abc-hs "
@@ -426,5 +474,8 @@ runWithOptions (Option _  isOneLine) = do
                  & PDocRT.renderIO stderr
             SIO.hPutStrLn stderr ""
 
+{-|
+    The tnery point of this program.
+-}
 main :: IO ()
 main = OA.execParser optionParserInfo >>= runWithOptions
