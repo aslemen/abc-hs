@@ -54,6 +54,7 @@ import CatPlus
 import ABCCat
 import ABCDepMarking
 import ParsedTree
+import ABCTree
 
 -- | = Data Types
 
@@ -86,7 +87,6 @@ type RelabelFunc children
         -> ABCTree
 
 type KeyakiTree = Tree (CatPlus KeyakiCat)
-type ABCTree    = Tree (CatPlus ABCCat)
 
 {-|
     A data structure that represents a way of segmentation of 
@@ -170,7 +170,7 @@ genABCCat = BaseCategory . DT.pack . show
 -}
 relabel :: (MonadThrow m) => KeyakiTree -> m ABCTree
 relabel Node {
-    rootLabel = nt@(NonTerm { deriv = "" }) -- filter out special derivations
+    rootLabel = nt@(NonTerm { deriv = Other _ }) -- filter out special derivations
     , subForest = oldTreeChildren
 } = do
     case genABCCat <$> nt of 
@@ -452,7 +452,7 @@ runWithOptions (Option _  isOneLine) = do
     where
         printTree :: _ -> IO ()
         printTree tree = tree 
-            & PDoc.pretty
+            & printABCTree (PrintOption Indented Normal)
             & (if isOneLine then PDoc.group else id)
             & (if isOneLine   
                     then (<> PDoc.line <> PDoc.line) 
@@ -469,7 +469,7 @@ runWithOptions (Option _  isOneLine) = do
             SIO.hPutStr stderr "Exception: "
             SIO.hPutStrLn stderr $ show e
             SIO.hPutStrLn stderr "Tree:"
-            tree & PDoc.pretty 
+            tree & PDoc.pretty
                  & PDoc.layoutPretty (PDoc.LayoutOptions PDoc.Unbounded)
                  & PDocRT.renderIO stderr
             SIO.hPutStrLn stderr ""

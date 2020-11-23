@@ -19,18 +19,22 @@
 module CatPlus (
     -- * Types
     CatPlus(.., (:#:), (:#||:))
+    , Deriv(..)
     -- * Constructors
     , newNonTerm
     -- * Viewers
     , getCat
     , getCatRule
+    -- * Printers
+    , CatPlusPrintOption(..)
+    , printCatPlus
     ) where
 
 import qualified Data.List as DList
 
 import Data.Char (isSpace, isNumber, isAlpha)
 
-import Data.Text (Text)
+import Data.Text (Text, unpack)
 import qualified Data.Text as DText
 import qualified Data.Text.Read as DTR
 
@@ -47,6 +51,22 @@ import Data.Tree.Parser.Penn.Megaparsec.Char (
     )
 
 import ABCDepMarking
+
+data Deriv = 
+    LeftApp Int
+    | RightApp Int
+    | Other Text
+    | Undetermined
+    deriving (Eq)
+
+instance Show Deriv where
+    show (LeftApp 0) = "LeftApp"
+    show (LeftApp n) = "LeftApp" ++ show n
+    show (RightApp 0) = "RightApp"
+    show (RightApp n) = "RightApp" ++ show n
+    show (Other t) = unpack t
+    show Undetermined = "??"
+instance Pretty Deriv
 
 {-|
     A record structure that represents (Keyaki) tree node labels
@@ -71,7 +91,7 @@ data CatPlus cat =
             if any, invoked by this node.
             Empty as default.
         -}
-        , deriv :: Text
+        , deriv :: Deriv
         {-|
             To be abolished.
         -}
@@ -162,7 +182,7 @@ newNonTerm cs = NonTerm {
     cat = cs 
     , index = Nothing
     , role = None
-    , deriv = ""
+    , deriv = Undetermined
     , scope = []
     , covertArgs = []
     , attrs = DMap.empty 
@@ -204,7 +224,7 @@ instance {-# OVERLAPS #-}
                         dv <- takeWhile1P 
                                 (Just "Value of Attribute: Derivation Rule")
                                 checkCharValue 
-                        return $ kc { deriv = dv }
+                        return $ kc { deriv = Other dv }
                     "scope" -> do 
                         res <- decimal `sepBy1` single ','
                         return $ kc {
@@ -244,39 +264,68 @@ instance {-# OVERLAPS #-}
 
 ----------------------------------
 
+data CatPlusPrintOption = CatPlusPrintOption {
+    omitCat :: Bool
+    , omitRole :: Bool
+    , omitSelfEvidentDeriv :: Bool
+}
+
+printCatPlus :: (Pretty cat) 
+    => CatPlusPrintOption
+    -> CatPlus cat
+    -> Doc ann
+printCatPlus _ (Term word) = pretty word
+printCatPlus 
+    CatPlusPrintOption {
+        omitCat = omitC
+        , omitRole = omitR
+        , omitSelfEvidentDeriv = omitD
+    }
+    NonTerm {
+        cat = c
+        , index = idx
+        , role = r
+        , deriv = d
+        , scope = s
+        , covertArgs = cA
+        , attrs = as
+    } = (
+        if omitC then mempty else pretty c
+    ) <> (
+        case idx of
+            Just i -> "#index=" <> pretty i
+            Nothing -> mempty
+    ) <> (
+        if r == None || omitR  
+            then mempty 
+            else "#role=" <> pretty r
+    ) <> (case d of 
+        Other dr 
+            | dr == ""  -> mempty
+            | otherwise -> "#deriv=" <> pretty d
+        Undetermined    -> "#deriv=" <> pretty d
+        _
+            | omitD     -> mempty
+            | otherwise -> "#deriv=" <> pretty d
+    ) <> (
+        if s == [] then mempty
+        else "#scope="
+            <> (mconcat $ DList.intersperse comma (pretty <$> s))
+    ) <> (
+        case cA of
+            [] -> mempty
+            _  -> "#covertArgs=" 
+                    <> (mconcat $ DList.intersperse comma (makeArg <$> cA))
+    ) 
+    <> (pretty $ foldMapWithKey makeAttrVal as)
+    where 
+        makeArg :: (Pretty cat) => (Int, cat) -> Doc a
+        makeArg (i, c) = pretty i <> "^" <> pretty c <> ","
+        makeAttrVal :: Text -> Text -> Text
+        makeAttrVal attr val = "#" <> attr <> "=" <> val
+
 instance (Pretty cat) => Pretty (CatPlus cat) where
-    pretty (Term word) = pretty word
-    pretty NonTerm {
-            cat = c
-            , index = idx
-            , role = r
-            , deriv = d
-            , scope = s
-            , covertArgs = cA
-            , attrs = as
-        } = pretty c
-        <> (
-            case idx of
-                Just i -> "#index=" <> pretty i
-                Nothing -> mempty
-        ) <> (if r == None then mempty else "#role=" <> pretty r)
-        <> pretty (if d == "" then "" else "#deriv=" <> d)
-        <> (
-            if s == [] then mempty
-            else "#scope="
-                <> (mconcat $ DList.intersperse comma (pretty <$> s))
-        ) <> (
-            case cA of
-                [] -> mempty
-                _  -> "#covertArgs=" 
-                        <> (mconcat $ DList.intersperse comma (makeArg <$> cA))
-        ) 
-        <> (pretty $ foldMapWithKey makeAttrVal as)
-        where 
-            makeArg :: (Pretty cat) => (Int, cat) -> Doc a
-            makeArg (i, c) = pretty i <> "^" <> pretty c <> ","
-            makeAttrVal :: Text -> Text -> Text
-            makeAttrVal attr val = "#" <> attr <> "=" <> val
+    pretty = printCatPlus (CatPlusPrintOption False False False)
 
 instance (Show cat) => Show (CatPlus cat) where
     show = renderString . layoutCompact . pretty . fmap show 
